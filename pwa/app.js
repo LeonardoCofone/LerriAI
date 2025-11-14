@@ -87,7 +87,7 @@ async function syncToServer() {
     if (!user) return;
 
     isSyncing = true;
-    const payload = { user, events, tasks, settings, messages: messagesArray };
+    const payload = { user, messages: messagesArray };
 
     try {
         const response = await fetch("http://localhost:3000/api/save-data", {
