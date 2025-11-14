@@ -21,75 +21,75 @@ The focus is on helping users **stay organized, productive, and informed**.
 
 ## 🧩 Project Structure
 
-LerriAI/
-├── backend/                      # Node.js backend + agents and API management
-│   ├── server.js                 # Main Node.js server (API + agent orchestration)
-│   ├── refreshTokens.js          # Script to regenerate access tokens
-│   ├── users.csv                 # Users database + tokens
-│   ├── .env                      # Environment variables and credentials
-│   ├── package.json              # Backend dependencies
-│   ├── ecosystem.config.cjs      # PM2 config to start backend and refreshTokens
-│
-│   ├── data/                     # Users personal data (JSON)
-│   │   └── user@gmail.com.json   # Example user data (tasks, events, settings)
-│
-│   ├── agents/                   # AI agents that handle actions
-│   │   ├── routing-agent.js      # Selects which tool/AI to use
-│   │   ├── jarvis-agent.js       # Executes requested actions (main agent)
-│   │   └── daily-briefing-agent.js # Generates daily briefing
-│
-│   ├── tools/                    # Modules to interface with external services
-│   │   ├── calendar-tool.js
-│   │   ├── tasks-tool.js
-│   │   ├── gmail-tool.js
-│   │   ├── documents-tool.js
-│   │   ├── finance-tool.js
-│   │   ├── sheets-tool.js
-│   │   ├── drive-tool.js
-│   │   ├── news-tool.js
-│   │   ├── weather-tool.js
-│   │   └── index.js
-│
-│   ├── prompts/
-│   │   ├── routing-prompt.js
-│   │   ├── jarvis-prompt.js
-│   │   └── briefing-prompt.js
-│
-│   ├── memory/
-│   │   └── conversation-memory.js
-│
-│   ├── tts/
-│   │   └── speech-service.js
-│
-│   └── utils/
-│       ├── model-selector.js
-│       ├── toon-converter.js
-│       ├── userDataService.js
-│       └── user-utils.js
-│
-├── SITO/                         # Frontend / PWA
-│   ├── pwa/
-│   │   ├── index.html
-│   │   ├── app.js
-│   │   ├── app.css
-│   │   ├── manifest.json
-│   │   ├── sw.js
-│   │   └── icons/
-│   │       ├── icon-192.png
-│   │       └── icon-512.png
-│
-│   ├── login.html
-│   ├── existing.html
-│   ├── onboarding.html
-│   ├── onboarding.css
-│   ├── onboarding.js
-│   ├── gia_registrato.html
-│   ├── PrivacyPolicy.html
-│   ├── Terms_&_Conditions.html
-│   ├── auth.js
-│   ├── style.css
-│   ├── script.js
-│   ├── index.html
+LerriAI/  
+├── backend/                      # Node.js backend + agents and API management  
+│   ├── server.js                 # Main Node.js server (API + agent orchestration)  
+│   ├── refreshTokens.js          # Script to regenerate access tokens  
+│   ├── users.csv                 # Users database + tokens  
+│   ├── .env                      # Environment variables and credentials  
+│   ├── package.json              # Backend dependencies  
+│   ├── ecosystem.config.cjs      # PM2 config to start backend and refreshTokens  
+│  
+│   ├── data/                     # Users personal data (JSON)  
+│   │   └── user@gmail.com.json   # Example user data (tasks, events, settings)  
+│  
+│   ├── agents/                   # AI agents that handle actions  
+│   │   ├── routing-agent.js      # Selects which tool/AI to use  
+│   │   ├── jarvis-agent.js       # Executes requested actions (main agent)  
+│   │   └── daily-briefing-agent.js # Generates daily briefing  
+│  
+│   ├── tools/                    # Modules to interface with external services  
+│   │   ├── calendar-tool.js  
+│   │   ├── tasks-tool.js  
+│   │   ├── gmail-tool.js  
+│   │   ├── documents-tool.js  
+│   │   ├── finance-tool.js  
+│   │   ├── sheets-tool.js  
+│   │   ├── drive-tool.js  
+│   │   ├── news-tool.js  
+│   │   ├── weather-tool.js  
+│   │   └── index.js  
+│  
+│   ├── prompts/  
+│   │   ├── routing-prompt.js  
+│   │   ├── jarvis-prompt.js  
+│   │   └── briefing-prompt.js  
+│  
+│   ├── memory/  
+│   │   └── conversation-memory.js  
+│  
+│   ├── tts/  
+│   │   └── speech-service.js  
+│  
+│   └── utils/  
+│       ├── model-selector.js  
+│       ├── toon-converter.js  
+│       ├── userDataService.js  
+│       └── user-utils.js  
+│  
+├── SITO/                         # Frontend / PWA  
+│   ├── pwa/  
+│   │   ├── index.html  
+│   │   ├── app.js  
+│   │   ├── app.css  
+│   │   ├── manifest.json  
+│   │   ├── sw.js  
+│   │   └── icons/  
+│   │       ├── icon-192.png  
+│   │       └── icon-512.png  
+│  
+│   ├── login.html  
+│   ├── existing.html  
+│   ├── onboarding.html  
+│   ├── onboarding.css  
+│   ├── onboarding.js  
+│   ├── gia_registrato.html  
+│   ├── PrivacyPolicy.html  
+│   ├── Terms_&_Conditions.html  
+│   ├── auth.js  
+│   ├── style.css  
+│   ├── script.js  
+│   ├── index.html  
 │   └── README.md
 
 ---
