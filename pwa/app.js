@@ -12,6 +12,12 @@ const LANGUAGES = {
     "ar": "العربية"
 };
 
+const COSTS = {
+    TEXT_MESSAGE: 0.00099,          
+    VOICE_PER_SECOND: 0.006 / 60,  
+    VOICE_BASE: 0.00099  
+};
+
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 let selectedDate = null;
@@ -36,6 +42,11 @@ let isSyncing = false;
 let messagesArray = [];
 
 const md = window.markdownit();
+
+function calculateMessageCost(isVoice = false, durationSeconds = 0) {
+    if (!isVoice) return COSTS.TEXT_MESSAGE;
+    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
+}
 
 function makeLinksClickable(text) {
     return text.replace(
@@ -148,7 +159,9 @@ async function loadDataFromServer() {
                 stats: {
                     messages: data.settings.stats?.messages || 0,
                     events: data.settings.stats?.events || 0,
-                    tasks: data.settings.stats?.tasks || 0
+                    tasks: data.settings.stats?.tasks || 0,
+                    voiceMessages: data.settings.stats?.voiceMessages || 0,
+                    voiceSeconds: data.settings.stats?.voiceSeconds || 0
                 },
                 schedule: data.settings.schedule || {
                     work: null,
@@ -193,7 +206,7 @@ function getUserIdentifier() {
 document.addEventListener('DOMContentLoaded', async () => {
     const userEmail = getUserEmail();
     if (!userEmail) {
-        //window.location.href = '../login.html';
+        window.location.href = '../login.html';
         return;
     }
     
@@ -260,7 +273,15 @@ function initChat() {
     const userName = localStorage.getItem('user_name') || 'User';
     
     if (!email) {
-        //window.location.href = '../login.html';
+        window.location.href = '../login.html';
+        return;
+    }
+
+    if (settings.currentSpend >= settings.maxSpend) {
+        chatInput.disabled = true;
+        chatInput.placeholder = '⚠️ Budget esaurito';
+        micBtn.disabled = true;
+        addMessage('⚠️ Hai raggiunto il limite di spesa mensile. Aumenta il budget nelle impostazioni per continuare.', 'bot', false);
         return;
     }
 
@@ -298,10 +319,19 @@ function initChat() {
                     chatInput.disabled = false;
                     
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const duration = Math.round((Date.now() - startTime) / 1000);
-                    
-                    const transcribingMsg = addMessage(`🎤 Audio ${duration}s - Transcribing...`, 'user', false);
-                    
+                    const durationMs = Date.now() - startTime;
+                    const durationSeconds = Math.round(durationMs / 1000);
+
+                    const voiceCost = calculateMessageCost(true, durationSeconds);
+
+                    if (settings.currentSpend + voiceCost > settings.maxSpend) {
+                        addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
+                        stream.getTracks().forEach(track => track.stop());
+                        return;
+                    }
+
+                    const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s - Transcribing...`, 'user', false);
+                                        
                     const reader = new FileReader();
                     reader.onloadend = async () => {
                         const base64Audio = reader.result.split(',')[1];
@@ -324,12 +354,24 @@ function initChat() {
                             transcribingMsg.remove();
                             addMessage(replyText, 'user', true, audioBlob, true);
 
+                            settings.stats.messages++;
+                            settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
+                            settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
+                            settings.currentSpend += voiceCost;
+                            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+                            console.log(`💰 Costo vocale: €${voiceCost.toFixed(5)} (${durationSeconds}s)`);
+
                             if (data.events) events = data.events;
                             if (data.tasks) tasks = data.tasks;
-                            if (data.stats) settings.stats = data.stats;
-                            
+                            if (data.stats) {
+                                settings.stats.events = data.stats.events || settings.stats.events;
+                                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+                            }
+
                             await syncToServer();
                             updateStats();
+                            updateBudgetDisplay();
                             
                         } catch (error) {
                             transcribingMsg.remove();
@@ -362,6 +404,13 @@ function initChat() {
         const msg = chatInput.value.trim();
         if (!msg) return;
 
+        const textCost = calculateMessageCost(false);
+
+        if (settings.currentSpend + textCost > settings.maxSpend) {
+            addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
+            return;
+        }
+
         addMessage(msg, 'user', true, null, true);
         chatInput.value = '';
 
@@ -383,14 +432,24 @@ function initChat() {
             const replyText = data.value || data;
 
             loadingMsg.remove();
-            addMessage(replyText, 'bot', true, null, true); 
+            addMessage(replyText, 'bot', true, null, true);
+
+            settings.stats.messages++;
+            settings.currentSpend += textCost;
+            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+            console.log(`💰 Costo testuale: €${textCost.toFixed(5)}`);
 
             if (data.events) events = data.events;
             if (data.tasks) tasks = data.tasks;
-            if (data.stats) settings.stats = data.stats;
-            
+            if (data.stats) {
+                settings.stats.events = data.stats.events || settings.stats.events;
+                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+            }
+
             await syncToServer();
             updateStats();
+            updateBudgetDisplay();
 
         } catch (error) {
             loadingMsg.remove();
@@ -679,10 +738,19 @@ function updateLanguageSelect() {
 }
 
 function updateBudgetDisplay(){
-    document.getElementById('current-spend').textContent=settings.currentSpend.toFixed(2);
+    document.getElementById('current-spend').textContent=settings.currentSpend.toFixed(5);
     document.getElementById('max-spend-display').textContent=settings.maxSpend.toFixed(2);
     const percentage=(settings.currentSpend/settings.maxSpend)*100;
-    document.getElementById('spend-progress').style.width=`${Math.min(percentage,100)}%`;
+    const progressBar = document.getElementById('spend-progress');
+    progressBar.style.width=`${Math.min(percentage,100)}%`;
+    
+    if (percentage >= 90) {
+        progressBar.style.background = '#ef4444';
+    } else if (percentage >= 70) {
+        progressBar.style.background = '#f59e0b';
+    } else {
+        progressBar.style.background = '#667eea';
+    }
 }
 
 function updateModelCost(){
@@ -749,6 +817,6 @@ function initDeleteAccount() {
         }
         localStorage.clear();
         sessionStorage.clear();
-        //window.location.href = '../login.html';
+        window.location.href = '../login.html';
     });
 }
