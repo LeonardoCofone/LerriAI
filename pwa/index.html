@@ -95,12 +95,13 @@
                         <h3 id="selected-date-title">Selected Date</h3>
                     </div>
                     
-                    <div class="day-events">
-                        <h4>Day's Events</h4>
-                        <ul id="day-event-list" class="event-list">
-                            <li class="empty-state">No events for this day</li>
-                        </ul>
-                    </div>
+                    <div class="day-view-content">
+                        <div class="day-events">
+                            <h4>Day's Events</h4>
+                            <ul id="day-event-list" class="event-list">
+                                <li class="empty-state">No events for this day</li>
+                            </ul>
+                        </div>
                     
                     <div class="day-form">
                         <h4>Add Event</h4>
@@ -149,9 +150,11 @@
                     <button class="filter-btn" data-filter="completed">Completed</button>
                 </div>
                 
-                <ul id="task-list" class="task-list">
-                    <li class="empty-state">No tasks. Start by adding one!</li>
-                </ul>
+                <div class="task-list-wrapper">
+                    <ul id="task-list" class="task-list">
+                        <li class="empty-state">No tasks. Start by adding one!</li>
+                    </ul>
+                </div>
             </div>
         </section>
 
@@ -404,9 +407,7 @@
             });
         }
 
-</script>
-
-<script>
+    
 // Variables per la gestione del modal
 let editScheduleBlocks = {};
 let editSportsActivities = [];
@@ -811,6 +812,32 @@ function convertEditToScheduleFormat() {
 }
 
 initScheduleManager();
+
+// Hamburger menu per mobile
+const hamburger = document.createElement('button');
+hamburger.id = 'hamburger-btn';
+hamburger.innerHTML = '☰';
+hamburger.setAttribute('aria-label', 'Menu');
+document.querySelector('header').insertBefore(hamburger, document.querySelector('nav'));
+
+const nav = document.querySelector('nav');
+hamburger.addEventListener('click', () => {
+    nav.classList.toggle('open');
+});
+
+// Chiudi menu quando clicco su un tab
+document.querySelectorAll('#nav-tabs li').forEach(tab => {
+    tab.addEventListener('click', () => {
+        nav.classList.remove('open');
+    });
+});
+
+// Chiudi menu quando clicco fuori
+document.addEventListener('click', (e) => {
+    if (!nav.contains(e.target) && !hamburger.contains(e.target) && nav.classList.contains('open')) {
+        nav.classList.remove('open');
+    }
+});
 
 </script>
 
