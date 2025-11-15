@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://two-tools-lead.loca.lt";//"http://localhost:3000/api/chat";
+const BACKEND_URL = "http://localhost:3000/api/chat";
 const LANGUAGES = {
     "it": "Italiano",
     "en": "English",
@@ -116,8 +116,7 @@ async function syncToServer() {
     });
 
     try {
-        const response = await fetch("https://two-tools-lead.loca.lt/api/save-data", {
-//const response = await fetch("http://localhost:3000/api/save-data", {
+        const response = await fetch("http://localhost:3000/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -143,7 +142,7 @@ async function loadDataFromServer() {
     if (!user) return;
 
     try {
-        const res = await fetch(`https://two-tools-lead.loca.lt/api/load-data?user=${encodeURIComponent(user)}`);//const res = await fetch(`http://localhost:3000/api/load-data?user=${encodeURIComponent(user)}`);
+        const res = await fetch(`http://localhost:3000/api/load-data?user=${encodeURIComponent(user)}`);
         if (!res.ok) throw new Error('Load data error');
         
         const data = await res.json();
@@ -705,8 +704,7 @@ function initSettings(){
         settings.language = newLanguage;
         
         try {
-            await fetch("https://two-tools-lead.loca.lt/api/set-language", {
-//await fetch("http://localhost:3000/api/set-language", {
+            await fetch("http://localhost:3000/api/set-language", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: getUserEmail(), language: newLanguage })
@@ -805,8 +803,7 @@ function initDeleteAccount() {
         const email = localStorage.getItem("user_email");
         if (email) {
             try {
-                await fetch("https://two-tools-lead.loca.lt/api/delete-account", {
-//await fetch("http://localhost:3000/api/delete-account", {
+                await fetch("http://localhost:3000/api/delete-account", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email })
