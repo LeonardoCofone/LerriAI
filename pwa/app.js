@@ -87,7 +87,14 @@ async function syncToServer() {
     if (!user) return;
 
     isSyncing = true;
-    const payload = { user, messages: messagesArray };
+
+    const payload = { 
+        user, 
+        events, 
+        tasks, 
+        settings,  
+        messages: messagesArray 
+    };
 
     try {
         const response = await fetch("http://localhost:3000/api/save-data", {
@@ -98,6 +105,8 @@ async function syncToServer() {
         
         if (response.ok) {
             console.log("✅ Sync completato");
+        } else {
+            console.error("❌ Sync fallito:", await response.text());
         }
     } catch (err) {
         console.error("Sync error:", err);
