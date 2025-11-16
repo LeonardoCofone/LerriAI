@@ -210,6 +210,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSettings();
     initServiceWorker();
     initDeleteAccount();
+    initLogout();
+    initClearChat();
 });
 
 function initTabs() {
@@ -852,5 +854,71 @@ function initDeleteAccount() {
         localStorage.clear();
         sessionStorage.clear();
         window.location.href = '../login.html';
+    });
+}
+
+function initLogout() {
+    const logoutBtn = document.getElementById('logout-btn');
+    const modal = document.getElementById('logout-modal');
+    const cancelBtn = document.getElementById('cancel-logout');
+    const confirmBtn = document.getElementById('confirm-logout');
+    
+    if (!logoutBtn || !modal) return;
+
+    logoutBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+    confirmBtn.addEventListener('click', () => {
+        localStorage.removeItem('user_email');
+        localStorage.removeItem('user_name');
+        localStorage.removeItem('lexor-current-tab');
+        sessionStorage.clear();
+        window.location.href = '../login.html';
+    });
+}
+
+function initClearChat() {
+    const clearBtn = document.getElementById('clear-chat-btn');
+    const modal = document.getElementById('clear-chat-modal');
+    const cancelBtn = document.getElementById('cancel-clear-chat');
+    const confirmBtn = document.getElementById('confirm-clear-chat');
+    
+    if (!clearBtn || !modal) return;
+
+    clearBtn.addEventListener('click', () => modal.classList.remove('hidden'));
+    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+
+    confirmBtn.addEventListener('click', async () => {
+        const email = getUserEmail();
+        if (!email) return;
+
+        messagesArray = [];
+        
+        try {
+            await fetch("http://localhost:3000/api/save-data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    user: email, 
+                    events, 
+                    tasks, 
+                    settings,  
+                    messages: []
+                })
+            });
+        } catch (err) {
+            console.error("Clear chat error:", err);
+        }
+
+        const messagesContainer = document.getElementById('messages');
+        messagesContainer.innerHTML = `
+            <div class="welcome-message">
+                <h3>👋 Hello ${localStorage.getItem('user_name') || 'User'}!</h3>
+                <p>I'm Lerri, your digital strategic AI assistant. How can I help you today?</p>
+            </div>
+        `;
+
+        modal.classList.add('hidden');
+        showNotification('Chat cleared successfully', 'success');
     });
 }

@@ -41,6 +41,11 @@
     <main>
         <section id="chat" class="tab-content active">
             <div class="chat-window">
+                <div class="chat-header-bar">
+                    <button id="clear-chat-btn" class="btn-icon" aria-label="Clear chat">
+                        🗑️
+                    </button>
+                </div>
                 <div id="messages" class="messages">
                     <div class="welcome-message">
                         <h3>👋 Welcome to LerriAI!</h3>
@@ -58,7 +63,6 @@
                         <span>Send</span>
                     </button>
                 </form>
-
             </div>
         </section>
 
@@ -367,8 +371,9 @@
                     </div>
                 </div>
                 <!-- Delete Account Modal -->
-                 <div class="settings-card">
+                <div class="settings-card">
                     <h2>⚙️ Account</h2>
+                    <button id="logout-btn" class="btn-secondary" style="margin-bottom: 1rem;">Logout</button>
                     <button id="delete-account" class="btn-danger">Delete Account</button>
                 </div>
                 <div id="delete-modal" class="modal hidden">
@@ -381,10 +386,30 @@
                         </div>
                     </div>
                 </div>
+                <div id="logout-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <h3>🚪 Confirm Logout</h3>
+                        <p>Are you sure you want to logout?<br>You will need to login again to access the app.</p>
+                        <div class="modal-actions">
+                            <button id="cancel-logout" class="btn-secondary">Cancel</button>
+                            <button id="confirm-logout" class="btn-primary">Logout</button>
+                        </div>
+                    </div>
+                </div>
                 
 
             </div>
         </section>
+        <div id="clear-chat-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>🗑️ Clear Chat History</h3>
+                <p>Are you sure you want to delete all messages?<br>This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button id="cancel-clear-chat" class="btn-secondary">Cancel</button>
+                    <button id="confirm-clear-chat" class="btn-danger">Clear All</button>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
