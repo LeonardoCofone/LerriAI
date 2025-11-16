@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:3000/api/test-401";//"http://localhost:3000/api/chat";
+const BACKEND_URL = "http://localhost:3000/api/chat";
 const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
 const LANGUAGES = {
     "it": "Italiano",
