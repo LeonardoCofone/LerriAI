@@ -1377,6 +1377,35 @@ footer {
     justify-content: center;
 }
 
+.reauth-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.reauth-message {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+    border: 2px solid var(--color-warning);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.reauth-message p {
+    margin-bottom: 1rem;
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 0.9375rem;
+}
+
+.reauth-message button {
+    width: 100%;
+    max-width: 300px;
+}
+
 .btn-icon:hover {
     background: var(--color-background);
     transform: none;
@@ -1387,6 +1416,18 @@ footer {
 }
 
 @media (max-width: 1024px) {
+    .reauth-container {
+        padding: 0.75rem;
+    }
+    
+    .reauth-message {
+        padding: 1rem;
+    }
+    
+    .reauth-message button {
+        max-width: 100%;
+    }
+    
     .tab-content {
         margin: 0.75rem;
     }

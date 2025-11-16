@@ -420,6 +420,15 @@ function initChat() {
                 })
             });
 
+            if (response.status === 401) {
+                const errorData = await response.json();
+                if (errorData.needsReauth) {
+                    loadingMsg.remove();
+                    addReauthButton();
+                    return;
+                }
+            }
+
             if (!response.ok) throw new Error(await response.text());
             const data = await response.json();
             const replyText = data.value || data;
@@ -446,8 +455,14 @@ function initChat() {
 
         } catch (error) {
             loadingMsg.remove();
-            addMessage('❌ Server error. Try again.', 'bot');
-            showNotification('❌ Server error. Please try again later.', 'error');
+            
+            if (error.status === 401 || (error.message && error.message.includes('401'))) {
+                addReauthButton();
+            } else {
+                addMessage('❌ Server error. Try again.', 'bot');
+                showNotification('❌ Server error. Please try again later.', 'error');
+            }
+            
             console.error("Chat error:", error);
         }
     });
@@ -921,4 +936,65 @@ function initClearChat() {
         modal.classList.add('hidden');
         showNotification('Chat cleared successfully', 'success');
     });
+}
+
+function addReauthButton() {
+    const messagesContainer = document.getElementById('messages');
+    
+    const existingReauth = messagesContainer.querySelector('.reauth-container');
+    if (existingReauth) return;
+    
+    const reauthDiv = document.createElement('div');
+    reauthDiv.className = 'reauth-container';
+    reauthDiv.innerHTML = `
+        <div class="reauth-message">
+            <p>🔐 Your authorization has expired. Please reconnect your Google account to continue.</p>
+            <button id="reauth-btn" class="btn-primary">Reconnect Google Account</button>
+        </div>
+    `;
+    
+    messagesContainer.appendChild(reauthDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    document.getElementById('reauth-btn').addEventListener('click', handleReauth);
+}
+
+async function handleReauth() {
+    const email = getUserEmail();
+    if (!email) return;
+    
+    try {
+        google.accounts.oauth2.initCodeClient({
+            client_id: '580665131503-4cbr5v6hf5e5oruqdbj8s7kjd3jdh4hv.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+            callback: async (response) => {
+                if (response.code) {
+                    const result = await fetch('http://localhost:3000/api/refresh-oauth', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: email,
+                            oauth_code: response.code
+                        })
+                    });
+                    
+                    const data = await result.json();
+                    
+                    if (data.success) {
+                        const reauthContainer = document.querySelector('.reauth-container');
+                        if (reauthContainer) reauthContainer.remove();
+                        
+                        addMessage('✅ Authorization renewed successfully! You can continue using the assistant.', 'bot');
+                        showNotification('✅ Authorization renewed successfully!', 'success');
+                    } else {
+                        showNotification('❌ Authorization renewal failed. Try again.', 'error');
+                    }
+                }
+            }
+        }).requestCode();
+        
+    } catch (error) {
+        console.error('Reauth error:', error);
+        showNotification('❌ Error during authorization renewal', 'error');
+    }
 }
