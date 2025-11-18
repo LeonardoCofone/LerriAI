@@ -500,15 +500,6 @@ button:active {
     background: var(--color-primary-dark);
 }
 
-#calendar-grid td.has-events::after {
-    content: '•';
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--color-warning);
-    font-size: 1.25rem;
-}
 
 #calendar-grid td.other-month {
     opacity: 0.3;
@@ -1568,10 +1559,6 @@ footer {
         font-size: 0.875rem;
     }
     
-    #calendar-grid td.has-events::after {
-        font-size: 1rem;
-        bottom: 2px;
-    }
     
     .day-header {
         padding: 1rem;
