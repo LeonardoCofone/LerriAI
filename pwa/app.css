@@ -410,6 +410,13 @@ button:active {
     overflow: hidden;
 }
 
+.monthly-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
 .calendar-view {
     flex: 1;
     display: flex;
@@ -449,6 +456,8 @@ button:active {
 
 .calendar-grid-wrapper {
     flex: 1;
+    display: flex;
+    flex-direction: column;
     overflow: auto;
     padding: 1rem;
 }
@@ -480,7 +489,7 @@ button:active {
     transition: var(--transition);
     font-weight: 500;
     position: relative;
-    height: 60px;
+    height: 100px;
     vertical-align: top;
 }
 

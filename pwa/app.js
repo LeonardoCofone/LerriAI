@@ -830,6 +830,7 @@ function clearEventForm(){
     document.getElementById('day-event-end').value = '';
     document.getElementById('day-event-id').value = '';
 }
+
 function initTasks(){
     const taskForm=document.getElementById('task-form');
     taskForm.addEventListener('submit',e=>{e.preventDefault(); addTask();});
