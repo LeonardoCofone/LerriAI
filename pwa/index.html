@@ -107,18 +107,20 @@
                                 <li class="empty-state">No events for this day</li>
                             </ul>
                         </div>
-                    
                     <div class="day-form">
                         <h4>Add Event</h4>
                         <form id="day-event-form">
                             <input type="hidden" id="day-event-id">
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                                <select id="event-emoji-select" style="padding: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-surface); font-size: 1.25rem; cursor: pointer;">
-                                    <option value="">📅</option>
+                            
+                            <div class="emoji-title-group">
+                                <select id="event-emoji-select">
+                                    <option value="📅">📅</option>
                                 </select>
-                                <input type="text" id="day-event-title" placeholder="Event title..." required style="flex: 1;">
+                                <input type="text" id="day-event-title" placeholder="Event title..." required>
                             </div>
-                            <textarea id="day-event-description" placeholder="Description (optional)" rows="2" style="margin-bottom: 1rem;"></textarea>
+                            
+                            <textarea id="day-event-description" placeholder="Description (optional)" rows="2"></textarea>
+                            
                             <div class="time-inputs">
                                 <div class="input-group">
                                     <label for="day-event-start">Start</label>
@@ -129,6 +131,7 @@
                                     <input type="time" id="day-event-end">
                                 </div>
                             </div>
+                            
                             <div class="form-actions">
                                 <button type="submit" class="btn-primary">Save Event</button>
                                 <button type="button" id="delete-day-event" class="btn-danger">Delete</button>

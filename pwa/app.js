@@ -543,88 +543,112 @@ function initChat() {
 function initCalendar() {
     generateCalendar();
     initEmojiSelect();
+    
     document.getElementById('prev-month').addEventListener('click', () => {
         currentMonth--; 
         if (currentMonth < 0) { currentMonth = 11; currentYear--; }
         generateCalendar();
     });
+    
     document.getElementById('next-month').addEventListener('click', () => {
         currentMonth++; 
         if (currentMonth > 11) { currentMonth = 0; currentYear++; }
         generateCalendar();
     });
+    
     document.getElementById('back-to-month').addEventListener('click', () => {
         document.getElementById('day-view').classList.add('hidden');
         document.getElementById('monthly-view').classList.remove('hidden');
     });
+    
     document.getElementById('day-event-form').addEventListener('submit', (e) => {
         e.preventDefault(); 
         saveEvent();
     });
+    
     document.getElementById('delete-day-event').addEventListener('click', deleteEvent);
 }
 
 function generateCalendar() {
     const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     document.getElementById('calendar-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
     const startDay = firstDay === 0 ? 6 : firstDay - 1;
+    
     const tbody = document.getElementById('calendar-body'); 
     tbody.innerHTML = '';
     
     let date = 1, nextMonthDate = 1;
-    for (let i=0;i<6;i++){
+    
+    for (let i=0; i<6; i++) {
         const row = document.createElement('tr');
-        for (let j=0;j<7;j++){
+        
+        for (let j=0; j<7; j++) {
             const cell = document.createElement('td');
-            if(i===0&&j<startDay){ 
-                cell.textContent = daysInPrevMonth - startDay + j + 1; 
+            
+            if (i===0 && j<startDay) { 
+                const dayNum = document.createElement('span');
+                dayNum.className = 'day-number';
+                dayNum.textContent = daysInPrevMonth - startDay + j + 1;
+                cell.appendChild(dayNum);
                 cell.classList.add('other-month'); 
             }
-            else if(date>daysInMonth){ 
-                cell.textContent = nextMonthDate; 
+            else if (date > daysInMonth) { 
+                const dayNum = document.createElement('span');
+                dayNum.className = 'day-number';
+                dayNum.textContent = nextMonthDate;
+                cell.appendChild(dayNum);
                 cell.classList.add('other-month'); 
                 nextMonthDate++; 
             }
-            else{
+            else {
                 const cellDate = date;
                 const dateKey = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(cellDate).padStart(2,'0')}`;
+                
+                const dayNum = document.createElement('span');
+                dayNum.className = 'day-number';
+                dayNum.textContent = cellDate;
+                cell.appendChild(dayNum);
                 
                 const recurringEvents = getRecurringEventsForDate(dateKey);
                 const customEvents = events[dateKey] || [];
                 const allEvents = [...recurringEvents, ...customEvents];
                 
-                const dayNumber = document.createElement('div');
-                dayNumber.textContent = cellDate;
-                dayNumber.style.cssText = 'font-size: 0.875rem; margin-bottom: 2px;';
-                cell.appendChild(dayNumber);
-                
                 if (allEvents.length > 0) {
-                    const emojisContainer = document.createElement('div');
-                    emojisContainer.style.cssText = 'font-size: 0.75rem; line-height: 1;';
-                    const first3Events = allEvents.slice(0, 3);
-                    const emojis = first3Events.map(event => {
-                        const firstChar = event.title.charAt(0);
-                        return /\p{Emoji}/u.test(firstChar) ? firstChar : '📅';
-                    }).join('');
-                    emojisContainer.textContent = emojis;
-                    cell.appendChild(emojisContainer);
-                    cell.classList.add('has-events');
+                    const eventsPreview = document.createElement('div');
+                    eventsPreview.className = 'events-preview';
+                    
+                    const displayEvents = allEvents.slice(0, 3);
+                    displayEvents.forEach(event => {
+                        const dot = document.createElement('span');
+                        dot.className = 'event-dot';
+                        
+                        const match = event.title.match(/^(\p{Emoji})/u);
+                        dot.textContent = match ? match[1] : '📅';
+                        
+                        eventsPreview.appendChild(dot);
+                    });
+                    
+                    cell.appendChild(eventsPreview);
                 }
                 
                 const today = new Date();
-                if(cellDate===today.getDate() && currentMonth===today.getMonth() && currentYear===today.getFullYear()) 
+                if (cellDate === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear()) {
                     cell.classList.add('today');
+                }
                 
-                cell.addEventListener('click',()=>openDayView(cellDate));
+                cell.addEventListener('click', () => openDayView(cellDate));
                 date++;
             }
+            
             row.appendChild(cell);
         }
+        
         tbody.appendChild(row);
-        if(date>daysInMonth) break;
+        if (date > daysInMonth) break;
     }
 }
 
@@ -762,28 +786,40 @@ function loadDayEvents() {
     });
 }
 
-async function saveEvent(){
+async function saveEvent() {
     const emojiSelect = document.getElementById('event-emoji-select');
+    const titleInput = document.getElementById('day-event-title');
+    const descriptionInput = document.getElementById('day-event-description');
+    const startInput = document.getElementById('day-event-start');
+    const endInput = document.getElementById('day-event-end');
+    const eventIdInput = document.getElementById('day-event-id');
+    
     const selectedEmoji = emojiSelect.value || '📅';
-    const titleInput = document.getElementById('day-event-title').value.trim();
-    const title = selectedEmoji + ' ' + titleInput;
-    const description = document.getElementById('day-event-description').value.trim(); 
-    const start = document.getElementById('day-event-start').value;
-    const end = document.getElementById('day-event-end').value;
-    const eventId = document.getElementById('day-event-id').value;
+    const titleText = titleInput.value.trim();
+    
+    if (!titleText) {
+        alert('Please enter an event title');
+        return;
+    }
+    
+    const fullTitle = `${selectedEmoji} ${titleText}`;
+    const description = descriptionInput.value.trim();
+    const start = startInput.value || "00:00";
+    const end = endInput.value || "23:59";
+    const eventId = eventIdInput.value;
 
-    if(!title) return;
-    if(!events[selectedDate]) events[selectedDate] = [];
+    if (!events[selectedDate]) events[selectedDate] = [];
 
     const event = { 
-        title, 
+        title: fullTitle,
         description, 
-        start: start || "00:00", 
-        end: end || "23:59" 
+        start,
+        end
     };
 
-    if(eventId) events[selectedDate][parseInt(eventId)] = event;
-    else { 
+    if (eventId !== '') {
+        events[selectedDate][parseInt(eventId)] = event;
+    } else { 
         events[selectedDate].push(event); 
         settings.stats.events++; 
     }
@@ -793,23 +829,25 @@ async function saveEvent(){
     loadDayEvents(); 
     clearEventForm(); 
     generateCalendar();
+    
+    showNotification('✅ Event saved successfully', 'success');
 }
 
 
-function editEvent(index){
+function editEvent(index) {
     const event = events[selectedDate][index];
-    const titleParts = event.title.match(/^(\S+)\s+(.+)$/);
-    const emoji = titleParts ? titleParts[1] : '📅';
-    const titleText = titleParts ? titleParts[2] : event.title;
     
-    document.getElementById('event-emoji-select').value = /\p{Emoji}/u.test(emoji) ? emoji : '📅';
+    const emojiMatch = event.title.match(/^(\p{Emoji}+)\s/u);
+    const emoji = emojiMatch ? emojiMatch[1] : '📅';
+    const titleText = emojiMatch ? event.title.substring(emoji.length).trim() : event.title;
+    
+    document.getElementById('event-emoji-select').value = emoji;
     document.getElementById('day-event-title').value = titleText;
     document.getElementById('day-event-description').value = event.description || '';
     document.getElementById('day-event-start').value = event.start;
     document.getElementById('day-event-end').value = event.end;
     document.getElementById('day-event-id').value = index;
 }
-
 
 async function deleteEvent(){
     const eventId = document.getElementById('day-event-id').value;
@@ -822,8 +860,8 @@ async function deleteEvent(){
     generateCalendar();
 }
 
-function clearEventForm(){
-    document.getElementById('event-emoji-select').value = '';
+function clearEventForm() {
+    document.getElementById('event-emoji-select').value = '📅';
     document.getElementById('day-event-title').value = '';
     document.getElementById('day-event-description').value = '';
     document.getElementById('day-event-start').value = '';

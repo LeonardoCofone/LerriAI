@@ -435,89 +435,104 @@ button:active {
 }
 
 #calendar-month {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--color-text);
 }
 
 .calendar-header button {
-    background: var(--color-background);
-    color: var(--color-text);
-    border: 1px solid var(--color-border);
-    padding: 0.5rem 1rem;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
     min-width: 44px;
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+    border-radius: var(--border-radius);
 }
 
 .calendar-header button:hover {
-    background: var(--color-surface);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background: var(--color-primary-dark);
 }
 
 .calendar-grid-wrapper {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
-    padding: 1rem;
+    overflow: hidden;
+    padding: 0;
 }
 
 #calendar-grid {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    table-layout: fixed;
     height: 100%;
-    flex: 1;
+    border-collapse: collapse;
+    table-layout: fixed;
 }
 
 #calendar-grid th {
-    padding: 0.75rem;
+    padding: 1rem;
     text-align: center;
     font-weight: 600;
-    color: var(--color-text-light);
-    font-size: 0.875rem;
+    color: var(--color-text);
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-bottom: 2px solid var(--color-border);
+    background: var(--color-background);
 }
 
 #calendar-grid td {
-    padding: 0.75rem;
-    text-align: center;
+    padding: 0.5rem;
+    text-align: left;
+    vertical-align: top;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     cursor: pointer;
     transition: var(--transition);
     font-weight: 500;
     position: relative;
-    height: auto;
-    min-height: 80px;
-    vertical-align: top;
+    height: 100px;
 }
 
 #calendar-grid td:hover {
     background: rgba(99, 102, 241, 0.05);
     border-color: var(--color-primary);
-    transform: scale(1.02);
+    transform: scale(1.01);
 }
 
 #calendar-grid td.today {
-    background: var(--color-primary);
-    color: white;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border: 2px solid var(--color-primary);
     font-weight: 700;
 }
 
-#calendar-grid td.today:hover {
-    background: var(--color-primary-dark);
+#calendar-grid td.today .day-number {
+    color: var(--color-primary);
 }
-
 
 #calendar-grid td.other-month {
     opacity: 0.3;
     pointer-events: none;
     background: var(--color-background);
+}
+
+#calendar-grid td .day-number {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+#calendar-grid td .events-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+#calendar-grid td .event-dot {
+    font-size: 1.25rem;
+    line-height: 1;
 }
 
 .day-view {
@@ -552,7 +567,7 @@ button:active {
 }
 
 #selected-date-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--color-text);
 }
@@ -561,7 +576,7 @@ button:active {
     background: var(--color-background);
     color: var(--color-text);
     border: 1px solid var(--color-border);
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem;
 }
 
 .day-view-content {
@@ -576,7 +591,7 @@ button:active {
 
 .day-events h4 {
     margin-bottom: 1rem;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     color: var(--color-text);
 }
 
@@ -621,6 +636,31 @@ button:active {
     margin-bottom: 1rem;
     font-size: 1.125rem;
     color: var(--color-text);
+}
+
+.emoji-title-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.emoji-title-group select {
+    width: 80px;
+    padding: 0.875rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    background: var(--color-surface);
+    font-size: 1.5rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.emoji-title-group input {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    font-size: 0.9375rem;
 }
 
 .time-inputs {
@@ -1549,29 +1589,31 @@ footer {
         font-size: 0.9375rem;
     }
     
+    #calendar-grid td {
+        padding: 0.25rem;
+        height: 60px;
+        font-size: 0.875rem;
+    }
+
+    #calendar-grid td .day-number {
+        font-size: 0.875rem;
+    }
+
+    #calendar-grid td .event-dot {
+        font-size: 0.875rem;
+    }
+
     .calendar-header {
         padding: 1rem;
     }
-    
+
     #calendar-month {
         font-size: 1.125rem;
     }
-    
-    .calendar-grid-wrapper {
-        padding: 0.5rem;
+
+    .time-inputs {
+        grid-template-columns: 1fr;
     }
-    
-    #calendar-grid th {
-        padding: 0.5rem 0.25rem;
-        font-size: 0.75rem;
-    }
-    
-    #calendar-grid td {
-        padding: 0.5rem 0.25rem;
-        height: 44px;
-        font-size: 0.875rem;
-    }
-    
     
     .day-header {
         padding: 1rem;
