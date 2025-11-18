@@ -15,7 +15,7 @@ const LANGUAGES = {
 
 const COSTS = {
     TEXT_MESSAGE: 0.00099,          
-    VOICE_PER_SECOND: 0.006 / 60,  
+    VOICE_PER_SECOND: 0.0075 / 60,  
     VOICE_BASE: 0.00099  
 };
 
@@ -127,12 +127,17 @@ async function syncToServer() {
     }
 }
 
+// Replace the loadDataFromServer function in app.js with this improved version
+
 async function loadDataFromServer() {
     if (isLoading) return;
     isLoading = true;
     
     const user = getUserEmail();
-    if (!user) return;
+    if (!user) {
+        isLoading = false;
+        return;
+    }
 
     try {
         const res = await fetch(`http://localhost:3000/api/load-data?user=${encodeURIComponent(user)}`);
@@ -140,8 +145,19 @@ async function loadDataFromServer() {
         
         const data = await res.json();
 
-        if (data.events !== undefined) events = data.events;
-        if (data.tasks !== undefined) tasks = data.tasks;
+        console.log('📥 Data loaded from server:', data);
+
+        // Initialize events
+        if (data.events !== undefined) {
+            events = data.events;
+        }
+
+        // Initialize tasks
+        if (data.tasks !== undefined) {
+            tasks = data.tasks;
+        }
+
+        // Initialize settings with proper defaults
         if (data.settings !== undefined) {
             settings = {
                 maxSpend: data.settings.maxSpend !== undefined ? data.settings.maxSpend : 0.90,
@@ -155,35 +171,56 @@ async function loadDataFromServer() {
                     voiceMessages: data.settings.stats?.voiceMessages || 0,
                     voiceSeconds: data.settings.stats?.voiceSeconds || 0
                 },
-                schedule: data.settings.schedule || {
-                    work: null,
-                    subjects: [],
-                    sports: [],
-                    hobbies: []
+                schedule: {
+                    userDescription: data.settings.schedule?.userDescription || '',
+                    dailyBibleVerse: data.settings.schedule?.dailyBibleVerse || false,
+                    slots: Array.isArray(data.settings.schedule?.slots) ? data.settings.schedule.slots : [],
+                    categories: Array.isArray(data.settings.schedule?.categories) ? data.settings.schedule.categories : [],
+                    sports: Array.isArray(data.settings.schedule?.sports) ? data.settings.schedule.sports : [],
+                    hobbies: Array.isArray(data.settings.schedule?.hobbies) ? data.settings.schedule.hobbies : []
                 }
             };
         }
-        if (data.messages !== undefined) messagesArray = data.messages;
 
-        const messagesContainer = document.getElementById('messages');
-        messagesContainer.innerHTML = '';
-        messagesArray.forEach(msg => {
-            addMessage(msg.text, msg.sender, false);
+        console.log('📅 Schedule loaded:', {
+            slots: settings.schedule.slots.length,
+            categories: settings.schedule.categories.length,
+            sports: settings.schedule.sports.length,
+            hobbies: settings.schedule.hobbies.length
         });
 
+        // Initialize messages
+        if (data.messages !== undefined) {
+            messagesArray = data.messages;
+        }
+
+        // Render messages
+        const messagesContainer = document.getElementById('messages');
+        if (messagesContainer) {
+            messagesContainer.innerHTML = '';
+            messagesArray.forEach(msg => {
+                addMessage(msg.text, msg.sender, false);
+            });
+        }
+
+        // Render based on active tab
         const activeTab = localStorage.getItem('lexor-current-tab') || 'chat';
-        if (activeTab === 'calendar') generateCalendar();
-        if (activeTab === 'tasks') renderTasks();
+        if (activeTab === 'calendar') {
+            generateCalendar();
+        }
+        if (activeTab === 'tasks') {
+            renderTasks();
+        }
         if (activeTab === 'settings') {
             updateStats();
             updateLanguageSelect();
             updateBudgetDisplay();
         }
 
-        console.log("✅ Dati caricati dal server");
+        console.log("✅ Data loaded successfully from server");
 
     } catch (err) {
-        console.error("Load error:", err);
+        console.error("❌ Load error:", err);
     } finally {
         isLoading = false;
     }
@@ -540,6 +577,8 @@ function generateCalendar() {
     }
 }
 
+// Update only the getRecurringEventsForDate function in app.js
+
 function getRecurringEventsForDate(dateKey) {
     const schedule = settings.schedule;
     if (!schedule) return [];
@@ -553,64 +592,81 @@ function getRecurringEventsForDate(dateKey) {
 
     const recurringEvents = [];
 
-    const dayCategories = (schedule.categories || []).filter(cat => cat.day === dayName);
-    dayCategories.forEach(cat => {
-        const firstSlot = cat.slots[0];
-        const lastSlot = cat.slots[cat.slots.length - 1];
-        const description = cat.slots.map(s => `${s.start}-${s.end}: ${s.emoji} ${s.name}`).join(' | ');
+    // Process categories
+    if (Array.isArray(schedule.categories)) {
+        const dayCategories = schedule.categories.filter(cat => cat.day === dayName);
+        dayCategories.forEach(cat => {
+            if (cat.slots && cat.slots.length > 0) {
+                const firstSlot = cat.slots[0];
+                const lastSlot = cat.slots[cat.slots.length - 1];
+                const description = cat.slots.map(s => `${s.start}-${s.end}: ${s.emoji || ''} ${s.name || ''}`).join(' | ');
 
-        recurringEvents.push({
-            title: `📁 ${cat.name}`,
-            start: firstSlot.start,
-            end: lastSlot.end,
-            description: description,
-            isRecurring: true
+                recurringEvents.push({
+                    title: `📁 ${cat.name}`,
+                    start: firstSlot.start,
+                    end: lastSlot.end,
+                    description: description,
+                    isRecurring: true
+                });
+            }
         });
-    });
+    }
 
-    const daySlots = (schedule.slots || []).filter(slot => slot.day === dayName);
-    const categorizedSlotIds = new Set();
-    (schedule.categories || []).forEach(cat => {
-        if (cat.day === dayName) {
-            cat.slotIds.forEach(id => categorizedSlotIds.add(id));
-        }
-    });
-
-    daySlots.forEach(slot => {
-        if (!categorizedSlotIds.has(slot.id)) {
-            recurringEvents.push({
-                title: `${slot.emoji} ${slot.name}`.trim() || 'Activity',
-                start: slot.start,
-                end: slot.end,
-                description: slot.description || '',
-                isRecurring: true
+    // Process individual slots (excluding categorized ones)
+    if (Array.isArray(schedule.slots)) {
+        const daySlots = schedule.slots.filter(slot => slot.day === dayName);
+        const categorizedSlotIds = new Set();
+        
+        if (Array.isArray(schedule.categories)) {
+            schedule.categories.forEach(cat => {
+                if (cat.day === dayName && Array.isArray(cat.slotIds)) {
+                    cat.slotIds.forEach(id => categorizedSlotIds.add(id));
+                }
             });
         }
-    });
 
-    (schedule.sports || []).forEach(sport => {
-        if (sport.days && sport.days.includes(dayName)) {
-            recurringEvents.push({
-                title: `${sport.emoji} ${sport.name}`,
-                start: sport.startTime || '18:00',
-                end: sport.endTime || '19:30',
-                description: `Sport: ${sport.name}`,
-                isRecurring: true
-            });
-        }
-    });
+        daySlots.forEach(slot => {
+            if (!categorizedSlotIds.has(slot.id)) {
+                recurringEvents.push({
+                    title: `${slot.emoji || ''} ${slot.name || ''}`.trim() || 'Activity',
+                    start: slot.start,
+                    end: slot.end,
+                    description: slot.description || '',
+                    isRecurring: true
+                });
+            }
+        });
+    }
 
-    (schedule.hobbies || []).forEach(hobby => {
-        if (hobby.days && hobby.days.includes(dayName)) {
-            recurringEvents.push({
-                title: `${hobby.emoji} ${hobby.name}`,
-                start: hobby.startTime || '10:00',
-                end: hobby.endTime || '11:00',
-                description: `Hobby: ${hobby.name}`,
-                isRecurring: true
-            });
-        }
-    });
+    // Process sports
+    if (Array.isArray(schedule.sports)) {
+        schedule.sports.forEach(sport => {
+            if (Array.isArray(sport.days) && sport.days.includes(dayName)) {
+                recurringEvents.push({
+                    title: `${sport.emoji || '⚽'} ${sport.name}`,
+                    start: sport.startTime || '18:00',
+                    end: sport.endTime || '19:30',
+                    description: `Sport: ${sport.name}`,
+                    isRecurring: true
+                });
+            }
+        });
+    }
+
+    // Process hobbies
+    if (Array.isArray(schedule.hobbies)) {
+        schedule.hobbies.forEach(hobby => {
+            if (Array.isArray(hobby.days) && hobby.days.includes(dayName)) {
+                recurringEvents.push({
+                    title: `${hobby.emoji || '🎨'} ${hobby.name}`,
+                    start: hobby.startTime || '10:00',
+                    end: hobby.endTime || '11:00',
+                    description: `Hobby: ${hobby.name}`,
+                    isRecurring: true
+                });
+            }
+        });
+    }
 
     return recurringEvents;
 }
