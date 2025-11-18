@@ -40,6 +40,20 @@
                     Click to create time slots. Click a slot to edit. Drag to move, resize from bottom edge. Select multiple slots (checkbox) to create categories!
                 </p>
             </div>
+            <div class="custom-activity-creator" style="margin-bottom: 30px;">
+                <h3>👤 About You</h3>
+                <div class="input-group full-width">
+                    <label for="userDescription">Tell me about yourself (max 500 words), this will help Lerri understand who you are</label>
+                    <textarea id="userDescription" maxlength="500" placeholder="Who are you? What are your goals, aspirations, or anything else you'd like to share..."></textarea>
+                    <small style="color: #718096; margin-top: 5px;">Characters: <span id="charCount">0</span>/3000</small>
+                </div>
+                <div class="input-group full-width" style="margin-top: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="dailyBibleVerse" style="width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-size: 1rem;">📖 Send me a daily Bible verse</span>
+                    </label>
+                </div>
+            </div>
 
             <div class="calendar-controls">
                 <button class="btn-secondary" id="resetCalendarBtn">🔄 Reset Calendar</button>

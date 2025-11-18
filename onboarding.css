@@ -24,6 +24,16 @@ body {
     animation: slideUp 0.6s ease-out;
 }
 
+#userDescription {
+    min-height: 120px;
+    font-family: inherit;
+}
+
+#charCount {
+    font-weight: 600;
+    color: #667eea;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;

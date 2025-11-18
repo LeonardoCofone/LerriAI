@@ -747,6 +747,17 @@ function initializeEmojiPickers() {
     });
 }
 
+function initCharCounter() {
+    const textarea = document.getElementById('userDescription');
+    const counter = document.getElementById('charCount');
+    
+    if (textarea && counter) {
+        textarea.addEventListener('input', () => {
+            counter.textContent = textarea.value.length;
+        });
+    }
+}
+
 function createEmojiPicker(btnId, dropdownId, onSelect) {
     const btn = document.getElementById(btnId);
     const dropdown = document.getElementById(dropdownId);
@@ -938,6 +949,9 @@ async function finishSetup() {
     document.getElementById('setupView').classList.add('hidden');
     document.getElementById('loadingView').classList.remove('hidden');
 
+    const userDescription = document.getElementById('userDescription').value.trim();
+    const dailyBibleVerse = document.getElementById('dailyBibleVerse').checked;
+
     const allSlots = [];
     const allCategories = [];
     
@@ -972,54 +986,26 @@ async function finishSetup() {
     });
 
     const scheduleData = {
-        subjects: [],
+        userDescription: userDescription,
+        dailyBibleVerse: dailyBibleVerse,
+        slots: allSlots,
+        categories: allCategories,
         sports: sports.map(s => ({
             name: s.name,
             emoji: s.emoji,
             days: s.days,
             startTime: s.startTime,
-            endTime: s.endTime,
-            recurring: true
+            endTime: s.endTime
         })),
         hobbies: hobbies.map(h => ({
             name: h.name,
             emoji: h.emoji,
             days: h.days,
             startTime: h.startTime,
-            endTime: h.endTime,
-            recurring: true
-        }))
+            endTime: h.endTime
+        })),
+        timestamp: new Date().toISOString()
     };
-
-    allCategories.forEach(cat => {
-        const firstSlot = cat.slots[0];
-        const lastSlot = cat.slots[cat.slots.length - 1];
-        scheduleData.subjects.push({
-            name: cat.name,
-            days: [cat.day],
-            startTime: firstSlot.start,
-            endTime: lastSlot.end,
-            hasTime: true,
-            recurring: true,
-            description: cat.slots.map(s => `${s.start}-${s.end}: ${s.emoji} ${s.name}`).join(' | ')
-        });
-    });
-
-    allSlots.forEach(slot => {
-        const isInCategory = allCategories.some(cat => cat.slotIds.includes(slot.id));
-        if (!isInCategory) {
-            scheduleData.subjects.push({
-                name: slot.name || 'Activity',
-                emoji: slot.emoji,
-                days: [slot.day],
-                startTime: slot.start,
-                endTime: slot.end,
-                hasTime: true,
-                recurring: true,
-                description: slot.description
-            });
-        }
-    });
 
     try {
         const response = await fetch('http://localhost:3000/api/onboarding', {
@@ -1027,7 +1013,7 @@ async function finishSetup() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 email: userEmail,
-                schedule: scheduleData
+                data: scheduleData
             })
         });
 
@@ -1063,6 +1049,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeWeeklyCalendar();
     initializeEmojiPickers();
     setupDaySelectors();
+    initCharCounter();
     updateProgress();
     
     document.getElementById('nextToSportsBtn').addEventListener('click', () => goToSection(2));
