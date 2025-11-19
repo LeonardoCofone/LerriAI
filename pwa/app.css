@@ -428,6 +428,31 @@ button:active {
     height: 100%;
 }
 
+.calendar-day {
+    background-color: var(--color-surface);
+    min-height: 100px; /* Altezza minima per non schiacciare */
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.calendar-day:hover {
+    background-color: #f8fafc;
+}
+
+.calendar-day.today {
+    background-color: #e0e7ff;
+    border-top: 3px solid var(--color-primary);
+}
+
+/* Giorni vuoti (mese precedente/successivo) */
+.calendar-day.empty {
+    background-color: #f1f5f9;
+    cursor: default;
+}
 
 .calendar-header {
     display: flex;
@@ -468,14 +493,27 @@ button:active {
 }
 
 #calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 colonne uguali */
+    gap: 1px; /* Crea le linee della griglia */
+    background-color: var(--color-border); /* Colore delle linee */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
     width: 100%;
-    height: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
 }
 
 #calendar-grid thead {
     display: table-header-group;
+}
+
+.calendar-header-cell {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    font-weight: 600;
+    padding: 0.75rem 0.25rem;
+    text-align: center;
+    font-size: 0.9rem;
 }
 
 #calendar-grid th {
@@ -528,6 +566,13 @@ button:active {
 
 #calendar-grid td.today .day-number {
     color: var(--color-primary);
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    color: var(--color-text);
 }
 
 #calendar-grid td.other-month {
@@ -614,6 +659,17 @@ button:active {
 
 .day-events {
     margin-bottom: 2rem;
+}
+
+.day-event {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 4px;
+    background-color: var(--color-primary);
+    color: white;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .day-events h4 {
