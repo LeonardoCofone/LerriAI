@@ -462,16 +462,20 @@ button:active {
     flex: 1;
     display: flex;
     flex-direction: column;
-    overflow: auto;
     padding: 0;
     min-height: 0;
+    height: 100%;
 }
 
 #calendar-grid {
     width: 100%;
-    flex: 1;
+    height: 100%;
     border-collapse: collapse;
     table-layout: fixed;
+}
+
+#calendar-grid thead {
+    display: table-header-group;
 }
 
 #calendar-grid th {
@@ -488,7 +492,7 @@ button:active {
 }
 
 #calendar-grid td {
-    padding: 0.5rem;
+    padding: 0.75rem;
     text-align: left;
     vertical-align: top;
     background: var(--color-surface);
@@ -497,20 +501,18 @@ button:active {
     transition: var(--transition);
     font-weight: 500;
     position: relative;
-    width: calc(100% / 7);
+    width: 14.285%;
 }
 
 #calendar-grid tbody {
-    height: 100%;
-    display: table;
-    width: 100%;
-    table-layout: fixed;
+    display: table-row-group;
+    height: calc(100% - 50px);
 }
 
 #calendar-grid tr {
-    display: table-row;
-    height: calc((100vh - 250px) / 6);
+    height: 16.666%;
 }
+
 
 #calendar-grid td:hover {
     background: rgba(99, 102, 241, 0.05);
