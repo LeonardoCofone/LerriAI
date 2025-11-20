@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy</title>
+<title>Privacy Policy - LerriAI</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
         text-align: center;
     }
     main {
-        max-width: 800px;
+        max-width: 900px;
         margin: 30px auto;
         padding: 0 20px;
         background-color: #fff;
@@ -29,6 +29,11 @@
     }
     h1, h2, h3 {
         color: #222;
+    }
+    h2 {
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 10px;
+        margin-top: 30px;
     }
     table {
         width: 100%;
@@ -39,20 +44,36 @@
         border: 1px solid #ccc;
     }
     th, td {
-        padding: 10px;
+        padding: 12px;
         text-align: left;
     }
     th {
         background-color: #f0f0f0;
+        font-weight: bold;
     }
     section {
         padding: 20px 0;
     }
+    ul {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    ul li {
+        margin: 8px 0;
+    }
+    .important {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        margin: 20px 0;
+    }
     footer {
         text-align: center;
-        padding: 15px 0;
+        padding: 20px 0;
         font-size: 0.9em;
         color: #666;
+        border-top: 1px solid #ddd;
+        margin-top: 30px;
     }
 </style>
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
@@ -61,75 +82,260 @@
 
 <header>
     <h1>Privacy Policy</h1>
-    <p>Last Updated: 12/11/2025</p>
+    <p>Last Updated: December 11, 2025</p>
 </header>
 
 <main>
 <section>
-    <p>This Privacy Policy explains how LerriAI ("the Application", "we") collects, uses, and protects the personal data of users ("User") in compliance with Google API Services User Data Policy and applicable privacy laws.</p>
-    <p>The Application is a personal assistant designed to help Users manage and automate personal and professional tasks within Google services (such as Gmail, Google Drive, Google Calendar, and Google Tasks).</p>
+    <h2>Introduction</h2>
+    <p>This Privacy Policy describes how LerriAI ("we", "our", "the Application") collects, uses, stores, shares, and protects your personal data when you use our personal assistant application. LerriAI is designed to help you manage and automate personal and professional tasks by integrating with Google services including Gmail, Google Drive, Google Calendar, Google Tasks, Google Contacts, Google Documents, and Google Sheets.</p>
+    <p>This Privacy Policy is provided in compliance with the Google API Services User Data Policy, Google APIs Terms of Service, and applicable data protection laws. By using LerriAI, you consent to the data practices described in this policy.</p>
 </section>
 
 <section>
-    <h2>1. Data Collected and Purpose of Use</h2>
-    <p>The Application requires access to the following sensitive data (defined as "Sensitive Scopes" by Google) solely to provide the requested functionality:</p>
+    <h2>1. Data Accessed</h2>
+    <p>LerriAI accesses the following types of Google user data through the Google API Services to provide its core functionality. Access to this data is only granted after you explicitly authorize the Application through Google's OAuth 2.0 authentication process.</p>
+    
     <table>
         <tr>
             <th>Google Service</th>
-            <th>Data Collected</th>
-            <th>Purpose of Use (CRITICAL)</th>
+            <th>API Scope</th>
+            <th>Data Accessed</th>
+        </tr>
+        <tr>
+            <td>Google Account</td>
+            <td>userinfo.email<br>userinfo.profile</td>
+            <td>Your email address and basic profile information (name, profile picture) to identify your account and personalize your experience.</td>
         </tr>
         <tr>
             <td>Gmail</td>
-            <td>Read, send, delete, modify emails</td>
-            <td>Only to perform actions requested by the User, e.g., "Send an email to Mario", "Summarize unread emails", "Find flight receipt X".</td>
+            <td>gmail.send</td>
+            <td>Permission to send emails on your behalf. The Application can compose and send emails when you explicitly request this action through commands such as "Send an email to [recipient]".</td>
         </tr>
         <tr>
             <td>Google Drive</td>
-            <td>Access, modify, create, delete files</td>
-            <td>Only to retrieve or create documents on User request, e.g., "Find March report" or "Create a new note in Drive".</td>
+            <td>drive.file</td>
+            <td>Access to files and folders that you explicitly create with or open with the Application. This scope allows the Application to read, modify, create, and delete only those files that you directly interact with through LerriAI, not your entire Drive.</td>
         </tr>
         <tr>
             <td>Google Calendar</td>
-            <td>Access, create, modify events</td>
-            <td>Only to manage the calendar, e.g., "Schedule a meeting tomorrow at 10:00" or "Check my appointments".</td>
+            <td>calendar.readonly</td>
+            <td>Read-only access to your calendar events and metadata. The Application can view your calendar entries to answer queries such as "What are my appointments today?" or "Check my schedule for next week".</td>
         </tr>
         <tr>
-            <td>Google Tasks & Contacts</td>
-            <td>Manage tasks and search contacts</td>
-            <td>Only to add reminders or find necessary information to perform actions, e.g., sending emails.</td>
+            <td>Google Documents</td>
+            <td>documents</td>
+            <td>Permission to view and manage Google Docs that you create with or open with the Application. This allows the Application to create, read, and edit documents when you request actions like "Create a new document" or "Update my notes".</td>
+        </tr>
+        <tr>
+            <td>Google Sheets</td>
+            <td>spreadsheets</td>
+            <td>Permission to view and manage Google Sheets that you create with or open with the Application. This enables the Application to create, read, update, and manage spreadsheets when you request data organization or analysis tasks.</td>
         </tr>
     </table>
-    <p><strong>IMPORTANT NOTE:</strong> The Application only performs actions explicitly requested by the User and does not access data for any purposes other than those described.</p>
+
+    <div class="important">
+        <strong>Important:</strong> The Application only accesses data from the specific Google services listed above and only when necessary to fulfill your explicit requests. We do not access any other Google services or data beyond what is described in this policy.
+    </div>
 </section>
 
 <section>
-    <h2>2. Prohibition of Unauthorized Use</h2>
+    <h2>2. Data Usage</h2>
+    <p>LerriAI uses the Google user data it accesses exclusively to provide the personal assistant functionality you request. Specifically, the data is used for the following purposes:</p>
+    
+    <h3>2.1 Command Processing and Task Execution</h3>
+    <p>When you issue a command to LerriAI (such as "Schedule a meeting tomorrow at 10 AM" or "Find my flight receipt"), the Application processes your request using AI agents that:</p>
     <ul>
-        <li><strong>NO THIRD-PARTY SHARING:</strong> User sensitive data (Gmail, Drive, Calendar, Contacts) will never be shared, sold, or rented to third parties for marketing, advertising, or unrelated purposes.</li>
-        <li><strong>NO ADVERTISING:</strong> The Application does not display ads and does not use personal data for advertising purposes.</li>
-        <li><strong>NO USE BEYOND FUNCTIONALITY:</strong> Data is used only to process User commands and provide expected responses.</li>
+        <li>Analyze your command to understand the intent and required actions</li>
+        <li>Access the relevant Google services to retrieve necessary information</li>
+        <li>Execute the requested actions on your behalf</li>
+        <li>Provide you with confirmation and results of the completed task</li>
+    </ul>
+
+    <h3>2.2 Personalization and Context</h3>
+    <p>The Application maintains a temporary conversation context during your session to provide coherent and contextually relevant responses. This includes:</p>
+    <ul>
+        <li>Remembering the current conversation flow to handle follow-up questions</li>
+        <li>Storing user preferences and settings you configure within the Application</li>
+        <li>Maintaining a minimal set of personal data (such as your name and email) to personalize interactions</li>
+    </ul>
+
+    <h3>2.3 Daily Briefing Generation</h3>
+    <p>If you enable the daily briefing feature, the Application accesses your calendar data to generate a summary of your upcoming appointments and tasks. This briefing is created on-demand and is not stored permanently.</p>
+
+    <h3>2.4 Technical Operations</h3>
+    <p>The Application uses your Google account credentials (OAuth tokens) to authenticate and authorize API requests to Google services. These tokens are securely stored and used only to maintain your authenticated session.</p>
+
+    <div class="important">
+        <strong>Limitation of Use:</strong> LerriAI uses your Google user data solely to provide the features and functionality you explicitly request. We do not use your data for any other purposes, including advertising, marketing, data mining, profiling, or any activities unrelated to the core functionality of the Application.
+    </div>
+</section>
+
+<section>
+    <h2>3. Data Sharing</h2>
+    <p>LerriAI is committed to protecting your privacy and does not share your Google user data with third parties, except as described below:</p>
+
+    <h3>3.1 No Third-Party Sharing for Marketing or Advertising</h3>
+    <p>We do not sell, rent, trade, or otherwise share your personal data with third parties for marketing, advertising, or any commercial purposes unrelated to the functionality of the Application.</p>
+
+    <h3>3.2 Service Providers</h3>
+    <p>The Application uses the following service providers to deliver its functionality:</p>
+    <ul>
+        <li><strong>Google API Services:</strong> Your data is transmitted to Google's servers to execute API requests when you use features that interact with Gmail, Drive, Calendar, Documents, and Sheets. This data transmission is necessary for the Application to function and is governed by Google's Privacy Policy.</li>
+        <li><strong>Anthropic API:</strong> User commands and requests are processed using Anthropic's Claude AI model to understand intent and generate appropriate responses. We transmit only the minimum necessary information (your command and relevant context) to Anthropic's API. No complete emails, documents, or files are sent to Anthropic unless specifically required to fulfill your request. Anthropic's data handling is governed by their privacy policy.</li>
+        <li><strong>Cloud Hosting Provider:</strong> The Application backend is hosted on a cloud server infrastructure. Server logs and operational data may be stored by the hosting provider for technical maintenance and security purposes.</li>
+    </ul>
+
+    <h3>3.3 Legal Requirements</h3>
+    <p>We may disclose your personal data if required to do so by law or in response to valid requests by public authorities (such as a court order or government agency), including to meet national security or law enforcement requirements.</p>
+
+    <h3>3.4 No Data Brokers or Analytics</h3>
+    <p>We do not share your data with data brokers, analytics companies, or advertising networks. The Application does not include third-party tracking, analytics, or advertising SDKs.</p>
+</section>
+
+<section>
+    <h2>4. Data Storage and Protection</h2>
+    
+    <h3>4.1 Storage Practices</h3>
+    <p>LerriAI stores the following types of data on our secure backend servers:</p>
+    <ul>
+        <li><strong>Authentication Tokens:</strong> OAuth 2.0 access tokens and refresh tokens provided by Google are securely stored to maintain your authenticated session. These tokens are encrypted and stored in a secure database.</li>
+        <li><strong>User Account Information:</strong> Basic account details including your email address and name are stored to identify your account and personalize your experience.</li>
+        <li><strong>User Preferences and Settings:</strong> Configuration settings and preferences you set within the Application are stored in JSON format on our servers (in the data/ directory).</li>
+        <li><strong>Minimal Session Data:</strong> Temporary conversation context is maintained during active sessions to provide coherent responses to your commands.</li>
+    </ul>
+
+    <p><strong>What We Do NOT Store:</strong></p>
+    <ul>
+        <li>Complete email contents from Gmail</li>
+        <li>Full documents or files from Google Drive</li>
+        <li>Complete calendar event details beyond what is necessary for temporary processing</li>
+        <li>Sensitive file contents from Google Documents or Sheets</li>
+    </ul>
+
+    <p>Data retrieved from Google services is processed in real-time to fulfill your requests and is not permanently stored on our servers.</p>
+
+    <h3>4.2 Security Measures</h3>
+    <p>We implement industry-standard security measures to protect your data:</p>
+    <ul>
+        <li><strong>Encryption in Transit:</strong> All data transmitted between the Application, Google services, and AI providers is encrypted using HTTPS/TLS protocols.</li>
+        <li><strong>Encryption at Rest:</strong> Authentication tokens and sensitive user data stored on our servers are encrypted using industry-standard encryption algorithms.</li>
+        <li><strong>Access Controls:</strong> Access to backend systems and databases is restricted to authorized personnel only and protected by strong authentication mechanisms.</li>
+        <li><strong>Secure Authentication:</strong> The Application uses Google's OAuth 2.0 authentication protocol, which ensures that we never have access to your Google account password.</li>
+        <li><strong>Regular Security Updates:</strong> We regularly update our systems and dependencies to address known security vulnerabilities.</li>
+    </ul>
+
+    <h3>4.3 Data Location</h3>
+    <p>Your data is stored on servers located in secure data centers. The Application backend operates on cloud infrastructure, and data may be processed in different geographic locations depending on the service provider's infrastructure.</p>
+</section>
+
+<section>
+    <h2>5. Data Retention and Deletion</h2>
+    
+    <h3>5.1 Retention Policy</h3>
+    <p>LerriAI retains your data for the following periods:</p>
+    <ul>
+        <li><strong>Authentication Tokens:</strong> OAuth tokens are retained as long as you maintain an active account with LerriAI. Refresh tokens are periodically renewed to maintain uninterrupted service.</li>
+        <li><strong>User Account Data:</strong> Your account information and preferences are retained for as long as your account is active.</li>
+        <li><strong>Session Data:</strong> Temporary conversation context and session data are automatically deleted when your session ends or after a period of inactivity.</li>
+        <li><strong>Server Logs:</strong> Technical logs used for system maintenance and security monitoring are retained for a maximum of 90 days before being automatically deleted.</li>
+    </ul>
+
+    <h3>5.2 Data Deletion Rights</h3>
+    <p>You have the right to request the deletion of your personal data at any time. You can exercise this right through the following methods:</p>
+    <ul>
+        <li><strong>Revoke Access:</strong> You can revoke LerriAI's access to your Google account at any time by visiting your Google Account security settings at <a href="https://myaccount.google.com/permissions" target="_blank">https://myaccount.google.com/permissions</a> and removing LerriAI from the list of connected apps. This action will immediately terminate all access to your Google data.</li>
+        <li><strong>Request Account Deletion:</strong> You can request complete deletion of your LerriAI account and all associated data by contacting us at leonardo.cofone5@gmail.com. We will process your deletion request within 30 days.</li>
+        <li><strong>Automatic Deletion:</strong> If you revoke access or your account becomes inactive, we will automatically delete your authentication tokens and personal data within 90 days of revocation or inactivity.</li>
+    </ul>
+
+    <h3>5.3 Post-Deletion</h3>
+    <p>After your data is deleted:</p>
+    <ul>
+        <li>All authentication tokens will be invalidated and removed from our systems</li>
+        <li>Your user preferences and settings will be permanently deleted</li>
+        <li>Any temporary session data will be cleared</li>
+        <li>Anonymized technical logs may be retained for legal compliance or security purposes but will not contain personally identifiable information</li>
     </ul>
 </section>
 
 <section>
-    <h2>3. Data Security and Retention</h2>
-    <p>All data exchanged between the Application and Google servers is handled via encrypted connections (HTTPS). The Application does not store full email contents or Drive files on its servers. Session data necessary for operation (such as access tokens) is protected and revocable at any time.</p>
+    <h2>6. User Rights and Control</h2>
+    <p>You have the following rights regarding your personal data:</p>
+    
+    <h3>6.1 Right to Access</h3>
+    <p>You can request a copy of the personal data we store about you by contacting us at leonardo.cofone5@gmail.com. We will provide this information in a structured, commonly used format within 30 days of your request.</p>
+
+    <h3>6.2 Right to Rectification</h3>
+    <p>If any personal information we hold about you is inaccurate or incomplete, you have the right to request correction. You can update your profile information directly within the Application or contact us for assistance.</p>
+
+    <h3>6.3 Right to Revoke Access</h3>
+    <p>You can revoke LerriAI's access to your Google account at any time through your Google Account settings. This will immediately terminate all services provided by the Application and prevent any further access to your Google data.</p>
+
+    <h3>6.4 Right to Data Portability</h3>
+    <p>You have the right to receive your personal data in a portable format. Contact us at leonardo.cofone5@gmail.com to request a copy of your data.</p>
+
+    <h3>6.5 Right to Object</h3>
+    <p>You have the right to object to our processing of your personal data. Given that the Application only processes data to fulfill your explicit requests, objecting to processing would effectively prevent the Application from functioning. However, you can always choose to stop using the Application or revoke access.</p>
 </section>
 
 <section>
-    <h2>4. User Rights</h2>
-    <p>Users have the right to revoke access to the Application at any time via their Google account security settings. Revocation will immediately terminate all services provided by the Application.</p>
+    <h2>7. Compliance with Google API Services User Data Policy</h2>
+    <p>LerriAI's use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements. Specifically:</p>
+    <ul>
+        <li>We only request access to the minimum necessary scopes required to provide the Application's functionality</li>
+        <li>We use Google user data only to provide or improve user-facing features that are prominent in the Application's user interface</li>
+        <li>We do not transfer Google user data to third parties except as necessary to provide or improve user-facing features, comply with applicable law, or as part of a merger, acquisition, or sale of assets with user consent</li>
+        <li>We do not use or transfer Google user data for serving advertisements</li>
+        <li>We do not allow humans to read user data unless we have received the user's affirmative agreement, it is necessary for security purposes, or it is required by law</li>
+    </ul>
 </section>
 
 <section>
-    <p>LerriAI, contact: leonardo.cofone5@gmail.com</p>
+    <h2>8. Children's Privacy</h2>
+    <p>LerriAI is not intended for use by children under the age of 13 (or the applicable age of digital consent in your jurisdiction). We do not knowingly collect personal data from children. If we become aware that we have collected personal data from a child without parental consent, we will take steps to delete that information as quickly as possible. If you believe we have collected data from a child, please contact us immediately at leonardo.cofone5@gmail.com.</p>
+</section>
+
+<section>
+    <h2>9. Changes to This Privacy Policy</h2>
+    <p>We may update this Privacy Policy from time to time to reflect changes in our practices, technology, legal requirements, or other factors. When we make changes, we will:</p>
+    <ul>
+        <li>Update the "Last Updated" date at the top of this policy</li>
+        <li>Notify you of significant changes through the Application or via email</li>
+        <li>Provide you with an opportunity to review the updated policy</li>
+    </ul>
+    <p>Your continued use of LerriAI after any changes to this Privacy Policy constitutes your acceptance of the updated policy.</p>
+</section>
+
+<section>
+    <h2>10. Contact Information</h2>
+    <p>If you have any questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:</p>
+    <p><strong>LerriAI</strong><br>
+    Email: leonardo.cofone5@gmail.com</p>
+    <p>We will respond to your inquiry within 30 days.</p>
+</section>
+
+<section>
+    <h2>11. Additional Information</h2>
+    
+    <h3>11.1 How the Application Works</h3>
+    <p>LerriAI is a Progressive Web Application (PWA) that consists of a frontend interface and a backend server. When you issue a command:</p>
+    <ol>
+        <li>Your request is sent securely to our backend server</li>
+        <li>Our AI agents analyze your request to determine the appropriate action</li>
+        <li>The Application uses your authorized Google API access to retrieve or modify data as requested</li>
+        <li>The results are processed and returned to you through the interface</li>
+    </ol>
+
+    <h3>11.2 Transparency</h3>
+    <p>We are committed to transparency in our data practices. The Application only performs actions that you explicitly request, and you maintain full control over your data through Google's permission management system.</p>
 </section>
 
 </main>
 
 <footer>
     <p>&copy; 2025 LerriAI. All rights reserved.</p>
+    <p>This Privacy Policy is effective as of December 11, 2025.</p>
 </footer>
 
 </body>
