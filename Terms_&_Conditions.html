@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terms of Service</title>
+<title>Terms of Service - LerriAI</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
         text-align: center;
     }
     main {
-        max-width: 800px;
+        max-width: 900px;
         margin: 30px auto;
         padding: 0 20px;
         background-color: #fff;
@@ -30,14 +30,41 @@
     h1, h2, h3 {
         color: #222;
     }
+    h2 {
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 10px;
+        margin-top: 30px;
+    }
     section {
         padding: 20px 0;
     }
+    ul {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    ul li {
+        margin: 8px 0;
+    }
+    ol {
+        margin: 10px 0;
+        padding-left: 25px;
+    }
+    ol li {
+        margin: 8px 0;
+    }
+    .important {
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        padding: 15px;
+        margin: 20px 0;
+    }
     footer {
         text-align: center;
-        padding: 15px 0;
+        padding: 20px 0;
         font-size: 0.9em;
         color: #666;
+        border-top: 1px solid #ddd;
+        margin-top: 30px;
     }
 </style>
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
@@ -46,79 +73,335 @@
 
 <header>
     <h1>Terms of Service</h1>
-    <p>Last Updated: 12/11/2025</p>
+    <p>Last Updated: November 20, 2025</p>
 </header>
 
 <main>
 <section>
-    <p>These Terms of Service ("Terms") govern your use of LerriAI ("the Application", "we") and its services. By using the Application, you agree to these Terms in full.</p>
+    <h2>1. Acceptance of Terms</h2>
+    <p>These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you", "your") and LerriAI ("we", "us", "our", "the Application", "the Service") governing your access to and use of the LerriAI personal assistant application, including any associated websites, mobile applications, and services.</p>
+    <p>By creating an account, accessing, or using LerriAI in any manner, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must not access or use the Service.</p>
+    <p>These Terms apply to all users of the Service, including users who register an account and users who browse or interact with the Application.</p>
 </section>
 
 <section>
-    <h2>1. Use of Services</h2>
-    <p>The Application is a personal assistant designed to help Users manage tasks, emails, calendars, documents, and reminders within Google services (such as Gmail, Google Drive, Google Calendar, and Google Tasks) or local tools.</p>
-    <p>Users agree to use the Application only for lawful purposes and in accordance with Google API Services User Data Policy and applicable laws.</p>
-</section>
-
-<section>
-    <h2>2. User Responsibilities</h2>
+    <h2>2. Description of Service</h2>
+    <p>LerriAI is an AI-powered personal assistant application that helps users manage and automate personal and professional tasks by integrating with Google services. The Service provides the following core functionalities:</p>
     <ul>
-        <li>Provide accurate information during registration and account setup.</li>
-        <li>Protect account credentials and access tokens.</li>
-        <li>Do not attempt to access other users’ accounts or data.</li>
-        <li>Use the Application only for its intended purpose.</li>
+        <li>Natural language command processing to execute tasks across Google services</li>
+        <li>Email management through Gmail integration</li>
+        <li>Document creation and management through Google Drive, Google Documents, and Google Sheets</li>
+        <li>Calendar viewing and schedule consultation through Google Calendar</li>
+        <li>Task organization and personal data management</li>
+        <li>Daily briefing generation based on your calendar and tasks</li>
+        <li>Voice interaction capabilities</li>
+    </ul>
+    <p>The Service operates as a Progressive Web Application (PWA) accessible through web browsers and can be installed on compatible devices.</p>
+</section>
+
+<section>
+    <h2>3. Eligibility and Account Registration</h2>
+    
+    <h3>3.1 Age Requirement</h3>
+    <p>You must be at least 13 years of age (or the age of digital consent in your jurisdiction) to use the Service. If you are under 18 years of age, you must have permission from a parent or legal guardian to use the Service.</p>
+    
+    <h3>3.2 Account Creation</h3>
+    <p>To use LerriAI, you must create an account by authenticating with your Google account through Google's OAuth 2.0 protocol. By creating an account, you represent and warrant that:</p>
+    <ul>
+        <li>All information you provide is accurate, current, and complete</li>
+        <li>You have the legal capacity to enter into these Terms</li>
+        <li>You will maintain the accuracy of your account information</li>
+        <li>You are the legitimate owner of the Google account you use to authenticate</li>
+    </ul>
+    
+    <h3>3.3 Account Security</h3>
+    <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to:</p>
+    <ul>
+        <li>Immediately notify us of any unauthorized access or security breach</li>
+        <li>Ensure that you log out from your account at the end of each session when using shared devices</li>
+        <li>Take reasonable precautions to prevent unauthorized access to your account</li>
+    </ul>
+    <p>We are not liable for any loss or damage arising from your failure to protect your account credentials.</p>
+</section>
+
+<section>
+    <h2>4. Authorization and Permissions</h2>
+    
+    <h3>4.1 Google Account Authorization</h3>
+    <p>To function properly, LerriAI requires your explicit authorization to access specific Google services through Google API Services. When you grant these permissions, you authorize the Application to:</p>
+    <ul>
+        <li>Access your basic profile information and email address</li>
+        <li>Send emails on your behalf through Gmail</li>
+        <li>Access and manage files you create with or open with the Application in Google Drive</li>
+        <li>View your calendar events in read-only mode</li>
+        <li>Create and manage Google Documents that you create with or open with the Application</li>
+        <li>Create and manage Google Sheets that you create with or open with the Application</li>
+    </ul>
+    
+    <h3>4.2 Scope of Access</h3>
+    <p>The Application only accesses the minimum data necessary to perform the functions you explicitly request. You can review and revoke these permissions at any time through your Google Account settings.</p>
+    
+    <h3>4.3 Revocation of Access</h3>
+    <p>You may revoke the Application's access to your Google account at any time by visiting your Google Account permissions page. Revoking access will immediately terminate the Application's ability to function and may result in loss of data stored within the Application.</p>
+</section>
+
+<section>
+    <h2>5. Acceptable Use Policy</h2>
+    
+    <h3>5.1 Permitted Uses</h3>
+    <p>You may use the Service only for lawful purposes and in accordance with these Terms. You agree to use the Service solely for personal or business productivity purposes as intended by the Application's design.</p>
+    
+    <h3>5.2 Prohibited Conduct</h3>
+    <p>You agree not to engage in any of the following prohibited activities:</p>
+    <ul>
+        <li>Violating any applicable local, state, national, or international law or regulation</li>
+        <li>Infringing upon or violating the intellectual property rights of LerriAI or any third party</li>
+        <li>Transmitting any malicious code, viruses, worms, or other harmful computer code</li>
+        <li>Attempting to gain unauthorized access to the Service, other user accounts, or computer systems</li>
+        <li>Reverse engineering, decompiling, disassembling, or otherwise attempting to discover the source code of the Application</li>
+        <li>Using the Service to spam, harass, threaten, or abuse any person</li>
+        <li>Collecting or harvesting personal data of other users without their consent</li>
+        <li>Using the Service to send unsolicited commercial communications</li>
+        <li>Impersonating any person or entity or falsely stating or misrepresenting your affiliation with any person or entity</li>
+        <li>Interfering with or disrupting the Service or servers or networks connected to the Service</li>
+        <li>Using automated systems (bots, scripts, or scrapers) to access the Service without authorization</li>
+        <li>Attempting to circumvent any security or authentication measures</li>
+        <li>Using the Service in any manner that could damage, disable, overburden, or impair the Service</li>
+    </ul>
+    
+    <h3>5.3 Compliance with Google Policies</h3>
+    <p>Your use of LerriAI must comply with Google's Terms of Service, Google API Services User Data Policy, and all other applicable Google policies. Any violation of Google's policies may result in termination of your access to the Service.</p>
+</section>
+
+<section>
+    <h2>6. User Content and Data</h2>
+    
+    <h3>6.1 Your Content</h3>
+    <p>You retain all ownership rights to the content and data you create, upload, or transmit through the Service ("User Content"). By using the Service, you grant LerriAI a limited, non-exclusive, royalty-free license to process, transmit, and store your User Content solely for the purpose of providing the Service to you.</p>
+    
+    <h3>6.2 Responsibility for Content</h3>
+    <p>You are solely responsible for your User Content and the consequences of posting or publishing it. You represent and warrant that:</p>
+    <ul>
+        <li>You own or have the necessary rights to use and authorize us to use all User Content</li>
+        <li>Your User Content does not violate any applicable laws or third-party rights</li>
+        <li>Your User Content does not contain any material that is defamatory, obscene, or offensive</li>
+    </ul>
+    
+    <h3>6.3 Monitoring and Enforcement</h3>
+    <p>We do not routinely monitor User Content, but we reserve the right to review content if we receive reports of violations or as required by law. We may remove or refuse to process any User Content that violates these Terms or applicable laws.</p>
+</section>
+
+<section>
+    <h2>7. Intellectual Property Rights</h2>
+    
+    <h3>7.1 LerriAI Property</h3>
+    <p>The Service and its entire contents, features, and functionality (including but not limited to all software, code, designs, text, graphics, logos, and trademarks) are owned by LerriAI and are protected by copyright, trademark, and other intellectual property laws.</p>
+    
+    <h3>7.2 Limited License</h3>
+    <p>Subject to these Terms, we grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for your personal or internal business purposes. This license does not include any right to:</p>
+    <ul>
+        <li>Resell or make commercial use of the Service</li>
+        <li>Modify, copy, or create derivative works based on the Service</li>
+        <li>Download or copy any content except as expressly permitted</li>
+        <li>Use any data mining, robots, or similar data gathering tools</li>
+    </ul>
+    
+    <h3>7.3 Trademarks</h3>
+    <p>LerriAI and associated logos are trademarks of LerriAI. You may not use these trademarks without our prior written consent. All other trademarks mentioned in connection with the Service are the property of their respective owners.</p>
+</section>
+
+<section>
+    <h2>8. Service Availability and Modifications</h2>
+    
+    <h3>8.1 Service Availability</h3>
+    <p>We strive to provide reliable and continuous access to the Service. However, we do not guarantee that the Service will be available at all times or that it will be error-free. The Service may be temporarily unavailable due to:</p>
+    <ul>
+        <li>Scheduled maintenance and updates</li>
+        <li>Technical difficulties or system failures</li>
+        <li>Circumstances beyond our reasonable control</li>
+    </ul>
+    
+    <h3>8.2 Service Modifications</h3>
+    <p>We reserve the right to modify, suspend, or discontinue any aspect of the Service at any time, with or without notice. We may add new features, remove existing features, or change the functionality of the Service. We will make reasonable efforts to notify you of significant changes that materially affect your use of the Service.</p>
+    
+    <h3>8.3 No Obligation to Update</h3>
+    <p>We are under no obligation to provide updates, maintenance, support, or bug fixes for the Service, although we may choose to do so at our discretion.</p>
+</section>
+
+<section>
+    <h2>9. Third-Party Services and Content</h2>
+    
+    <h3>9.1 Google Services</h3>
+    <p>The Service integrates with and relies upon Google API Services. Your use of these Google services through LerriAI is subject to Google's Terms of Service and policies. We are not responsible for any issues arising from Google's services or changes to Google's APIs.</p>
+    
+    <h3>9.2 Third-Party AI Services</h3>
+    <p>The Service uses third-party artificial intelligence services (such as Anthropic's Claude) to process your requests. The use of these services is governed by the respective providers' terms and policies. We are not responsible for the accuracy, reliability, or availability of third-party AI services.</p>
+    
+    <h3>9.3 External Links</h3>
+    <p>The Service may contain links to third-party websites or services. We do not endorse or assume responsibility for any third-party sites, information, materials, products, or services. Your use of third-party websites is at your own risk and subject to their terms and conditions.</p>
+</section>
+
+<section>
+    <h2>10. Fees and Payment</h2>
+    <p>LerriAI is currently provided free of charge. We reserve the right to introduce fees or subscription plans in the future. If we decide to charge for the Service or any features, we will notify you in advance and provide you with the opportunity to accept or decline the new pricing terms. Your continued use of paid features will constitute acceptance of the applicable fees.</p>
+</section>
+
+<section>
+    <h2>11. Termination</h2>
+    
+    <h3>11.1 Termination by You</h3>
+    <p>You may terminate your account at any time by:</p>
+    <ul>
+        <li>Revoking LerriAI's access to your Google account through your Google Account settings</li>
+        <li>Contacting us at leonardo.cofone5@gmail.com to request account deletion</li>
+    </ul>
+    <p>Upon termination, your right to use the Service will immediately cease, and we will delete your account data in accordance with our Privacy Policy.</p>
+    
+    <h3>11.2 Termination by Us</h3>
+    <p>We reserve the right to suspend or terminate your access to the Service immediately, without prior notice or liability, for any reason, including but not limited to:</p>
+    <ul>
+        <li>Violation of these Terms</li>
+        <li>Violation of applicable laws or third-party rights</li>
+        <li>Fraudulent, abusive, or illegal activity</li>
+        <li>Prolonged inactivity</li>
+        <li>Technical or security reasons</li>
+    </ul>
+    
+    <h3>11.3 Effect of Termination</h3>
+    <p>Upon termination of your account:</p>
+    <ul>
+        <li>Your access to the Service will be immediately revoked</li>
+        <li>All licenses granted to you under these Terms will terminate</li>
+        <li>We will delete your personal data in accordance with our data retention policy</li>
+        <li>Provisions of these Terms that by their nature should survive termination will remain in effect</li>
     </ul>
 </section>
 
 <section>
-    <h2>3. Data and Privacy</h2>
-    <p>The Application may access the following Google services and data only as needed to perform User-requested actions:</p>
+    <h2>12. Disclaimers and Warranties</h2>
+    
+    <h3>12.1 "As-Is" Basis</h3>
+    <p>THE SERVICE IS PROVIDED ON AN "AS-IS" AND "AS-AVAILABLE" BASIS WITHOUT ANY WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY LAW, LERRIAI DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:</p>
     <ul>
-        <li><strong>Gmail:</strong> Read, send, delete, modify emails.</li>
-        <li><strong>Google Drive:</strong> Access, modify, create, delete files.</li>
-        <li><strong>Google Calendar:</strong> Access, create, modify events.</li>
-        <li><strong>Google Tasks & Contacts:</strong> Manage tasks and search contacts.</li>
+        <li>IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT</li>
+        <li>WARRANTIES REGARDING THE ACCURACY, RELIABILITY, OR AVAILABILITY OF THE SERVICE</li>
+        <li>WARRANTIES THAT THE SERVICE WILL BE UNINTERRUPTED, SECURE, OR ERROR-FREE</li>
+        <li>WARRANTIES REGARDING THE RESULTS OBTAINED FROM USE OF THE SERVICE</li>
     </ul>
-    <p>All data is used strictly to perform actions requested by the User. Data is never shared, sold, or used for advertising purposes.</p>
-</section>
-
-<section>
-    <h2>4. Restrictions</h2>
+    
+    <h3>12.2 AI-Generated Content</h3>
+    <p>The Service uses artificial intelligence to process requests and generate responses. AI-generated content may contain errors, inaccuracies, or inappropriate suggestions. You acknowledge that:</p>
     <ul>
-        <li>Do not reverse engineer or attempt to modify the Application.</li>
-        <li>Do not use the Application to collect data from third parties without consent.</li>
-        <li>Do not upload illegal or malicious content.</li>
+        <li>AI responses should be reviewed before taking action based on them</li>
+        <li>The Service does not provide professional advice (legal, financial, medical, etc.)</li>
+        <li>You are responsible for verifying the accuracy of AI-generated content</li>
+        <li>We are not liable for decisions made based on AI-generated responses</li>
     </ul>
+    
+    <h3>12.3 No Guarantee of Results</h3>
+    <p>We do not guarantee that the Service will meet your specific requirements or expectations, or that any particular results will be achieved through use of the Service.</p>
 </section>
 
 <section>
-    <h2>5. Security</h2>
-    <p>All data exchanged with Google servers or local services is encrypted via HTTPS. Sensitive data is stored securely on the server and can be revoked by the User at any time.</p>
+    <h2>13. Limitation of Liability</h2>
+    
+    <h3>13.1 Exclusion of Damages</h3>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, LERRIAI, ITS AFFILIATES, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND LICENSORS SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO:</p>
+    <ul>
+        <li>Loss of profits, revenue, or data</li>
+        <li>Loss of business opportunity or goodwill</li>
+        <li>Service interruptions or system failures</li>
+        <li>Cost of substitute services</li>
+        <li>Any other intangible losses</li>
+    </ul>
+    <p>This limitation applies regardless of the legal theory on which the claim is based (contract, tort, negligence, strict liability, or otherwise) and even if we have been advised of the possibility of such damages.</p>
+    
+    <h3>13.2 Cap on Liability</h3>
+    <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, OUR TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING OUT OF OR RELATED TO THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE TWELVE (12) MONTHS PRECEDING THE EVENT GIVING RISE TO LIABILITY, OR ONE HUNDRED DOLLARS ($100), WHICHEVER IS GREATER.</p>
+    
+    <h3>13.3 Jurisdictional Limitations</h3>
+    <p>Some jurisdictions do not allow the exclusion or limitation of certain warranties or liabilities. In such jurisdictions, the above limitations may not apply to you, and our liability will be limited to the maximum extent permitted by law.</p>
 </section>
 
 <section>
-    <h2>6. Termination</h2>
-    <p>We may suspend or terminate access to the Application if a User violates these Terms or any applicable law. Users may terminate their account at any time, and their data will be deleted accordingly.</p>
+    <h2>14. Indemnification</h2>
+    <p>You agree to indemnify, defend, and hold harmless LerriAI, its affiliates, officers, directors, employees, agents, and licensors from and against any claims, liabilities, damages, losses, costs, or expenses (including reasonable attorneys' fees) arising out of or related to:</p>
+    <ul>
+        <li>Your use or misuse of the Service</li>
+        <li>Your violation of these Terms</li>
+        <li>Your violation of any rights of another person or entity</li>
+        <li>Your User Content or any content you submit through the Service</li>
+        <li>Your violation of any applicable laws or regulations</li>
+    </ul>
+    <p>We reserve the right to assume exclusive defense and control of any matter subject to indemnification by you, and you agree to cooperate with our defense of such claims.</p>
 </section>
 
 <section>
-    <h2>7. Limitation of Liability</h2>
-    <p>The Application is provided "as-is". LerriAI is not responsible for any indirect, incidental, or consequential damages arising from use or inability to use the Application.</p>
+    <h2>15. Dispute Resolution</h2>
+    
+    <h3>15.1 Informal Resolution</h3>
+    <p>Before initiating any formal dispute resolution, you agree to first contact us at leonardo.cofone5@gmail.com to attempt to resolve the dispute informally. We will work in good faith to resolve any disputes amicably.</p>
+    
+    <h3>15.2 Governing Law</h3>
+    <p>These Terms and any disputes arising out of or related to them shall be governed by and construed in accordance with the laws of the jurisdiction in which LerriAI operates, without regard to its conflict of law provisions.</p>
+    
+    <h3>15.3 Jurisdiction and Venue</h3>
+    <p>You agree that any legal action or proceeding related to these Terms or the Service shall be brought exclusively in the courts located in the jurisdiction where LerriAI operates, and you consent to the personal jurisdiction of such courts.</p>
 </section>
 
 <section>
-    <h2>8. Changes to Terms</h2>
-    <p>We reserve the right to update these Terms at any time. Users will be notified of significant changes, and continued use constitutes acceptance of the new Terms.</p>
+    <h2>16. General Provisions</h2>
+    
+    <h3>16.1 Entire Agreement</h3>
+    <p>These Terms, together with our Privacy Policy, constitute the entire agreement between you and LerriAI regarding the Service and supersede all prior agreements, representations, and understandings.</p>
+    
+    <h3>16.2 Amendments</h3>
+    <p>We reserve the right to modify these Terms at any time. We will notify you of material changes by:</p>
+    <ul>
+        <li>Posting the updated Terms on our website with a new "Last Updated" date</li>
+        <li>Sending an email notification to your registered email address</li>
+        <li>Displaying a prominent notice within the Application</li>
+    </ul>
+    <p>Your continued use of the Service after such modifications constitutes your acceptance of the updated Terms. If you do not agree to the modified Terms, you must stop using the Service.</p>
+    
+    <h3>16.3 Severability</h3>
+    <p>If any provision of these Terms is found to be invalid, illegal, or unenforceable, the remaining provisions shall continue in full force and effect. The invalid provision shall be modified to the minimum extent necessary to make it valid and enforceable.</p>
+    
+    <h3>16.4 Waiver</h3>
+    <p>No waiver of any term or condition of these Terms shall be deemed a further or continuing waiver of such term or any other term. Our failure to enforce any right or provision of these Terms shall not constitute a waiver of such right or provision.</p>
+    
+    <h3>16.5 Assignment</h3>
+    <p>You may not assign or transfer these Terms or your rights and obligations under them without our prior written consent. We may assign these Terms and our rights and obligations without restriction, including in connection with a merger, acquisition, or sale of assets.</p>
+    
+    <h3>16.6 Force Majeure</h3>
+    <p>We shall not be liable for any failure or delay in performing our obligations under these Terms due to circumstances beyond our reasonable control, including but not limited to acts of God, natural disasters, war, terrorism, labor disputes, governmental actions, or failures of third-party services.</p>
+    
+    <h3>16.7 Relationship</h3>
+    <p>Nothing in these Terms creates any partnership, joint venture, employment, or agency relationship between you and LerriAI. You have no authority to bind LerriAI or make representations on our behalf.</p>
+    
+    <h3>16.8 Language</h3>
+    <p>These Terms are provided in English. Any translation is provided for convenience only. In the event of any conflict between the English version and a translated version, the English version shall prevail.</p>
 </section>
 
 <section>
-    <p>Contact: leonardo.cofone5@gmail.com</p>
+    <h2>17. Contact Information</h2>
+    <p>If you have any questions, concerns, or feedback regarding these Terms of Service, please contact us:</p>
+    <p><strong>LerriAI</strong><br>
+    Email: leonardo.cofone5@gmail.com</p>
+    <p>We will respond to your inquiry within a reasonable timeframe.</p>
+</section>
+
+<section>
+    <div class="important">
+        <strong>By using LerriAI, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service and our Privacy Policy.</strong>
+    </div>
 </section>
 
 </main>
 
 <footer>
     <p>&copy; 2025 LerriAI. All rights reserved.</p>
+    <p>These Terms of Service are effective as of November 20, 2025.</p>
 </footer>
 
 </body>
