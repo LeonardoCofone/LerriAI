@@ -84,10 +84,19 @@ function calculateMessageCost(isVoice = false, durationSeconds = 0) {
 }
 
 function makeLinksClickable(text) {
-    return text.replace(
-        /(https?:\/\/[^\s]+)/g,
-        '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
-    );
+    const urlRegex = /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/g;
+    return text.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+}
+
+function normalizeMarkdown(text) {
+    if (!text) return '';
+    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
+    text = text.replace(/^```(\w+)?\n/gm, '\n```$1\n');
+    text = text.replace(/\n```$/gm, '\n```\n');
+    text = text.replace(/\n{3,}/g, '\n\n');
+    return text;
 }
 
 function addMessage(text, sender, save = true, audioBlob = null, skipSync = false) {
@@ -108,10 +117,22 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
     }
     
     const textDiv = document.createElement('div');
-    const html = DOMPurify.sanitize(md.render(normalizeMarkdown(text)));
-    textDiv.innerHTML = makeLinksClickable(html);
-    msgEl.appendChild(textDiv);
+    const normalizedText = normalizeMarkdown(text);
+    const renderedHtml = md.render(normalizedText);
+    const sanitizedHtml = DOMPurify.sanitize(renderedHtml, {
+        ADD_ATTR: ['target', 'rel']
+    });
+    const htmlWithLinks = makeLinksClickable(sanitizedHtml);
+    textDiv.innerHTML = htmlWithLinks;
     
+    textDiv.querySelectorAll('a').forEach(link => {
+        if (!link.hasAttribute('target')) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+        }
+    });
+    
+    msgEl.appendChild(textDiv);
     messagesContainer.appendChild(msgEl);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -320,14 +341,6 @@ function initTabs() {
     });
 
     activateTab(savedTab);
-}
-
-function normalizeMarkdown(text) {
-    if (!text) return '';
-    text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim();
-    text = text.replace(/```/g, '\n```\n');
-    text = text.replace(/\n{3,}/g, '\n\n');
-    return text;
 }
 
 function initChat() {
