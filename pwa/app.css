@@ -732,6 +732,19 @@ button:active {
     border: none;
 }
 
+.emoji-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.emoji-title-group .emoji-label {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+
 .day-form {
     background: var(--color-background);
     padding: 1.5rem;
