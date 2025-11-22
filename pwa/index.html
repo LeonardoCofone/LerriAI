@@ -82,7 +82,7 @@
                                 <span class="info-icon">ℹ️</span>
                                 <div class="tooltip-content">
                                     Import all your future events from Google Calendar. 
-                                    Duplicates will be updated automatically.
+                                    This will only READ you events from your google calendar, no original data will be modified.
                                 </div>
                             </div>
                         </div>
@@ -125,8 +125,21 @@
                             <input type="hidden" id="day-event-id">
                             
                             <div class="emoji-title-group" style="display: flex; flex-direction: column; align-items: center;">
-                                <button type="button" id="event-emoji-select" class="btn-icon" style="font-size: 1.5rem; width: 60px;">📅</button>
-                                <span class="emoji-label">Change emoji</span>
+                                <button type="button" id="event-emoji-select" class="btn-icon"
+                                    style="
+                                        font-size: 2rem;
+                                        width: 70px;
+                                        height: 70px;
+                                        background: white;
+                                        border-radius: 12px;
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: center;
+                                        border: 2px solid #ddd;
+                                    ">
+                                    🕒
+                                </button>
+
                                 <input type="text" id="day-event-title" placeholder="Event title..." required>
                             </div>
 
