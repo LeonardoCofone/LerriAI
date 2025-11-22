@@ -1108,27 +1108,37 @@ function initSettings(){
     const settingsForm=document.getElementById('settings-form');
     const maxSpendInput=document.getElementById('max-spend');
     const languageSelect=document.getElementById('language-select');
+    const userDescriptionInput=document.getElementById('user-description');
+    const bibleVerseCheckbox=document.getElementById('daily-bible-verse');
     
     maxSpendInput.value=settings.maxSpend;
+    
+    const currentDescription = settings.schedule?.userDescription || '';
+    userDescriptionInput.value = currentDescription;
+    userDescriptionInput.placeholder = currentDescription || 'Tell me about yourself, your interests, goals...';
+    
+    bibleVerseCheckbox.checked = settings.schedule?.dailyBibleVerse || false;
+    
     updateBudgetDisplay(); 
     updateModelCost();
     updateLanguageSelect();
     
-    if (languageSelect) {
-        updateLanguageSelect();
-    }
-    
     settingsForm.addEventListener('submit', async e=>{
         e.preventDefault(); 
         settings.maxSpend=parseFloat(maxSpendInput.value)||0.90;
-        const newLanguage = languageSelect.value;
-        settings.language = newLanguage;
+        settings.language = languageSelect.value;
+        
+        if (!settings.schedule) {
+            settings.schedule = { slots: [], categories: [], sports: [], hobbies: [] };
+        }
+        settings.schedule.userDescription = userDescriptionInput.value.trim();
+        settings.schedule.dailyBibleVerse = bibleVerseCheckbox.checked;
         
         try {
             await fetch("http://localhost:3000/api/set-language", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: getUserEmail(), language: newLanguage })
+                body: JSON.stringify({ email: getUserEmail(), language: settings.language })
             });
         } catch (err) {
             console.error("Language update failed:", err);

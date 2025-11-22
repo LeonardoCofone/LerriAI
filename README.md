@@ -42,6 +42,7 @@ LerriAI/
 │   │   ├── calendar-tool.js  
 │   │   ├── tasks-tool.js  
 │   │   ├── gmail-tool.js  
+│   │   ├── google-calendar-import.js  
 │   │   ├── documents-tool.js  
 │   │   ├── finance-tool.js  
 │   │   ├── sheets-tool.js  
