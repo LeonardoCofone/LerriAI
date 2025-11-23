@@ -1110,6 +1110,17 @@ function initSettings(){
     const languageSelect=document.getElementById('language-select');
     const userDescriptionInput=document.getElementById('user-description');
     const bibleVerseCheckbox=document.getElementById('daily-bible-verse');
+
+    const manageScheduleBtn = document.getElementById('manage-schedule-btn');
+    if (manageScheduleBtn) {
+        manageScheduleBtn.addEventListener('click', () => {
+            if (typeof openScheduleManager === 'function') {
+                openScheduleManager();
+            } else {
+                showNotification('❌ Errore caricamento. Ricarica la pagina.', 'error');
+            }
+        });
+    }
     
     maxSpendInput.value=settings.maxSpend;
     

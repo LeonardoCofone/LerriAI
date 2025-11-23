@@ -14,7 +14,7 @@
     <script src="app.js" defer></script>
     <link rel="icon" href="icon/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="schedule-manager.css">
-    <script src="schedule-manager.js" defer></script>
+    <script src="schedule-manager.js"></script>
 </head>
 <body>
     <header>
@@ -202,7 +202,7 @@
             <div class="settings-card">
                 <h2>📅 Recurring Timetable</h2>
                 <p style="padding-bottom: 10px;">Manage your recurring weekly calendar</p>
-                <button onclick="openScheduleManager()" class="btn-primary">Manage Schedule</button>
+                <button id="manage-schedule-btn" class="btn-primary">Manage Schedule</button>
             </div>
             <div id="schedule-modal" class="modal hidden">
                 <div class="modal-content schedule-modal-content">
@@ -492,6 +492,275 @@
                 this.scrollTop = this.scrollHeight;
             });
         }
+
+    
+
+function loadCurrentSchedule() {
+    editScheduleBlocks = {};
+    editCurrentSelection = new Set();
+    editSportsActivities = [];
+    editHobbiesActivities = [];
+    
+    // Carica dalla configurazione corrente
+    if (settings.schedule && settings.schedule.subjects) {
+        settings.schedule.subjects.forEach((subject, index) => {
+            if (subject.hasTime && subject.days && subject.days.length > 0) {
+                const blocks = [];
+                subject.days.forEach(day => {
+                    blocks.push({
+                        day: day,
+                        time: subject.startTime
+                    });
+                });
+                editScheduleBlocks[index] = {
+                    name: subject.name,
+                    blocks: blocks
+                };
+            }
+        });
+    }
+
+    if (settings.schedule && settings.schedule.sports) {
+        editSportsActivities = settings.schedule.sports.map(s => ({
+            name: s.name,
+            emoji: s.emoji || '⚽'
+        }));
+    }
+
+    if (settings.schedule && settings.schedule.hobbies) {
+        editHobbiesActivities = settings.schedule.hobbies.map(h => ({
+            name: h.name,
+            emoji: h.emoji || '🎨'
+        }));
+    }
+
+    renderEditActivities();
+    renderEditSports();
+    renderEditHobbies();
+}
+
+
+function toggleEditCell(key, cell) {
+    if (editCurrentSelection.has(key)) {
+        editCurrentSelection.delete(key);
+        cell.style.background = 'white';
+        cell.innerHTML = '';
+    } else {
+        editCurrentSelection.add(key);
+        cell.style.background = '#667eea';
+        cell.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 1.2rem; font-weight: bold;">✓</div>';
+    }
+}
+
+function saveEditActivity() {
+    if (editCurrentSelection.size === 0) {
+        alert('Seleziona almeno una cella del calendario!');
+        return;
+    }
+
+    const activityName = document.getElementById('edit-activity-name').value.trim() || 'Attività';
+    const blocks = Array.from(editCurrentSelection).map(key => {
+        const [day, time] = key.split('-');
+        return { day, time };
+    });
+
+    const activityId = Date.now();
+    editScheduleBlocks[activityId] = {
+        name: activityName,
+        blocks: blocks
+    };
+
+    renderEditActivities();
+    editCurrentSelection.clear();
+    generateEditCalendar();
+    document.getElementById('edit-activity-name').value = '';
+}
+
+function renderEditActivities() {
+    const list = document.getElementById('edit-activities-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    Object.entries(editScheduleBlocks).forEach(([id, activity]) => {
+        const tag = document.createElement('div');
+        tag.className = 'activity-tag-edit';
+        tag.innerHTML = `
+            <span>📚 ${activity.name} (${activity.blocks.length} slot)</span>
+            <button onclick="removeEditActivity(${id})">×</button>
+        `;
+        list.appendChild(tag);
+    });
+}
+
+function removeEditActivity(id) {
+    delete editScheduleBlocks[id];
+    renderEditActivities();
+}
+
+function addEditSport(name, emoji) {
+    editSportsActivities.push({ name, emoji });
+    renderEditSports();
+}
+
+function addCustomEditSport() {
+    const input = document.getElementById('custom-sport-name');
+    const name = input.value.trim();
+    if (name) {
+        editSportsActivities.push({ name, emoji: '⚽' });
+        input.value = '';
+        renderEditSports();
+    }
+}
+
+function renderEditSports() {
+    const list = document.getElementById('edit-sports-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    editSportsActivities.forEach((sport, index) => {
+        const tag = document.createElement('div');
+        tag.className = 'activity-tag-edit';
+        tag.innerHTML = `
+            <span>${sport.emoji} ${sport.name}</span>
+            <button onclick="removeEditSport(${index})">×</button>
+        `;
+        list.appendChild(tag);
+    });
+}
+
+function removeEditSport(index) {
+    editSportsActivities.splice(index, 1);
+    renderEditSports();
+}
+
+function addEditHobby(name, emoji) {
+    editHobbiesActivities.push({ name, emoji });
+    renderEditHobbies();
+}
+
+function addCustomEditHobby() {
+    const input = document.getElementById('custom-hobby-name');
+    const name = input.value.trim();
+    if (name) {
+        editHobbiesActivities.push({ name, emoji: '🎨' });
+        input.value = '';
+        renderEditHobbies();
+    }
+}
+
+function renderEditHobbies() {
+    const list = document.getElementById('edit-hobbies-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    editHobbiesActivities.forEach((hobby, index) => {
+        const tag = document.createElement('div');
+        tag.className = 'activity-tag-edit';
+        tag.innerHTML = `
+            <span>${hobby.emoji} ${hobby.name}</span>
+            <button onclick="removeEditHobby(${index})">×</button>
+        `;
+        list.appendChild(tag);
+    });
+}
+
+function removeEditHobby(index) {
+    editHobbiesActivities.splice(index, 1);
+    renderEditHobbies();
+}
+
+function convertEditToScheduleFormat() {
+    const scheduleByDayTime = {};
+
+    Object.values(editScheduleBlocks).forEach(activity => {
+        activity.blocks.forEach(block => {
+            const key = `${block.day}-${block.time}`;
+            if (!scheduleByDayTime[key]) {
+                scheduleByDayTime[key] = [];
+            }
+            scheduleByDayTime[key].push(activity.name);
+        });
+    });
+
+    // Unifica eventi consecutivi
+    const consolidatedActivities = {};
+    const processedBlocks = new Set();
+
+    Object.entries(scheduleByDayTime).forEach(([key, names]) => {
+        if (processedBlocks.has(key)) return;
+
+        const [day, time] = key.split('-');
+        const [hours] = time.split(':').map(Number);
+        const activityName = names[0];
+
+        let endHour = hours + 1;
+
+        // Cerca blocchi consecutivi
+        let keepLooking = true;
+        while (keepLooking) {
+            const nextTimeStr = `${String(endHour).padStart(2, '0')}:00`;
+            const nextKey = `${day}-${nextTimeStr}`;
+            
+            if (scheduleByDayTime[nextKey] && scheduleByDayTime[nextKey][0] === activityName) {
+                processedBlocks.add(nextKey);
+                endHour++;
+            } else {
+                keepLooking = false;
+            }
+        }
+
+        processedBlocks.add(key);
+
+        if (!consolidatedActivities[activityName]) {
+            consolidatedActivities[activityName] = [];
+        }
+
+        consolidatedActivities[activityName].push({
+            day,
+            start: time,
+            end: `${String(endHour).padStart(2, '0')}:00`
+        });
+    });
+
+    const subjects = [];
+    Object.entries(consolidatedActivities).forEach(([name, timeBlocks]) => {
+        timeBlocks.forEach(timeBlock => {
+            subjects.push({
+                name: name,
+                days: [timeBlock.day],
+                startTime: timeBlock.start,
+                endTime: timeBlock.end,
+                hasTime: true
+            });
+        });
+    });
+
+    const sportsData = editSportsActivities.map(sport => ({
+        name: sport.name,
+        emoji: sport.emoji,
+        days: [],
+        hasTime: false
+    }));
+
+    const hobbiesData = editHobbiesActivities.map(hobby => ({
+        name: hobby.name,
+        emoji: hobby.emoji,
+        days: [],
+        hasTime: false
+    }));
+
+    return {
+        work: null,
+        subjects: subjects,
+        sports: sportsData,
+        hobbies: hobbiesData
+    };
+}
+
+
 
 // Hamburger menu per mobile
 const hamburger = document.createElement('button');
