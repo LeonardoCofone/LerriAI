@@ -1736,6 +1736,49 @@ function initNotificationPrompt() {
     }, 500);
 }
 
+const VAPID_PUBLIC_KEY = 'YOUR_PUBLIC_KEY_HERE';
+
+async function subscribeUserToPush() {
+    try {
+        const registration = await navigator.serviceWorker.ready;
+        
+        const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+        
+        await fetch('http://localhost:3000/api/subscribe-notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: getUserEmail(),
+                subscription: subscription
+            })
+        });
+        
+        console.log('✅ Subscribed to push notifications');
+        return true;
+    } catch (error) {
+        console.error('Push subscription error:', error);
+        return false;
+    }
+}
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+        .replace(/\-/g, '+')
+        .replace(/_/g, '/');
+    
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+}
+
 function showNotificationPrompt() {
     const modal = document.createElement('div');
     modal.id = 'notification-modal';
@@ -1754,84 +1797,6 @@ function showNotificationPrompt() {
         </div>
     `;
 
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 10001;
-        animation: fadeIn 0.3s ease-out;
-    `;
-
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        .notification-modal-overlay {
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        .notification-modal-content {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-        
-        .notification-modal-icon {
-            font-size: 4rem;
-            margin-bottom: 15px;
-        }
-        
-        .notification-modal-content h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.5rem;
-            color: #2d3748;
-        }
-        
-        .notification-modal-content p {
-            margin: 10px 0;
-            font-size: 1rem;
-            color: #64748b;
-            line-height: 1.5;
-        }
-        
-        .notification-modal-content p strong {
-            color: #667eea;
-            font-weight: 700;
-        }
-        
-        .notification-modal-actions {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .notification-modal-actions button {
-            width: 100%;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-        }
-    `;
-    document.head.appendChild(style);
     document.body.appendChild(modal);
 
     document.getElementById('notification-enable-btn').addEventListener('click', async () => {
@@ -1839,11 +1804,10 @@ function showNotificationPrompt() {
             const permission = await Notification.requestPermission();
             
             if (permission === 'granted') {
-                console.log('✅ Notifications enabled');
-                showNotification('🔔 Notifications enabled! You will receive daily briefings and reminders.', 'success');
-            } else {
-                console.log('❌ Notifications denied');
-                showNotification('Notifications blocked. You can enable them later in settings.', 'info');
+                const subscribed = await subscribeUserToPush();
+                if (subscribed) {
+                    showNotification('🔔 Notifications enabled! You will receive daily briefings.', 'success');
+                }
             }
         } catch (error) {
             console.error('Notification error:', error);

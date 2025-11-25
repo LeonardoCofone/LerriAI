@@ -72,3 +72,39 @@ self.addEventListener("fetch", event => {
             })
     );
 });
+
+self.addEventListener('push', event => {
+    console.log('Push received:', event);
+    
+    const data = event.data ? event.data.json() : {
+        title: 'Notification',
+        body: 'You have a new message',
+        icon: '/icon/icon-192.png'
+    };
+    
+    const options = {
+        body: data.body,
+        icon: data.icon || '/icon/icon-192.png',
+        badge: data.badge || '/icon/icon-192.png',
+        vibrate: [200, 100, 200],
+        data: data.data || {},
+        actions: [
+            { action: 'open', title: 'Open App' },
+            { action: 'close', title: 'Close' }
+        ]
+    };
+    
+    event.waitUntil(
+        self.registration.showNotification(data.title, options)
+    );
+});
+
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    
+    if (event.action === 'open') {
+        event.waitUntil(
+            clients.openWindow('/')
+        );
+    }
+});
