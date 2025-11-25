@@ -61,18 +61,20 @@ function initDailyBriefingButton() {
         line-height: 1.4;
     `;
 
+
     const tooltipArrow = document.createElement('div');
     tooltipArrow.style.cssText = `
         position: absolute;
-        top: 100%;
+        top: 0;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translateX(-50%) translateY(-50%);
         width: 0;
         height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
         border-top: 6px solid #2d3748;
     `;
+
     tooltip.appendChild(tooltipArrow);
 
     infoIcon.addEventListener('mouseenter', () => {
