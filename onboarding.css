@@ -228,12 +228,69 @@ h1 {
 .time-label {
     height: 60px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-end;
     padding-right: 10px;
     font-size: 0.75rem;
     color: #718096;
     font-weight: 600;
+    line-height: 60px;
+}
+
+.slot-ghost {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    font-size: 3rem;
+    opacity: 0.9;
+    transition: none;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+}
+
+.slot-hints {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    pointer-events: none;
+    opacity: 0.6;
+    font-size: 1.2rem;
+}
+
+.slot-hint-top {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    padding-top: 40px;
+    padding-bottom: 30px;
+    transform: translateX(-50%);
+    font-size: 1rem;
+}
+
+.slot-hint-bottom {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    padding-bottom: 14px;
+}
+
+.slot-hint-sides {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
 }
 
 .weekly-calendar {
@@ -256,7 +313,6 @@ h1 {
 .day-header {
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white;
-    padding: 12px;
     text-align: center;
     font-weight: 700;
     font-size: 0.9rem;
@@ -264,13 +320,31 @@ h1 {
     position: sticky;
     top: 0;
     z-index: 20;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px; /* spazio tra testo e pulsante */
 }
+
+.add-slot-btn {
+    padding: 4px 8px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
 
 .day-grid {
     position: relative;
     flex: 1;
-    background: linear-gradient(to bottom, transparent 59px, #e2e8f0 59px, #e2e8f0 60px);
-    background-size: 100% 60px;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 59px,
+        #e2e8f0 59px,
+        #e2e8f0 60px
+    );
     height: auto;
     min-height: 0;
 }
@@ -780,6 +854,26 @@ textarea {
     align-items: center;
     background: #fff;
     border-top: 1px solid #edf2f7;
+}
+
+.btn-danger {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-danger:hover,
+.btn-danger:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
 }
 
 .modal-close {

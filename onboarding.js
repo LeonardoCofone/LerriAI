@@ -36,12 +36,16 @@ const MINUTES_PER_SLOT = 60;
 const SNAP_MINUTES = 10;
 
 const VISIBLE_START_HOUR = 5;
-const VISIBLE_END_HOUR = 22;
-const VISIBLE_HOURS = VISIBLE_END_HOUR - VISIBLE_START_HOUR;
+const VISIBLE_END_HOUR = 23;
+const VISIBLE_HOURS = VISIBLE_END_HOUR - VISIBLE_START_HOUR + 1;
 
 let draggedSlot = null;
 let dragStartY = 0;
 let isResizing = false;
+let isDuplicating = false;
+let ghostElement = null;
+let duplicateStartX = 0;
+let originalDayIndex = -1;
 let selectedSlots = new Set();
 let currentEditingSlot = null;
 let selectedSlotEmoji = '🕒';
@@ -55,9 +59,7 @@ function timeToPixels(timeStr) {
 function pixelsToTime(px) {
     const totalMinutesFromStart = Math.round((px / SLOT_HEIGHT_PX) * MINUTES_PER_SLOT);
     const snappedMinutesFromStart = Math.round(totalMinutesFromStart / SNAP_MINUTES) * SNAP_MINUTES;
-    // absolute minutes since midnight
     let absMinutes = snappedMinutesFromStart + (VISIBLE_START_HOUR * 60);
-    // clamp to visible range
     const minAbs = VISIBLE_START_HOUR * 60;
     const maxAbs = VISIBLE_END_HOUR * 60;
     if (absMinutes < minAbs) absMinutes = minAbs;
@@ -66,6 +68,7 @@ function pixelsToTime(px) {
     const minutes = absMinutes % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
+
 function timeToMinutes(timeStr) {
     if (!timeStr) return 0;
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -120,11 +123,12 @@ function initializeWeeklyCalendar() {
         dayColumn.className = 'day-column';
         dayColumn.innerHTML = `
             <div class="day-header">
-                ${dayNamesDisplay[day]}
+                <div class="day-name">${dayNamesDisplay[day]}</div>
                 <button class="add-slot-btn" data-day="${day}">➕</button>
             </div>
             <div class="day-grid" data-day="${day}"></div>
         `;
+
 
         dayColumn.style.minHeight = '0';
 
@@ -204,14 +208,34 @@ function renderDaySlots(day) {
         slotEl.style.top = startPx + 'px';
         slotEl.style.height = height + 'px';
 
+        const durationMinutes = timeToMinutes(slot.end) - timeToMinutes(slot.start);
+        const showHints = durationMinutes >= 180;
+
         slotEl.innerHTML = `
             <input type="checkbox" class="slot-checkbox" data-slot-id="${slot.id}" ${selectedSlots.has(slot.id) ? 'checked' : ''}>
+            
             <div class="slot-content">
                 <div class="slot-time">${slot.start} - ${slot.end}</div>
                 ${slot.emoji || slot.name ? `<div class="slot-info">${slot.emoji} ${slot.name}</div>` : ''}
             </div>
+
+            ${showHints ? `
+                <div class="slot-hints">
+                    <div class="slot-hint-top">▲ Move</div>
+
+                    <div class="slot-hint-sides">
+                        <span>◀</span>
+                        <span>Copy</span>
+                        <span>▶</span>
+                    </div>
+
+                    <div class="slot-hint-bottom">▼ Resize</div>
+                </div>
+            ` : ''}
+
             <div class="slot-resize-handle"></div>
         `;
+
 
         const checkbox = slotEl.querySelector('.slot-checkbox');
         checkbox.addEventListener('change', (e) => {
@@ -245,6 +269,14 @@ function renderDaySlots(day) {
             openSlotEditor(slot);
         });
 
+        slotEl.addEventListener('touchend', (e) => {
+            if (e.target.closest('.slot-checkbox') || e.target.closest('.slot-resize-handle')) return;
+            if (recentlyDragged || isResizing) return;
+            if (draggedSlot && draggedSlot.moved) return;
+            e.preventDefault();
+            openSlotEditor(slot);
+        }, { passive: false });
+
         container.appendChild(slotEl);
     });
 
@@ -254,8 +286,13 @@ function renderDaySlots(day) {
 
 
 function startDrag(e, slot, slotEl) {
+    const dayColumn = slotEl.closest('.day-column');
+    const dayGrid = dayColumn.querySelector('.day-grid');
+    originalDayIndex = dayNames.indexOf(dayGrid.dataset.day);
+    
     draggedSlot = { slot, slotEl, startY: e.clientY, startX: e.clientX, moved: false };
     dragStartY = e.clientY;
+    duplicateStartX = e.clientX;
     slotEl.classList.add('dragging');
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
@@ -279,36 +316,102 @@ function onDragMove(e) {
     }
 
     draggedSlot.moved = true;
-    const deltaY = clientY - dragStartY;
-    const currentTop = parseInt(draggedSlot.slotEl.style.top) || 0;
-    const newTop = Math.max(0, currentTop + deltaY);
-    draggedSlot.slotEl.style.top = newTop + 'px';
-    dragStartY = clientY;
+    
+    const horizontalDelta = Math.abs(clientX - duplicateStartX);
+    
+    if (horizontalDelta > 80 && !isDuplicating) {
+        isDuplicating = true;
+        
+        if (!ghostElement) {
+            ghostElement = document.createElement('div');
+            ghostElement.className = 'slot-ghost';
+            ghostElement.textContent = draggedSlot.slot.emoji || '📋';
+            document.body.appendChild(ghostElement);
+        }
+    }
+    
+    if (isDuplicating && ghostElement) {
+        ghostElement.style.left = (clientX - ghostElement.offsetWidth / 2) + 'px';
+        ghostElement.style.top = (clientY - ghostElement.offsetHeight / 2) + 'px';
+    } else if (!isDuplicating) {
+        const deltaY = clientY - dragStartY;
+        const currentTop = parseInt(draggedSlot.slotEl.style.top) || 0;
+        const maxTop = (VISIBLE_HOURS * SLOT_HEIGHT_PX) - parseInt(draggedSlot.slotEl.style.height);
+        const newTop = Math.max(0, Math.min(maxTop, currentTop + deltaY));
+        draggedSlot.slotEl.style.top = newTop + 'px';
+        dragStartY = clientY;
+    }
 }
 
 
 
 
-function onDragEnd() {
+function onDragEnd(e) {
     if (!draggedSlot) return;
     const wasMoved = !!draggedSlot.moved;
-    if (wasMoved) {
+    
+    if (ghostElement) {
+        ghostElement.remove();
+        ghostElement = null;
+    }
+    
+    if (isDuplicating && wasMoved) {
+        const clientX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+        const dayColumns = document.querySelectorAll('.day-column');
+        let targetDayIndex = -1;
+        
+        dayColumns.forEach((col, idx) => {
+            const rect = col.getBoundingClientRect();
+            if (clientX >= rect.left && clientX <= rect.right) {
+                targetDayIndex = idx;
+            }
+        });
+        
+        if (targetDayIndex !== -1 && targetDayIndex !== originalDayIndex) {
+            const targetDay = dayNames[targetDayIndex];
+            const originalSlot = draggedSlot.slot;
+            const newSlot = createSlot(
+                targetDay,
+                originalSlot.start,
+                originalSlot.end,
+                originalSlot.name,
+                originalSlot.emoji,
+                originalSlot.description
+            );
+            weeklySlots[targetDay].push(newSlot);
+            renderDaySlots(targetDay);
+            showToast(`✅ Slot duplicated to ${dayNamesDisplay[targetDay]}!`);
+        }
+        
+        renderDaySlots(draggedSlot.slot.day);
+        
+    } else if (wasMoved && !isDuplicating) {
         const newTop = parseInt(draggedSlot.slotEl.style.top) || 0;
         const newStart = pixelsToTime(newTop);
         const duration = timeToMinutes(draggedSlot.slot.end) - timeToMinutes(draggedSlot.slot.start);
-        const newEnd = minutesToTime(timeToMinutes(newStart) + duration);
-        draggedSlot.slot.start = newStart;
-        draggedSlot.slot.end = newEnd;
-        draggedSlot.slotEl.classList.remove('dragging');
+        let newEndMinutes = timeToMinutes(newStart) + duration;
+        const maxEndMinutes = VISIBLE_END_HOUR * 60;
+        
+        if (newEndMinutes > maxEndMinutes) {
+            newEndMinutes = maxEndMinutes;
+            const newStartMinutes = newEndMinutes - duration;
+            draggedSlot.slot.start = minutesToTime(newStartMinutes);
+            draggedSlot.slot.end = minutesToTime(newEndMinutes);
+        } else {
+            draggedSlot.slot.start = newStart;
+            draggedSlot.slot.end = minutesToTime(newEndMinutes);
+        }
         renderDaySlots(draggedSlot.slot.day);
-
+        
         recentlyDragged = true;
-        setTimeout(() => recentlyDragged = false, 200);
+        setTimeout(() => recentlyDragged = false, 300);
     } else {
         draggedSlot.slotEl.classList.remove('dragging');
     }
 
+    isDuplicating = false;
     draggedSlot = null;
+    originalDayIndex = -1;
     document.removeEventListener('mousemove', onDragMove);
     document.removeEventListener('mouseup', onDragEnd);
     document.removeEventListener('touchmove', onDragMove);
@@ -334,7 +437,9 @@ function onResizeMove(e) {
     
     const deltaY = clientY - dragStartY;
     const currentHeight = parseInt(resizedSlot.slotEl.style.height) || SLOT_HEIGHT_PX;
-    const newHeight = Math.max(SLOT_HEIGHT_PX / 6, currentHeight + deltaY);
+    const currentTop = parseInt(resizedSlot.slotEl.style.top) || 0;
+    const maxHeight = (VISIBLE_HOURS * SLOT_HEIGHT_PX) - currentTop;
+    const newHeight = Math.max(SLOT_HEIGHT_PX / 6, Math.min(maxHeight, currentHeight + deltaY));
     resizedSlot.slotEl.style.height = newHeight + 'px';
     dragStartY = clientY;
 }
@@ -347,20 +452,29 @@ function onResizeEnd() {
     const endPx = startPx + newHeight;
     let newEnd = pixelsToTime(endPx);
     const startMinutes = timeToMinutes(resizedSlot.slot.start);
-    if (timeToMinutes(newEnd) <= startMinutes) {
-        newEnd = minutesToTime(startMinutes + 10);
+    const maxEndMinutes = VISIBLE_END_HOUR * 60;
+    let newEndMinutes = timeToMinutes(newEnd);
+    
+    if (newEndMinutes > maxEndMinutes) {
+        newEndMinutes = maxEndMinutes;
     }
-    resizedSlot.slot.end = newEnd;
+    
+    if (newEndMinutes <= startMinutes) {
+        newEndMinutes = startMinutes + 10;
+    }
+    
+    resizedSlot.slot.end = minutesToTime(newEndMinutes);
     renderDaySlots(resizedSlot.slot.day);
 
-    // brief block to prevent click immediately after resizing
     recentlyDragged = true;
-    setTimeout(() => recentlyDragged = false, 200);
+    setTimeout(() => recentlyDragged = false, 300);
 
     isResizing = false;
     resizedSlot = null;
     document.removeEventListener('mousemove', onResizeMove);
     document.removeEventListener('mouseup', onResizeEnd);
+    document.removeEventListener('touchmove', onResizeMove);
+    document.removeEventListener('touchend', onResizeEnd);
 }
 
 function toggleSlotSelection(slotId) {
@@ -390,9 +504,10 @@ function updateSelectionToolbar() {
 }
 
 function openSlotEditor(slot) {
+    if (recentlyDragged) return;
+    
     currentEditingSlot = slot;
 
-    // find or create modal overlay
     let modal = document.getElementById('slotEditorModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -401,7 +516,6 @@ function openSlotEditor(slot) {
         document.body.appendChild(modal);
     }
 
-    // build modal content (removed search input)
     const categoriesHtml = Object.keys(emojiCategories).map(cat => {
         return `<button type="button" class="emoji-cat-tab" data-cat="${cat}">${cat}</button>`;
     }).join('');
@@ -447,37 +561,26 @@ function openSlotEditor(slot) {
             </div>
 
             <div class="modal-footer">
-                <div class="left-actions">
-                    ${slot.name ? '<button class="btn-danger" id="slotEditorDeleteBtn">Delete</button>' : ''}
-                </div>
-                <div class="right-actions">
-                    <button class="btn-secondary" id="slotEditorCancelBtn">Cancel</button>
-                    <button class="btn-primary" id="slotEditorSaveBtn">Save</button>
-                </div>
+                <button class="btn-secondary" id="slotEditorDeleteBtn">🗑️ Delete</button>
+                <button class="btn-primary" id="slotEditorSaveBtn">💾 Save</button>
             </div>
         </div>
     `;
 
-    // show modal
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
     document.body.classList.add('modal-open');
 
-    // set initial selected emoji variable and preview
     selectedSlotEmoji = slot.emoji || selectedSlotEmoji || '🕒';
     const preview = modal.querySelector('#selectedEmojiPreview');
     if (preview) preview.textContent = selectedSlotEmoji;
 
-    // event wiring
     const closeBtn = modal.querySelector('#slotEditorCloseBtn');
-    const cancelBtn = modal.querySelector('#slotEditorCancelBtn');
     const saveBtn = modal.querySelector('#slotEditorSaveBtn');
     const deleteBtn = modal.querySelector('#slotEditorDeleteBtn');
 
     if (closeBtn) closeBtn.addEventListener('click', closeSlotEditor);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeSlotEditor);
     if (saveBtn) saveBtn.addEventListener('click', () => {
-        // update currentEditingSlot values from modal fields then save
         if (!currentEditingSlot) return;
         currentEditingSlot.name = (modal.querySelector('#slotName') || { value: '' }).value.trim();
         currentEditingSlot.emoji = selectedSlotEmoji;
@@ -487,18 +590,15 @@ function openSlotEditor(slot) {
         showToast('✅ Slot saved!');
     });
     if (deleteBtn) deleteBtn.addEventListener('click', () => {
-        // set currentEditingSlot then delegate
         currentEditingSlot = slot;
         deleteCurrentSlot();
     });
 
-    // emoji interaction (delegated)
     const gridWrapper = modal.querySelector('.emoji-grid-modal-wrapper');
     gridWrapper.addEventListener('click', (ev) => {
         const btn = ev.target.closest('.emoji-btn-modal');
         if (!btn) return;
         const emoji = btn.dataset.emoji;
-        // select and update preview + visual state
         selectEmoji(emoji);
         const p = modal.querySelector('#selectedEmojiPreview');
         if (p) p.textContent = emoji;
@@ -506,7 +606,6 @@ function openSlotEditor(slot) {
         btn.classList.add('selected');
     });
 
-    // category tabs behaviour
     modal.querySelectorAll('.emoji-cat-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             const cat = tab.dataset.cat;
@@ -518,18 +617,14 @@ function openSlotEditor(slot) {
         });
     });
 
-    // default show first category and highlight selected emoji
     const firstTab = modal.querySelector('.emoji-cat-tab');
     if (firstTab) firstTab.click();
-    // highlight currently selected emoji button if present
     modal.querySelectorAll(`.emoji-btn-modal[data-emoji="${selectedSlotEmoji}"]`).forEach(b => b.classList.add('selected'));
 
-    // keyboard: ESC to close
     const keyHandler = (ke) => { if (ke.key === 'Escape') closeSlotEditor(); };
     modal._keyHandler = keyHandler;
     document.addEventListener('keydown', keyHandler);
 
-    // focus input
     setTimeout(() => {
         const input = modal.querySelector('#slotName');
         if (input) input.focus();
@@ -583,18 +678,17 @@ function saveSlotEdits() {
 
 function deleteCurrentSlot() {
     if (!currentEditingSlot) return;
-    if (confirm('Are you sure you want to delete this slot?')) {
-        const day = currentEditingSlot.day;
-        const slotId = currentEditingSlot.id;
-        weeklySlots[day] = weeklySlots[day].filter(s => s.id !== slotId);
-        categories[day].forEach(cat => {
-            cat.slotIds = cat.slotIds.filter(id => id !== slotId);
-        });
-        categories[day] = categories[day].filter(cat => cat.slotIds.length > 0);
-        renderDaySlots(day);
-        closeSlotEditor();
-        showToast('🗑️ Slot deleted');
-    }
+    const day = currentEditingSlot.day;
+    const slotId = currentEditingSlot.id;
+    weeklySlots[day] = weeklySlots[day].filter(s => s.id !== slotId);
+    categories[day].forEach(cat => {
+        cat.slotIds = cat.slotIds.filter(id => id !== slotId);
+    });
+    categories[day] = categories[day].filter(cat => cat.slotIds.length > 0);
+    renderDaySlots(day);
+    closeSlotEditor();
+    showToast('🗑️ Slot deleted');
+    
 }
 
 function resetCalendar() {

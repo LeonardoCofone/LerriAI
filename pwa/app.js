@@ -72,7 +72,7 @@ function initDailyBriefingButton() {
         height: 0;
         border-left: 6px solid transparent;
         border-right: 6px solid transparent;
-        border-top: 6px solid #2d3748;
+        border-bottom: 6px solid #2d3748;
     `;
 
     tooltip.appendChild(tooltipArrow);
