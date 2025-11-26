@@ -243,11 +243,12 @@ let messagesArray = [];
 
 const md = window.markdownit();
 
-function calculateMessageCost(isVoice = false, durationSeconds = 0) {
-    if (!isVoice) return COSTS.TEXT_MESSAGE;
-    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
+function calculateMessageCost(isVoice = false, durationSeconds = 0, toolsUsed = 0) {
+    if (isVoice) {
+        return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND) + (toolsUsed * 0.0005);
+    }
+    return 0.0005 + (toolsUsed * 0.0005);
 }
-
 function makeLinksClickable(text) {
     const urlRegex = /(https?:\/\/[^\s<>"']+)/g;
     return text.replace(urlRegex, (url) => {

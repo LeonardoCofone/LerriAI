@@ -185,7 +185,7 @@ h1 {
 
 .section-description {
     color: #718096;
-    font-size: 1rem;
+    font-size: 1.2rem;
     max-width: 700px;
     margin: 0 auto;
     line-height: 1.6;
@@ -193,12 +193,23 @@ h1 {
 
 .calendar-controls {
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
-    padding: 15px 20px;
+    padding: 25px 20px;
     background: #f7fafc;
     border-radius: 12px;
+}
+
+.calendar-controls p {
+    color: #718096;
+    text-align: center;
+    white-space: normal;
+    word-wrap: break-word;
+    font-size: 1rem;
+    flex: 1;
+    margin-top: 15px;
 }
 
 .weekly-calendar-wrapper {
@@ -235,6 +246,7 @@ h1 {
     color: #718096;
     font-weight: 600;
     line-height: 60px;
+    padding-top: 20px;
 }
 
 .slot-ghost {
