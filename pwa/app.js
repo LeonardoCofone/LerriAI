@@ -214,7 +214,7 @@ function initEmojiSelect() {
 
 const COSTS = {
     TEXT_MESSAGE: 0.00099,          
-    VOICE_PER_SECOND: 0.0075 / 60,  
+    VOICE_PER_SECOND: 0.0035 / 60,  
     VOICE_BASE: 0.00099  
 };
 
@@ -1506,8 +1506,8 @@ async function handleReauth() {
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'https://www.googleapis.com/auth/drive.file',
                 'https://www.googleapis.com/auth/calendar.readonly',
-                'https://www.googleapis.com/auth/documents',
-                'https://www.googleapis.com/auth/spreadsheets',
+                'https://www.googleapis.com/auth/documents.readonly',
+                'https://www.googleapis.com/auth/spreadsheets.readonly',
                 'https://www.googleapis.com/auth/gmail.send'
             ].join(" "),
 
