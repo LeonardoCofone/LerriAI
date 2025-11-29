@@ -55,7 +55,13 @@
                         <p>Your digital strategic AI assistant. Ask me anything!</p>
                     </div>
                 </div>
-                <form id="chat-form">
+                <form id="chat-form">                                   <!--,.jpg,.jpeg,.png,.gif,.webp-->
+                    <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt" style="display: none;">
+                    
+                    <button type="button" id="attach-btn" aria-label="Attach files">
+                        📎
+                    </button>
+
                     <button type="button" id="mic-btn" aria-label="Use voice">
                         🎤
                     </button>

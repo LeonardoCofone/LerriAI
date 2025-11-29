@@ -404,6 +404,98 @@ button:active {
     to { opacity: 0; }
 }
 
+#file-input {
+    display: none;
+}
+
+#attach-btn {
+    background: var(--color-background);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    padding: 0.875rem;
+    font-size: 1.25rem;
+    min-width: 48px;
+}
+
+#attach-btn:hover {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+#attach-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.attached-files-container {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(99, 102, 241, 0.05);
+    border-top: 1px solid var(--color-border);
+    align-items: center;
+}
+
+.attached-file-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    max-width: 200px;
+}
+
+.file-icon {
+    font-size: 1.125rem;
+    flex-shrink: 0;
+}
+
+.file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+.remove-file-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-danger);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: var(--transition);
+    line-height: 1;
+}
+
+.remove-file-btn:hover {
+    transform: scale(1.2);
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 50%;
+}
+
+.files-cost-tag {
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+    color: white;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
 .btn-primary {
     padding-top: 10px;
     background: var(--color-primary);
@@ -1818,6 +1910,20 @@ footer {
     #chat-input {
         font-size: 16px;
         padding: 0.75rem;
+    }
+
+    .attached-files-container {
+        padding: 0.5rem 1rem;
+    }
+
+    .attached-file-tag {
+        max-width: 150px;
+        font-size: 0.8125rem;
+    }
+
+    #attach-btn {
+        padding: 0.75rem;
+        min-width: 44px;
     }
     
     button {

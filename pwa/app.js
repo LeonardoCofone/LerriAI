@@ -215,8 +215,12 @@ function initEmojiSelect() {
 const COSTS = {
     TEXT_MESSAGE: 0.00099,          
     VOICE_PER_SECOND: 0.0035 / 60,  
-    VOICE_BASE: 0.00099  
+    VOICE_BASE: 0.00099,
+    FILE_ATTACHMENT: 0.05
 };
+
+let attachedFiles = [];
+const MAX_FILES = 5;
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
@@ -544,6 +548,8 @@ function initChat() {
         chatInput.disabled = true;
         chatInput.placeholder = '⚠️ Budget esaurito';
         micBtn.disabled = true;
+        const attachBtn = document.getElementById('attach-btn');
+        if (attachBtn) attachBtn.disabled = true;
         addMessage('⚠️ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
         return;
     }
@@ -557,6 +563,17 @@ function initChat() {
     }
     
     const micBtn = document.getElementById("mic-btn");
+    const attachBtn = document.getElementById("attach-btn");
+    const fileInput = document.getElementById("file-input");
+    
+    if (attachBtn && fileInput) {
+        attachBtn.addEventListener("click", () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener("change", handleFileSelect);
+    }
+    
     let mediaRecorder;
     let audioChunks = [];
     let startTime;
@@ -586,8 +603,10 @@ function initChat() {
                     const durationSeconds = Math.round(durationMs / 1000);
 
                     const voiceCost = calculateMessageCost(true, durationSeconds);
+                    const filesCost = attachedFiles.length * COSTS.FILE_ATTACHMENT;
+                    const totalCost = voiceCost + filesCost;
 
-                    if (settings.currentSpend + voiceCost > settings.maxSpend) {
+                    if (settings.currentSpend + totalCost > settings.maxSpend) {
                         addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
                         stream.getTracks().forEach(track => track.stop());
                         return;
@@ -600,13 +619,18 @@ function initChat() {
                         const base64Audio = reader.result.split(',')[1];
                         
                         try {
+                            const filesData = await Promise.all(
+                                attachedFiles.map(file => fileToBase64(file))
+                            );
+
                             const response = await fetch(BACKEND_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({
                                     audio_data: base64Audio,
                                     email: getUserEmail(),
-                                    user_id: getUserIdentifier()
+                                    user_id: getUserIdentifier(),
+                                    files: filesData
                                 })
                             });
                             
@@ -629,10 +653,10 @@ function initChat() {
                             settings.stats.messages++;
                             settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
                             settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
-                            settings.currentSpend += voiceCost;
+                            settings.currentSpend += totalCost;
                             settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
 
-                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s)`);
+                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
 
                             if (data.events) events = data.events;
                             if (data.tasks) tasks = data.tasks;
@@ -641,6 +665,7 @@ function initChat() {
                                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
                             }
 
+                            clearAttachedFiles();
                             await syncToServer();
                             updateStats();
                             updateBudgetDisplay();
@@ -674,28 +699,36 @@ function initChat() {
         e.preventDefault();
         
         const msg = chatInput.value.trim();
-        if (!msg) return;
+        if (!msg && attachedFiles.length === 0) return;
 
         const textCost = calculateMessageCost(false);
+        const filesCost = attachedFiles.length * COSTS.FILE_ATTACHMENT;
+        const totalCost = textCost + filesCost;
 
-        if (settings.currentSpend + textCost > settings.maxSpend) {
+        if (settings.currentSpend + totalCost > settings.maxSpend) {
             addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
             return;
         }
 
-        addMessage(msg, 'user', true, null, true);
+        const displayMsg = msg || '📎 Files attached';
+        addMessage(displayMsg, 'user', true, null, true);
         chatInput.value = '';
 
         const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
 
         try {
+            const filesData = await Promise.all(
+                attachedFiles.map(file => fileToBase64(file))
+            );
+
             const response = await fetch(BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: msg,
+                    message: msg || 'Analyze these files',
                     email: getUserEmail(),
-                    user_id: getUserIdentifier()
+                    user_id: getUserIdentifier(),
+                    files: filesData
                 })
             });
 
@@ -716,10 +749,10 @@ function initChat() {
             addMessage(replyText, 'bot', true, null, true);
 
             settings.stats.messages++;
-            settings.currentSpend += textCost;
+            settings.currentSpend += totalCost;
             settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
 
-            console.log(`💰 Costo testuale: €${textCost.toFixed(5)}`);
+            console.log(`💰 Text cost: €${textCost.toFixed(5)} + Files: €${filesCost.toFixed(2)}`);
 
             if (data.events) events = data.events;
             if (data.tasks) tasks = data.tasks;
@@ -728,6 +761,7 @@ function initChat() {
                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
             }
 
+            clearAttachedFiles();
             await syncToServer();
             updateStats();
             updateBudgetDisplay();
@@ -747,6 +781,111 @@ function initChat() {
     });
     initDailyBriefingButton();
 }
+
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
+    
+    if (attachedFiles.length + files.length > MAX_FILES) {
+        showNotification(`❌ Maximum ${MAX_FILES} files allowed`, 'error');
+        return;
+    }
+
+    const validTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/msword',
+        'text/plain',
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp'
+    ];
+
+    for (const file of files) {
+        if (!validTypes.includes(file.type)) {
+            showNotification(`❌ File type not supported: ${file.name}`, 'error');
+            continue;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            showNotification(`❌ File too large (max 10MB): ${file.name}`, 'error');
+            continue;
+        }
+
+        attachedFiles.push(file);
+    }
+
+    updateAttachedFilesUI();
+    event.target.value = '';
+}
+
+function updateAttachedFilesUI() {
+    let container = document.getElementById('attached-files-container');
+    
+    if (!container) {
+        const chatForm = document.getElementById('chat-form');
+        container = document.createElement('div');
+        container.id = 'attached-files-container';
+        container.className = 'attached-files-container';
+        chatForm.insertBefore(container, chatForm.firstChild);
+    }
+
+    if (attachedFiles.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.style.display = 'flex';
+    container.innerHTML = attachedFiles.map((file, index) => `
+        <div class="attached-file-tag">
+            <span class="file-icon">${getFileIcon(file.type)}</span>
+            <span class="file-name">${file.name}</span>
+            <button type="button" class="remove-file-btn" onclick="removeAttachedFile(${index})">×</button>
+        </div>
+    `).join('');
+
+    const filesCost = attachedFiles.length * COSTS.FILE_ATTACHMENT;
+    const costTag = document.createElement('div');
+    costTag.className = 'files-cost-tag';
+    costTag.textContent = `+€${filesCost.toFixed(2)}`;
+    container.appendChild(costTag);
+}
+
+function removeAttachedFile(index) {
+    attachedFiles.splice(index, 1);
+    updateAttachedFilesUI();
+}
+
+function clearAttachedFiles() {
+    attachedFiles = [];
+    updateAttachedFilesUI();
+}
+
+function getFileIcon(mimeType) {
+    if (mimeType.startsWith('image/')) return '🖼️';
+    if (mimeType.includes('pdf')) return '📄';
+    if (mimeType.includes('word')) return '📝';
+    if (mimeType.includes('text')) return '📃';
+    return '📎';
+}
+
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            resolve({
+                name: file.name,
+                type: file.type,
+                size: file.size,
+                data: reader.result.split(',')[1]
+            });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+window.removeAttachedFile = removeAttachedFile;
 
 function initCalendar() {
     generateCalendar();
@@ -1506,8 +1645,6 @@ async function handleReauth() {
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'https://www.googleapis.com/auth/drive.file',
                 'https://www.googleapis.com/auth/calendar.readonly',
-                'https://www.googleapis.com/auth/documents.readonly',
-                'https://www.googleapis.com/auth/spreadsheets.readonly',
                 'https://www.googleapis.com/auth/gmail.send'
             ].join(" "),
 
