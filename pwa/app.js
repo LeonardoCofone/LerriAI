@@ -222,7 +222,6 @@ const COSTS = {
 let attachedFiles = [];
 let fileMessageCounter = 0;
 const MAX_FILES = 5;
-const FILE_MEMORY_MESSAGES = 3;
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
@@ -681,8 +680,6 @@ function initChat() {
                                 settings.stats.events = data.stats.events || settings.stats.events;
                                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
                             }
-
-                            incrementFileMessageCounter();
                             
                             await syncToServer();
                             updateStats();
@@ -805,8 +802,6 @@ function initChat() {
                 settings.stats.events = data.stats.events || settings.stats.events;
                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
             }
-
-            incrementFileMessageCounter();
             
             await syncToServer();
             updateStats();
@@ -950,27 +945,6 @@ function clearAttachedFiles() {
     attachedFiles = [];
     updateAttachedFilesDisplay();
 }
-
-function incrementFileMessageCounter() {
-    fileMessageCounter++;
-    
-    attachedFiles = attachedFiles.map(item => ({
-        ...item,
-        messageCount: item.messageCount + 1
-    }));
-    
-    const expiredFiles = attachedFiles.filter(item => item.messageCount >= FILE_MEMORY_MESSAGES);
-    
-    if (expiredFiles.length > 0) {
-        attachedFiles = attachedFiles.filter(item => item.messageCount < FILE_MEMORY_MESSAGES);
-        updateAttachedFilesDisplay();
-        
-        if (attachedFiles.length === 0) {
-            showNotification('📎 Files cleared from memory', 'info');
-        }
-    }
-}
-
 
 function getFileIcon(mimeType) {
     if (mimeType.startsWith('image/')) return '🖼️';
@@ -1232,8 +1206,8 @@ function getRecurringEventsForDate(dateKey) {
             if (Array.isArray(sport.days) && sport.days.includes(dayName)) {
                 recurringEvents.push({
                     title: `${sport.emoji || '⚽'} ${sport.name}`,
-                    start: sport.startTime || '18:00',
-                    end: sport.endTime || '19:30',
+                    start: sport.startTime || '00:00',
+                    end: sport.endTime || '23:59',
                     description: `Sport: ${sport.name}`,
                     isRecurring: true
                 });
