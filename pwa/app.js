@@ -220,7 +220,9 @@ const COSTS = {
 };
 
 let attachedFiles = [];
+let fileMessageCounter = 0;
 const MAX_FILES = 5;
+const FILE_MEMORY_MESSAGES = 3;
 
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
@@ -612,7 +614,10 @@ function initChat() {
                         return;
                     }
 
-                    const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s - Transcribing...`, 'user', false);
+                    const hasFiles = attachedFiles.length > 0;
+                    const filesList = attachedFiles.map(item => item.file.name).join(', ');
+
+                    const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
                                         
                     const reader = new FileReader();
                     reader.onloadend = async () => {
@@ -620,7 +625,7 @@ function initChat() {
                         
                         try {
                             const filesData = await Promise.all(
-                                attachedFiles.map(file => fileToBase64(file))
+                                attachedFiles.map(item => fileToBase64(item.file))
                             );
 
                             const response = await fetch(BACKEND_URL, {
@@ -643,7 +648,19 @@ function initChat() {
                             transcribingMsg.remove();
                             
                             if (transcribedText) {
-                                addMessage(transcribedText, 'user', true, audioBlob, true);
+                                const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
+                                
+                                if (hasFiles) {
+                                    const filesListDiv = document.createElement('div');
+                                    filesListDiv.className = 'message-files-list';
+                                    filesListDiv.innerHTML = attachedFiles.map(item => `
+                                        <span class="message-file-badge">
+                                            <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                                            ${item.file.name}
+                                        </span>
+                                    `).join('');
+                                    userMsgElement.appendChild(filesListDiv);
+                                }
                             }
                             
                             if (aiReply) {
@@ -665,7 +682,8 @@ function initChat() {
                                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
                             }
 
-                            clearAttachedFiles();
+                            incrementFileMessageCounter();
+                            
                             await syncToServer();
                             updateStats();
                             updateBudgetDisplay();
@@ -710,22 +728,49 @@ function initChat() {
             return;
         }
 
-        const displayMsg = msg || '📎 Files attached';
-        addMessage(displayMsg, 'user', true, null, true);
+        const hasFiles = attachedFiles.length > 0;
+        const filesList = attachedFiles.map(item => item.file.name).join(', ');
+        
+        let displayMsg = msg || '🔎 Analyzing attached files';
+        if (hasFiles && msg) {
+            displayMsg = msg;
+        }
+        
+        const userMsgElement = addMessage(displayMsg, 'user', true, null, true);
+        
+        if (hasFiles) {
+            const filesListDiv = document.createElement('div');
+            filesListDiv.className = 'message-files-list';
+            filesListDiv.innerHTML = attachedFiles.map(item => `
+                <span class="message-file-badge">
+                    <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                    ${item.file.name}
+                </span>
+            `).join('');
+            userMsgElement.appendChild(filesListDiv);
+        }
+        
         chatInput.value = '';
 
         const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
 
         try {
             const filesData = await Promise.all(
-                attachedFiles.map(file => fileToBase64(file))
+                attachedFiles.map(item => fileToBase64(item.file))
             );
+
+            let optimizedPrompt = msg;
+            
+            if (hasFiles) {
+                const fileContext = `\n\n[SYSTEM: The user has attached ${attachedFiles.length} document${attachedFiles.length > 1 ? 's' : ''}: ${filesList}. Analyze the content and respond accordingly.]`;
+                optimizedPrompt = (msg || 'Please analyze the attached documents and provide a summary.') + fileContext;
+            }
 
             const response = await fetch(BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    message: msg || 'Analyze these files',
+                    message: optimizedPrompt,
                     email: getUserEmail(),
                     user_id: getUserIdentifier(),
                     files: filesData
@@ -761,7 +806,8 @@ function initChat() {
                 settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
             }
 
-            clearAttachedFiles();
+            incrementFileMessageCounter();
+            
             await syncToServer();
             updateStats();
             updateBudgetDisplay();
@@ -812,12 +858,55 @@ function handleFileSelect(event) {
             continue;
         }
 
-        attachedFiles.push(file);
+        attachedFiles.push({
+            file: file,
+            addedAt: Date.now(),
+            messageCount: 0
+        });
     }
 
-    updateAttachedFilesUI();
+    updateAttachedFilesDisplay();
     event.target.value = '';
 }
+
+function updateAttachedFilesDisplay() {
+    let display = document.getElementById('attached-files-display');
+    
+    if (!display) {
+        const messagesContainer = document.getElementById('messages');
+        display = document.createElement('div');
+        display.id = 'attached-files-display';
+        display.className = 'attached-files-display hidden';
+        messagesContainer.parentNode.insertBefore(display, messagesContainer);
+    }
+
+    if (attachedFiles.length === 0) {
+        display.classList.add('hidden');
+        return;
+    }
+
+    display.classList.remove('hidden');
+    
+    const totalSize = attachedFiles.reduce((sum, item) => sum + item.file.size, 0);
+    const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(2);
+    
+    display.innerHTML = `
+        <div class="files-count-badge">
+            📎 ${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} (${totalSizeMB} MB)
+        </div>
+        ${attachedFiles.map((item, index) => `
+            <div class="attached-file-chip">
+                <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                <div class="file-chip-info">
+                    <span class="file-chip-name">${item.file.name}</span>
+                    <span class="file-chip-size">${(item.file.size / 1024).toFixed(1)} KB</span>
+                </div>
+                <button type="button" class="remove-file-chip-btn" onclick="removeAttachedFile(${index})">×</button>
+            </div>
+        `).join('')}
+    `;
+}
+
 
 function updateAttachedFilesUI() {
     let container = document.getElementById('attached-files-container');
@@ -853,13 +942,35 @@ function updateAttachedFilesUI() {
 
 function removeAttachedFile(index) {
     attachedFiles.splice(index, 1);
-    updateAttachedFilesUI();
+    updateAttachedFilesDisplay();
+    showNotification('📎 File removed', 'info');
 }
 
 function clearAttachedFiles() {
     attachedFiles = [];
-    updateAttachedFilesUI();
+    updateAttachedFilesDisplay();
 }
+
+function incrementFileMessageCounter() {
+    fileMessageCounter++;
+    
+    attachedFiles = attachedFiles.map(item => ({
+        ...item,
+        messageCount: item.messageCount + 1
+    }));
+    
+    const expiredFiles = attachedFiles.filter(item => item.messageCount >= FILE_MEMORY_MESSAGES);
+    
+    if (expiredFiles.length > 0) {
+        attachedFiles = attachedFiles.filter(item => item.messageCount < FILE_MEMORY_MESSAGES);
+        updateAttachedFilesDisplay();
+        
+        if (attachedFiles.length === 0) {
+            showNotification('📎 Files cleared from memory', 'info');
+        }
+    }
+}
+
 
 function getFileIcon(mimeType) {
     if (mimeType.startsWith('image/')) return '🖼️';
