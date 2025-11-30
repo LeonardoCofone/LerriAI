@@ -1929,6 +1929,129 @@ footer {
     font-size: 1rem;
 }
 
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(0); }
+    to { transform: translateY(100%); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.pwa-banner-content {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pwa-banner-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.pwa-banner-text {
+    flex: 1;
+}
+
+.pwa-banner-text h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    color: #2d3748;
+}
+
+.pwa-banner-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+.pwa-banner-actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.pwa-banner-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.notification-modal-overlay {
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.notification-modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.notification-modal-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+}
+
+.notification-modal-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.5rem;
+    color: #2d3748;
+}
+
+.notification-modal-content p {
+    margin: 10px 0;
+    font-size: 1rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.notification-modal-content p strong {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.notification-modal-actions {
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification-modal-actions button {
+    width: 100%;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+}
 @media (max-width: 1024px) {
     .reauth-container {
         padding: 0.75rem;
@@ -1970,6 +2093,20 @@ footer {
 @media (max-width: 768px) {
     :root {
         --header-height: 56px;
+    }
+
+    .pwa-banner-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .pwa-banner-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .pwa-banner-actions button {
+        width: 100%;
     }
     
     header {

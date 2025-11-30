@@ -163,7 +163,6 @@ if (document.getElementById("registerForm")) {
 
                         showNotification(`✅ Welcome, ${data.name}!`, "success");
 
-                        // CHECK ONBOARDING
                         try {
                             const onboardingRes = await fetch(`http://localhost:3000/api/check-onboarding?email=${encodeURIComponent(data.email)}`);
                             const onboardingStatus = await onboardingRes.json();
