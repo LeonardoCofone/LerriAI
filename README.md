@@ -50,6 +50,11 @@ LerriAI/
 │   │   ├── news-tool.js  
 │   │   ├── weather-tool.js  
 │   │   └── index.js  
+│ 
+│   ├── scheduler/  
+│   │   ├── bible.js  
+│   │   ├── briefing-scheduler.js  
+│   │   └── notification-scheduler.js  
 │  
 │   ├── prompts/  
 │   │   ├── routing-prompt.js  

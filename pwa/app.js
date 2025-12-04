@@ -1,4 +1,5 @@
 const BACKEND_URL = "http://localhost:3000/api/chat";
+const PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENT_ID_HERE";
 const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
 const LANGUAGES = {
     "it": "Italiano",
@@ -161,6 +162,109 @@ function initDailyBriefingButton() {
             briefingBtn.innerHTML = '📊';
         }
     });
+}
+
+async function checkTrialStatus() {
+    const email = getUserEmail();
+    if (!email) return { canSendMessage: true, messagesRemaining: 80 };
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/check-trial-status?email=${encodeURIComponent(email)}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Trial status check error:', error);
+        return { canSendMessage: true, messagesRemaining: 80 };
+    }
+}
+
+async function showSubscriptionModal() {
+    const modal = document.createElement('div');
+    modal.id = 'subscription-modal';
+    modal.innerHTML = `
+        <div class="subscription-modal-overlay">
+            <div class="subscription-modal-content">
+                <h2>🚀 Upgrade to Premium</h2>
+                <p>You've used all 80 free messages!</p>
+                <div class="subscription-benefits">
+                    <p>✨ Unlimited messages</p>
+                    <p>🤖 Full AI assistant capabilities</p>
+                    <p>📅 Advanced calendar features</p>
+                    <p>💾 Unlimited storage</p>
+                </div>
+                <p class="subscription-price">Only $4.99/month</p>
+                <div id="paypal-button-container"></div>
+                <button id="close-subscription-modal" class="btn-secondary">Maybe Later</button>
+            </div>
+        </div>
+    `;
+    
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10002;
+    `;
+    
+    document.body.appendChild(modal);
+    
+    document.getElementById('close-subscription-modal').addEventListener('click', () => {
+        modal.remove();
+    });
+    
+    if (window.paypal) {
+        window.paypal.Buttons({
+            style: {
+                shape: 'rect',
+                color: 'gold',
+                layout: 'vertical',
+                label: 'subscribe'
+            },
+            createSubscription: async function(data, actions) {
+                const email = getUserEmail();
+                const response = await fetch('http://localhost:3000/api/create-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const result = await response.json();
+                return result.subscriptionId;
+            },
+            onApprove: async function(data, actions) {
+                const email = getUserEmail();
+                const response = await fetch('http://localhost:3000/api/activate-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email, 
+                        subscriptionId: data.subscriptionID 
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    modal.remove();
+                    showNotification('✅ Subscription activated! Enjoy unlimited messages!', 'success');
+                    await loadDataFromServer();
+                    location.reload();
+                } else {
+                    showNotification('❌ Subscription activation failed', 'error');
+                }
+            },
+            onError: function(err) {
+                console.error('PayPal error:', err);
+                showNotification('❌ Payment error. Please try again.', 'error');
+            }
+        }).render('#paypal-button-container');
+    }
 }
 
 
@@ -334,14 +438,14 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
         if (messagesArray.length > 25) messagesArray = messagesArray.slice(-25);
     }
 
-    //if (sender === 'bot' && 'Notification' in window) {
-    //    if (Notification.permission === 'granted') {
-    //        new Notification('LerriAI', {
-    //            body: text.length > 100 ? text.slice(0, 100) + '…' : text,
-    //            icon: '/icon/icon-192.png'
-    //         });
-    //    }
-    //}
+    if (sender === 'bot' && 'Notification' in window) {
+        if (Notification.permission === 'granted') {
+            new Notification('LerriAI', {
+                body: text.length > 100 ? text.slice(0, 100) + '…' : text,
+                icon: '/icon/icon-192.png'
+             });
+        }
+    }
 
     return msgEl;
 }
@@ -433,6 +537,14 @@ async function loadDataFromServer() {
                     hobbies: Array.isArray(data.settings.schedule?.hobbies) ? data.settings.schedule.hobbies : []
                 }
             };
+        }
+
+        if (!window.paypalLoaded) {
+            const script = document.createElement('script');
+            script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
+            script.async = true;
+            document.body.appendChild(script);
+            window.paypalLoaded = true;
         }
 
         console.log('🕒 Schedule loaded:', {
@@ -660,6 +772,24 @@ function initChat() {
     const chatInput = document.getElementById('chat-input');
     const email = getUserEmail();
     const userName = localStorage.getItem('user_name') || 'User';
+
+    checkTrialStatus().then(status => {
+        if (!status.subscriptionActive && status.messagesRemaining >= 0) {
+            const trialBanner = document.createElement('div');
+            trialBanner.id = 'trial-banner';
+            trialBanner.style.cssText = `
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px;
+                text-align: center;
+                font-weight: 600;
+                border-radius: 8px;
+                margin-bottom: 15px;
+            `;
+            trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
+            messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
+        }
+    });
     
     if (!email) {
         window.location.href = '../login.html';
@@ -836,6 +966,17 @@ function initChat() {
         
         const msg = chatInput.value.trim();
         if (!msg && attachedFiles.length === 0) return;
+
+        const trialStatus = await checkTrialStatus();
+        
+        if (!trialStatus.canSendMessage) {
+            await showSubscriptionModal();
+            return;
+        }
+        
+        if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 10) {
+            showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
+        }
 
         const textCost = calculateMessageCost(false);
         const filesCost = calculateFileCost(attachedFiles);
