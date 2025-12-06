@@ -179,6 +179,32 @@ async function checkTrialStatus() {
     }
 }
 
+async function updateTrialBanner() {
+    const status = await checkTrialStatus();
+    const existingBanner = document.getElementById('trial-banner');
+    
+    if (existingBanner) {
+        existingBanner.remove();
+    }
+    
+    if (!status.subscriptionActive && status.messagesRemaining >= 0) {
+        const messagesContainer = document.getElementById('messages');
+        const trialBanner = document.createElement('div');
+        trialBanner.id = 'trial-banner';
+        trialBanner.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        `;
+        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
+        messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
+    }
+}
+
 async function showSubscriptionModal() {
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
@@ -981,6 +1007,12 @@ function initChat() {
     const userName = localStorage.getItem('user_name') || 'User';
 
     checkTrialStatus().then(status => {
+        // Remove existing banner first
+        const existingBanner = document.getElementById('trial-banner');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+
         if (!status.subscriptionActive && status.messagesRemaining >= 0) {
             const trialBanner = document.createElement('div');
             trialBanner.id = 'trial-banner';
@@ -1275,6 +1307,7 @@ function initChat() {
             await syncToServer();
             updateStats();
             updateBudgetDisplay();
+            await updateTrialBanner();
 
         } catch (error) {
             loadingMsg.remove();
