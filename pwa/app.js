@@ -588,10 +588,10 @@ async function loadDataFromServer() {
 
         // Render messages
         const messagesContainer = document.getElementById('messages');
-        if (messagesContainer) {
+        if (messagesContainer && localStorage.getItem('lexor-current-tab') === 'chat') {
             messagesContainer.innerHTML = '';
             messagesArray.forEach(msg => {
-                addMessage(msg.text, msg.sender, false);
+                addMessage(msg.text, msg.sender, false, null, false);
             });
         }
 
@@ -1006,29 +1006,7 @@ function initChat() {
     const email = getUserEmail();
     const userName = localStorage.getItem('user_name') || 'User';
 
-    checkTrialStatus().then(status => {
-        // Remove existing banner first
-        const existingBanner = document.getElementById('trial-banner');
-        if (existingBanner) {
-            existingBanner.remove();
-        }
-
-        if (!status.subscriptionActive && status.messagesRemaining >= 0) {
-            const trialBanner = document.createElement('div');
-            trialBanner.id = 'trial-banner';
-            trialBanner.style.cssText = `
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 12px;
-                text-align: center;
-                font-weight: 600;
-                border-radius: 8px;
-                margin-bottom: 15px;
-            `;
-            trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
-            messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
-        }
-    });
+    updateTrialBanner();
     
     if (!email) {
         window.location.href = '../login.html';
@@ -1323,6 +1301,7 @@ function initChat() {
         }
     });
     initDailyBriefingButton();
+    updateTrialBanner();
 }
 
 function handleFileSelect(event) {
