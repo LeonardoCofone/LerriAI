@@ -1025,10 +1025,19 @@ async function checkAndPromptPWA() {
 
     const dismissTime = localStorage.getItem('pwa-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
-    if (daysSinceDismiss < 7) return;
+    
+    console.log('📅 Days since dismiss:', daysSinceDismiss);
+    
+    if (daysSinceDismiss < 7) {
+        console.log('⏳ PWA prompt dismissed recently, waiting...');
+        return;
+    }
 
     if (deferredPrompt) {
+        console.log('✅ Showing PWA banner...');
         showPWAInstallBanner();
+    } else {
+        console.log('⚠️ deferredPrompt not available yet');
     }
 }
 

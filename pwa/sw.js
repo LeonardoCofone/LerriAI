@@ -18,7 +18,13 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('[SW] Caching app shell');
-                return cache.addAll(urlsToCache);
+                return Promise.all(
+                    urlsToCache.map((url) => {
+                        return cache.add(url).catch((error) => {
+                            console.warn(`[SW] Failed to cache ${url}:`, error);
+                        });
+                    })
+                );
             })
             .then(() => self.skipWaiting())
     );
