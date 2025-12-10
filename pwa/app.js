@@ -820,18 +820,10 @@ function initPWAInstallPrompt() {
         e.preventDefault();
         deferredPrompt = e;
         
-        const dismissTime = localStorage.getItem('pwa-prompt-dismiss-time');
-        const daysSinceDismiss = dismissTime ? 
-            (Date.now() - parseInt(dismissTime)) / (1000 * 60 * 60 * 24) : 999;
-        
-        console.log('📅 Days since dismiss:', daysSinceDismiss);
-        
-        if (daysSinceDismiss >= 3) {
-            setTimeout(() => {
-                console.log('📢 Showing PWA banner...');
-                showPWAInstallBanner();
-            }, 2000);
-        }
+        setTimeout(() => {
+            console.log('📢 Showing PWA banner...');
+            showPWAInstallBanner();
+        }, 1000);
     });
 
     window.addEventListener('appinstalled', () => {
@@ -846,7 +838,7 @@ function initPWAInstallPrompt() {
         if (deferredPrompt) {
             console.log('✅ deferredPrompt is available');
         } else {
-            console.log('⚠️ deferredPrompt not available - PWA might already be installed or browser doesn\'t support it');
+            console.log('⚠️ deferredPrompt not available');
         }
     }, 3000);
 }
