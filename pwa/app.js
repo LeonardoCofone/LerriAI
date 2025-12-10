@@ -738,18 +738,18 @@ let isStandalone = false;
 function checkPWAStatus() {
     const displayMode = window.matchMedia('(display-mode: standalone)').matches;
     const navigatorStandalone = window.navigator.standalone === true;
-    const androidApp = document.referrer.includes('android-app://');
+    const isIOSChrome = /CriOS/.test(navigator.userAgent);
     const localStorageFlag = localStorage.getItem('pwa-installed') === 'true';
     
     console.log('🔍 PWA Status Check:', {
         'Display Mode (standalone)': displayMode,
         'Navigator Standalone (iOS)': navigatorStandalone,
-        'Android App Referrer': androidApp,
         'LocalStorage Flag': localStorageFlag,
-        'Document Referrer': document.referrer
+        'Document Referrer': document.referrer,
+        'User Agent': navigator.userAgent
     });
     
-    isStandalone = displayMode || navigatorStandalone || androidApp;
+    isStandalone = displayMode || navigatorStandalone;
     
     if (isStandalone) {
         localStorage.setItem('pwa-installed', 'true');
@@ -757,7 +757,7 @@ function checkPWAStatus() {
         return true;
     }
     
-    if (localStorageFlag) {
+    if (localStorageFlag && !isIOSChrome) {
         console.log('✅ PWA marked as installed (localStorage)');
         return true;
     }
@@ -779,22 +779,42 @@ window.testPWA = {
         location.reload();
     },
     showBanner: () => {
+        console.log('🧪 Manual banner trigger');
         localStorage.removeItem('pwa-prompt-dismiss-time');
-        showPWAInstallBanner();
-        console.log('🧪 Banner forced to show');
+        if (deferredPrompt) {
+            showPWAInstallBanner();
+            console.log('✅ Banner shown');
+        } else {
+            console.log('⚠️ Cannot show banner - deferredPrompt not available');
+            console.log('Simulating deferredPrompt for testing...');
+            deferredPrompt = {
+                prompt: async () => {
+                    console.log('Simulated prompt called');
+                    return Promise.resolve();
+                },
+                userChoice: Promise.resolve({ outcome: 'accepted' })
+            };
+            showPWAInstallBanner();
+        }
     },
     status: () => {
-        return checkPWAStatus();
+        const status = checkPWAStatus();
+        console.log('📊 PWA Status:', status);
+        console.log('📊 deferredPrompt available:', !!deferredPrompt);
+        return status;
     }
 };
 
 function initPWAInstallPrompt() {
+    console.log('🔧 Initializing PWA install prompt...');
+    
     if (checkPWAStatus()) {
         console.log('PWA already installed or running in standalone mode');
         return;
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('🎯 beforeinstallprompt event fired!');
         e.preventDefault();
         deferredPrompt = e;
         
@@ -802,18 +822,31 @@ function initPWAInstallPrompt() {
         const daysSinceDismiss = dismissTime ? 
             (Date.now() - parseInt(dismissTime)) / (1000 * 60 * 60 * 24) : 999;
         
+        console.log('📅 Days since dismiss:', daysSinceDismiss);
+        
         if (daysSinceDismiss >= 3) {
-            setTimeout(() => showPWAInstallBanner(), 1000);
+            setTimeout(() => {
+                console.log('📢 Showing PWA banner...');
+                showPWAInstallBanner();
+            }, 2000);
         }
     });
 
     window.addEventListener('appinstalled', () => {
-        console.log('PWA installed successfully');
+        console.log('✅ PWA installed successfully');
         localStorage.setItem('pwa-installed', 'true');
         localStorage.removeItem('pwa-prompt-dismiss-time');
         hidePWAInstallBanner();
         deferredPrompt = null;
     });
+    
+    setTimeout(() => {
+        if (deferredPrompt) {
+            console.log('✅ deferredPrompt is available');
+        } else {
+            console.log('⚠️ deferredPrompt not available - PWA might already be installed or browser doesn\'t support it');
+        }
+    }, 3000);
 }
 
 function checkNotificationStatus() {
@@ -2357,8 +2390,18 @@ function checkPWAInstallation() {
 }
 
 function showPWAInstallBanner() {
+    console.log('🎨 Creating PWA banner...');
+    
     const existingBanner = document.getElementById('pwa-install-banner');
-    if (existingBanner || !deferredPrompt) return;
+    if (existingBanner) {
+        console.log('Banner already exists');
+        return;
+    }
+    
+    if (!deferredPrompt) {
+        console.log('⚠️ No deferredPrompt available, cannot show banner');
+        return;
+    }
 
     const banner = document.createElement('div');
     banner.id = 'pwa-install-banner';
@@ -2462,9 +2505,14 @@ function showPWAInstallBanner() {
     document.head.appendChild(style);
 
     document.body.appendChild(banner);
+    console.log('✅ PWA banner displayed');
 
     document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-        if (!deferredPrompt) return;
+        console.log('🔘 Install button clicked');
+        if (!deferredPrompt) {
+            console.log('⚠️ No deferredPrompt available');
+            return;
+        }
 
         const installBtn = document.getElementById('pwa-install-btn');
         installBtn.disabled = true;
@@ -2473,6 +2521,7 @@ function showPWAInstallBanner() {
         try {
             await deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
+            console.log('📊 Install outcome:', outcome);
 
             if (outcome === 'accepted') {
                 localStorage.setItem('pwa-installed', 'true');
@@ -2482,7 +2531,7 @@ function showPWAInstallBanner() {
                 localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
             }
         } catch (error) {
-            console.error('Install error:', error);
+            console.error('❌ Install error:', error);
         } finally {
             hidePWAInstallBanner();
             deferredPrompt = null;
@@ -2490,6 +2539,7 @@ function showPWAInstallBanner() {
     });
 
     document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+        console.log('❌ Banner dismissed by user');
         localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
         hidePWAInstallBanner();
     });
