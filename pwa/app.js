@@ -695,6 +695,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     initClearChat();
 });
 
+setTimeout(() => checkAndPromptPWA(), 2000);
+
 function initTabs() {
     const tabs = document.querySelectorAll('#nav-tabs li');
     const contents = document.querySelectorAll('.tab-content');
@@ -2173,7 +2175,7 @@ function updateStats(){
     document.getElementById('total-tasks').textContent=settings.stats.tasks;
 }
 
-function initServiceWorker() {
+async function initServiceWorker() {
     if (!('serviceWorker' in navigator)) {
         console.log('❌ Service Workers not supported');
         return;
@@ -2206,10 +2208,8 @@ function initServiceWorker() {
             const registration = await navigator.serviceWorker.register('./sw.js');
             console.log('✅ Service Worker registered:', registration.scope);
             
-            // CHANGED: rimosso initPWAInstallPrompt() qui (già chiamato all'avvio)
-            
             if (checkPWAStatus()) {
-                promptNotificationPermission();
+                await promptNotificationPermission();
             }
             
         } catch (error) {
