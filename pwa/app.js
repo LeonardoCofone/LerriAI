@@ -743,91 +743,58 @@ function checkPWAStatus() {
     const isIOSChrome = /CriOS/.test(navigator.userAgent);
     const localStorageFlag = localStorage.getItem('pwa-installed') === 'true';
     
-    console.log('🔍 PWA Status Check:', {
-        'Display Mode (standalone)': displayMode,
-        'Navigator Standalone (iOS)': navigatorStandalone,
-        'LocalStorage Flag': localStorageFlag,
-        'Document Referrer': document.referrer,
-        'User Agent': navigator.userAgent
-    });
-    
     isStandalone = displayMode || navigatorStandalone;
     
     if (isStandalone) {
         localStorage.setItem('pwa-installed', 'true');
-        console.log('✅ PWA is running in standalone mode');
         return true;
     }
     
     if (localStorageFlag && !isIOSChrome) {
-        console.log('✅ PWA marked as installed (localStorage)');
         return true;
     }
     
-    console.log('❌ PWA not installed - browser mode');
     return false;
 }
 
-window.testPWA = {
-    forceInstalled: () => {
-        localStorage.setItem('pwa-installed', 'true');
-        console.log('🧪 PWA forced as INSTALLED');
-        location.reload();
-    },
-    forceNotInstalled: () => {
-        localStorage.removeItem('pwa-installed');
-        localStorage.removeItem('pwa-prompt-dismiss-time');
-        console.log('🧪 PWA forced as NOT INSTALLED');
-        location.reload();
-    },
-    showBanner: () => {
-        console.log('🧪 Manual banner trigger');
-        localStorage.removeItem('pwa-prompt-dismiss-time');
-        if (deferredPrompt) {
-            showPWAInstallBanner();
-            console.log('✅ Banner shown');
+
+window.testNotifications = {
+    showPrompt: () => {
+        localStorage.removeItem('notification-prompt-dismiss-time');
+        console.log('🧪 Forcing notification prompt display');
+        // Prefer in-app modal used by promptNotificationPermission
+        if (typeof showNotificationModal === 'function') {
+            showNotificationModal();
+        } else if (typeof showNotificationPrompt === 'function') {
+            showNotificationPrompt();
         } else {
-            console.log('⚠️ Cannot show banner - deferredPrompt not available');
-            console.log('Simulating deferredPrompt for testing...');
-            deferredPrompt = {
-                prompt: async () => {
-                    console.log('Simulated prompt called');
-                    return Promise.resolve();
-                },
-                userChoice: Promise.resolve({ outcome: 'accepted' })
-            };
-            showPWAInstallBanner();
+            console.warn('No notification UI found to show');
         }
     },
-    status: () => {
-        const status = checkPWAStatus();
-        console.log('📊 PWA Status:', status);
-        console.log('📊 deferredPrompt available:', !!deferredPrompt);
-        return status;
+    dismiss: () => {
+        localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
+        console.log('🧪 Notification prompt dismissed (test)');
     }
 };
 
 function initPWAInstallPrompt() {
-    console.log('🔧 Initializing PWA install prompt...');
     
     if (checkPWAStatus()) {
-        console.log('PWA already installed or running in standalone mode');
         return;
     }
 
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('🎯 beforeinstallprompt event fired!');
         e.preventDefault();
         deferredPrompt = e;
         
         setTimeout(() => {
             console.log('📢 Showing PWA banner...');
             showPWAInstallBanner();
+            checkAndPromptNotifications().catch(err => console.error('Notification prompt error:', err));
         }, 1000);
     });
 
     window.addEventListener('appinstalled', () => {
-        console.log('✅ PWA installed successfully');
         localStorage.setItem('pwa-installed', 'true');
         localStorage.removeItem('pwa-prompt-dismiss-time');
         hidePWAInstallBanner();
@@ -876,16 +843,19 @@ function promptNotificationPermission() {
     }
 
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
-    const daysSinceDismiss = dismissTime ? 
-        (Date.now() - parseInt(dismissTime)) / (1000 * 60 * 60 * 24) : 999;
+    const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : Infinity;
     
-    if (daysSinceDismiss < 3) {
+    console.log('📅 Notification days since dismiss (permission prompt):', daysSinceDismiss);
+
+    if (daysSinceDismiss < 1) {
         console.log('⏳ Notification prompt dismissed recently');
         return;
     }
 
     setTimeout(() => showNotificationModal(), 1000);
 }
+
+
 
 function showNotificationModal() {
     const existingModal = document.getElementById('notification-permission-modal');
@@ -1053,16 +1023,18 @@ async function checkAndPromptNotifications() {
     }
 
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
-    const daysSinceDismiss = dismissTime ? 
-        (Date.now() - parseInt(dismissTime)) / (1000 * 60 * 60 * 24) : 999;
+    const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : Infinity;
     
-    if (daysSinceDismiss < 3) {
+    console.log('📅 Notification days since dismiss:', daysSinceDismiss);
+    
+    if (daysSinceDismiss < 1) {
         console.log('⏳ Notification prompt dismissed recently, waiting...');
         return;
     }
 
-    setTimeout(() => showNotificationPrompt(), 500);
+    await promptNotificationPermission();
 }
+
 
 
 async function ensurePushSubscription() {
@@ -2208,6 +2180,8 @@ async function initServiceWorker() {
         try {
             const registration = await navigator.serviceWorker.register('./sw.js');
             console.log('✅ Service Worker registered:', registration.scope);
+
+            checkAndPromptNotifications().catch(err => console.error('Notification prompt error:', err));
             
             if (checkPWAStatus()) {
                 await promptNotificationPermission();
