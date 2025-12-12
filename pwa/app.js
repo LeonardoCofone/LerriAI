@@ -960,7 +960,6 @@ function showNotificationModal() {
 
             console.log('📬 Requesting notification permission...');
 
-            // If the browser already reports 'denied', show instructions to the user
             if (checkNotificationPermission() === 'denied') {
                 console.log('❌ Notifications permanently denied by user');
                 showNotificationDeniedInstructions();
@@ -972,12 +971,12 @@ function showNotificationModal() {
 
             if (result === 'granted') {
                 console.log('✅ Notifications granted - subscribing to push');
-                const success = await ensurePushSubscription();
-                if (success) {
-                    const id = getUserEmail() || getPwaId();
-                    await sendSubscriptionToBackend(id, success);
+                const subscription = await ensurePushSubscription();
+                if (subscription) {
+                    console.log('✅ Push subscription obtained:', subscription);
                     showNotification('✅ Notifications enabled!', 'success');
                 } else {
+                    console.error('❌ ensurePushSubscription returned null');
                     showNotification('⚠️ Push subscription failed', 'error');
                 }
             } else {
@@ -1113,35 +1112,26 @@ async function checkAndPromptNotifications() {
 
 async function ensurePushSubscription() {
     try {
-        if (!('serviceWorker' in navigator)) return false;
+        if (!('serviceWorker' in navigator)) return null;
         
         const registration = await navigator.serviceWorker.getRegistration();
-        if (!registration) return false;
+        if (!registration) return null;
 
         const existing = await registration.pushManager.getSubscription();
         if (existing) {
             console.log('✅ Push subscription already exists');
-            return true;
+            return existing;
         }
-
-        const VAPID_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjgbqTHxKqzqU4bMYLNibnl4ltPQzIFkr0-c';
-        
         const sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_KEY)
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
         
-        console.log('✅ Push subscription created');
-        
-        const email = getUserEmail();
-        if (email) {
-            await sendSubscriptionToBackend(email, sub);
-        }
-        
-        return true;
+        console.log('✅ Push subscription created:', sub);
+        return sub;
     } catch (err) {
         console.error('❌ ensurePushSubscription error:', err);
-        return false;
+        return null;
     }
 }
 
@@ -2635,80 +2625,6 @@ function urlBase64ToUint8Array(base64String) {
         outputArray[i] = rawData.charCodeAt(i);
     }
     return outputArray;
-}
-
-
-
-
-function showNotificationPrompt() {
-    const existingModal = document.getElementById('notification-modal');
-    if (existingModal) return;
-
-    const modal = document.createElement('div');
-    modal.id = 'notification-modal';
-    modal.innerHTML = `
-        <div class="notification-modal-overlay">
-            <div class="notification-modal-content">
-                <div class="notification-modal-icon">🔔</div>
-                <h3>Enable Notifications</h3>
-                <p><strong>HIGHLY RECOMMENDED!</strong></p>
-                <p>Get daily briefings, task reminders, and important updates automatically.</p>
-                <div class="notification-modal-actions">
-                    <button id="notification-enable-btn" class="btn-primary">Enable Notifications</button>
-                    <button id="notification-dismiss-btn" class="btn-secondary">Maybe Later</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    modal.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 10001;
-        animation: fadeIn 0.3s ease-out;
-    `;
-
-    document.body.appendChild(modal);
-
-    document.getElementById('notification-enable-btn').addEventListener('click', async () => {
-        const btn = document.getElementById('notification-enable-btn');
-        const originalText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = '⏳ Enabling...';
-        
-        try {
-            const permission = await Notification.requestPermission();
-            
-            if (permission === 'granted') {
-                const subscribed = await subscribeUserToPush();
-                if (subscribed) {
-                    showNotification('🔔 Notifications enabled! You will receive daily briefings.', 'success');
-                    localStorage.removeItem('notification-prompt-dismiss-time');
-                } else {
-                    showNotification('❌ Failed to subscribe to notifications', 'error');
-                }
-            } else {
-                showNotification('Notifications blocked. You can enable them later in settings.', 'info');
-                localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
-            }
-        } catch (error) {
-            console.error('Notification error:', error);
-            showNotification('❌ Error enabling notifications', 'error');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = originalText;
-        }
-        
-        hideNotificationPrompt();
-    });
-
-    document.getElementById('notification-dismiss-btn').addEventListener('click', () => {
-        localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
-        hideNotificationPrompt();
-    });
 }
 
 function hideNotificationPrompt() {
