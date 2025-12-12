@@ -800,6 +800,17 @@ window.testPWA.status = () => {
     console.log('PWA dismiss time:', localStorage.getItem('pwa-prompt-dismiss-time'));
     console.log('Notif deny time:', localStorage.getItem('notification-prompt-dismiss-time'));
     console.log('Notification permission:', Notification.permission);
+    console.log('Location protocol:', location.protocol);
+    console.log('isSecureContext:', window.isSecureContext);
+    try {
+        if (navigator.permissions && navigator.permissions.query) {
+            navigator.permissions.query({ name: 'notifications' }).then(p => {
+                console.log('navigator.permissions (notifications):', p.state, p);
+            }).catch(err => console.warn('permissions.query error:', err));
+        }
+    } catch (err) {
+        console.warn('permissions API unavailable', err);
+    }
 };
 
 function initPWAInstallPrompt() {
@@ -946,20 +957,39 @@ function showNotificationModal() {
             const btn = document.getElementById('lerri-notif-enable');
             btn.disabled = true;
             btn.textContent = '⏳ Enabling...';
-            
+
             console.log('📬 Requesting notification permission...');
+
+            // If the browser already reports 'denied', show instructions to the user
+            if (checkNotificationPermission() === 'denied') {
+                console.log('❌ Notifications permanently denied by user');
+                showNotificationDeniedInstructions();
+                return;
+            }
+
             const result = await Notification.requestPermission();
             console.log('📬 Permission result:', result);
-            
+
             if (result === 'granted') {
                 console.log('✅ Notifications granted - subscribing to push');
                 const success = await ensurePushSubscription();
                 if (success) {
+                    const id = getUserEmail() || getPwaId();
+                    await sendSubscriptionToBackend(id, success);
                     showNotification('✅ Notifications enabled!', 'success');
+                } else {
+                    showNotification('⚠️ Push subscription failed', 'error');
                 }
+            } else {
+                // user denied or dismissed - record dismiss time and show guidance
+                localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
+                console.log('❌ Notifications denied by user');
+                showNotificationDeniedInstructions();
             }
+
         } catch (err) {
             console.error('❌ Error:', err);
+            showNotification('⚠️ Notification setup error', 'error');
         } finally {
             cleanup();
         }
@@ -972,6 +1002,51 @@ function hideNotificationModal() {
         modal.style.animation = 'fadeOut 0.3s ease-out';
         setTimeout(() => modal.remove(), 300);
     }
+}
+
+function showNotificationDeniedInstructions() {
+    if (document.getElementById('lerri-notif-denied-modal')) return;
+
+    const instructions = `Notifications are blocked for this site.
+
+To enable them:
+- Chrome / Edge: Click the lock icon (🔒) next to the address bar → Site settings → Notifications → Allow.
+- Alternatively open: chrome://settings/content/notifications and remove this site from the blocked list.
+- Firefox: Click the info icon (i) → Permissions → Notifications → Allow.
+- You can also test in an Incognito/Private window or another browser profile.
+
+After changing the setting, reload this page and click Enable.`;
+
+    const container = document.createElement('div');
+    container.id = 'lerri-notif-denied-modal';
+    container.style.cssText = `position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:10001;background:rgba(0,0,0,0.6);`;
+    container.innerHTML = `
+        <div style="background:#fff;border-radius:12px;padding:20px;max-width:560px;width:94%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:left">
+            <h3 style="margin-top:0">Notifications blocked</h3>
+            <p style="color:#4a5568;white-space:pre-wrap;margin-bottom:12px">${instructions}</p>
+            <div style="display:flex;gap:8px;justify-content:flex-end">
+                <button id="lerri-copy-notif-instr" style="padding:8px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#f7fafc;cursor:pointer">Copy instructions</button>
+                <a id="lerri-open-notif-settings" href="chrome://settings/content/notifications" target="_blank" style="padding:8px 12px;border-radius:8px;border:1px solid #e2e8f0;background:#edf2ff;color:#2b6cb0;text-decoration:none;display:inline-flex;align-items:center;">Open settings</a>
+                <button id="lerri-close-notif-instr" style="padding:8px 12px;border-radius:8px;background:#e2e8f0;border:none;cursor:pointer">Close</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(container);
+
+    document.getElementById('lerri-copy-notif-instr').addEventListener('click', async () => {
+        try {
+            await navigator.clipboard.writeText(instructions);
+            showNotification('📋 Instructions copied to clipboard', 'success');
+        } catch (err) {
+            showNotification('⚠️ Unable to copy — please select and copy manually', 'error');
+        }
+    });
+
+    document.getElementById('lerri-close-notif-instr').addEventListener('click', () => {
+        const el = document.getElementById('lerri-notif-denied-modal');
+        if (el) el.remove();
+    });
 }
 
 async function checkAndPromptPWA() {
@@ -2645,5 +2720,26 @@ function hideNotificationPrompt() {
                 document.body.removeChild(modal);
             }
         }, 300);
+    }
+}
+
+function diagnoseNotificationPermission() {
+    console.log('📡 Diagnosing notification permission...');
+    try {
+        console.log(' - Location:', location.href);
+        console.log(' - Protocol:', location.protocol);
+        console.log(' - isSecureContext:', window.isSecureContext);
+        console.log(' - In iframe:', window.top !== window.self);
+
+        if (navigator.permissions && navigator.permissions.query) {
+            navigator.permissions.query({ name: 'notifications' }).then(p => {
+                console.log(' - permissions.query notifications state:', p.state);
+                console.log(' - permissions object:', p);
+            }).catch(err => console.warn(' - permissions.query error:', err));
+        } else {
+            console.log(' - navigator.permissions API not available');
+        }
+    } catch (err) {
+        console.error('Diagnosis error:', err);
     }
 }
