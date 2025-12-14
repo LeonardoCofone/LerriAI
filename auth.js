@@ -83,11 +83,11 @@ if (document.getElementById("registerForm")) {
                 if (onboardingStatus.completed) {
                     window.location.href = "pwa/index.html";
                 } else {
-                    window.location.href = "pwa/index.html"//"onboarding.html";
+                    window.location.href = "onboarding.html";
                 }
             } catch (error) {
                 console.error("Error checking onboarding:", error);
-                window.location.href = "pwa/index.html"//"onboarding.html";
+                window.location.href = "onboarding.html";
             }
         })();
     }
@@ -175,12 +175,12 @@ if (document.getElementById("registerForm")) {
                             } else {
                                 console.log("----Starting onboarding");
                                 setTimeout(() => {
-                                    window.location.href = "pwa/index.html"//"onboarding.html";
+                                    window.location.href = "onboarding.html";
                                 }, 1500);
                             }
                         } catch (err) {
                             console.error("Error checking onboarding:", err);
-                            window.location.href = "pwa/index.html"//"onboarding.html";
+                            window.location.href = "onboarding.html";
                         }
 
                     } else if (data.redirect) {
@@ -219,11 +219,11 @@ if (document.getElementById("loginForm")) {
                 if (onboardingStatus.completed) {
                     window.location.href = "pwa/index.html";
                 } else {
-                    window.location.href = "pwa/index.html"//"onboarding.html";
+                    window.location.href = "onboarding.html";
                 }
             } catch (error) {
                 console.error("Error checking onboarding:", error);
-                window.location.href = "pwa/index.html"//"onboarding.html";
+                window.location.href = "onboarding.html";
             }
         })();
     }
@@ -265,7 +265,7 @@ if (document.getElementById("loginForm")) {
                     }, 1000);
                 } else {
                     setTimeout(() => {
-                        window.location.href = "pwa/index.html"//"onboarding.html";
+                        window.location.href = "onboarding.html";
                     }, 1000);
                 }
             }else {
