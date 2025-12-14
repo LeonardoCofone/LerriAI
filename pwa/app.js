@@ -495,6 +495,33 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
         messagesArray.push({ text, sender });
         if (messagesArray.length > 25) messagesArray = messagesArray.slice(-25);
     }
+
+    if (sender === 'bot' && 'Notification' in window && Notification.permission === 'granted' && text != '⏳ Processing...') {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('LerriAI', {
+                    body: text.length > 100 ? text.slice(0, 100) + '…' : text,
+                    icon: '/icon/icon-192.png',
+                    vibrate: [200, 100, 200], 
+                    tag: 'lerri-msg'
+                });
+            }).catch(err => {
+                console.warn('Errore notifica SW:', err);
+            });
+        } 
+        else {
+            try {
+                new Notification('LerriAI', {
+                    body: text.length > 100 ? text.slice(0, 100) + '…' : text,
+                    icon: '/icon/icon-192.png'
+                });
+            } catch (e) {
+                console.error('Notifica fallita:', e);
+            }
+        }
+    }
+
+
     return msgEl;
 }
 
