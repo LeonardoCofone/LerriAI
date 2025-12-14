@@ -495,16 +495,6 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
         messagesArray.push({ text, sender });
         if (messagesArray.length > 25) messagesArray = messagesArray.slice(-25);
     }
-
-    if (sender === 'bot' && 'Notification' in window) {
-        if (Notification.permission === 'granted') {
-            new Notification('LerriAI', {
-                body: text.length > 100 ? text.slice(0, 100) + '…' : text,
-                icon: '/icon/icon-192.png'
-             });
-        }
-    }
-
     return msgEl;
 }
 
