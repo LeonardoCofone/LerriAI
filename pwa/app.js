@@ -17,6 +17,30 @@ const LANGUAGES = {
 
 const VAPID_PUBLIC_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjgbqTHxKqzqU4bMYLNibnl4ltPQzIFkr0-c';
 let isProcessing = false;
+
+function loadPayPalSDK() {
+    if (window.paypalLoaded || document.querySelector('script[src*="paypal.com/sdk"]')) {
+        return Promise.resolve();
+    }
+    
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
+        script.async = true;
+        script.onload = () => {
+            window.paypalLoaded = true;
+            console.log('✅ PayPal SDK loaded');
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('❌ PayPal SDK load failed');
+            reject(new Error('PayPal SDK failed to load'));
+        };
+        document.body.appendChild(script);
+    });
+}
+
+
 function setProcessingState(processing) {
     isProcessing = processing;
     
@@ -334,15 +358,17 @@ async function showSubscriptionModal() {
     const existingModal = document.getElementById('subscription-modal');
     if (existingModal) return;
 
+    await loadPayPalSDK();
+
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
     modal.innerHTML = `
         <div class="subscription-modal-overlay">
             <div class="subscription-modal-content">
             
-            <h2 class="premium-title">Upgrade to Premium</h2>
+            <h2 class="premium-title">🚀 Upgrade to Premium</h2>
             <p class="premium-subtitle">
-                You’ve reached the free message limit.  
+                You've reached the free message limit.  
                 Unlock the full power of LerriAI.
             </p>
 
@@ -356,17 +382,87 @@ async function showSubscriptionModal() {
             <div class="premium-divider"></div>
 
             <p class="subscription-price">
-                $2.99 + What you use <span>/ month</span>
+                $2.99 <span>/ month</span>
             </p>
 
-            <div id="paypal-button-container"></div>
+            <div id="paypal-button-container" style="margin-top: 20px;"></div>
+            <div id="paypal-loading" style="text-align: center; padding: 20px; color: #667eea;">
+                Loading payment options...
+            </div>
 
             </div>
         </div>
-        `;
+    `;
+    
+    const style = document.createElement('style');
+    style.textContent = `
+        .subscription-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(153, 0, 128, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .subscription-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(74, 58, 58, 0.3);
+            text-align: center;
+        }
+        .premium-title {
+            font-size: 2rem;
+            margin: 0 0 15px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .premium-subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .subscription-benefits {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .subscription-benefits p {
+            margin: 12px 0;
+            font-size: 1.1rem;
+            color: #1e293b;
+        }
+        .premium-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+            margin: 20px 0;
+        }
+        .subscription-price {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+        }
+        .subscription-price span {
+            font-size: 1.2rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
     
     document.body.appendChild(modal);
-    
     document.body.style.overflow = 'hidden';
     
     const allInputs = document.querySelectorAll('input, textarea, button, select');
@@ -379,12 +475,15 @@ async function showSubscriptionModal() {
     });
     
     if (window.paypal) {
+        document.getElementById('paypal-loading').style.display = 'none';
+        
         window.paypal.Buttons({
             style: {
                 shape: 'rect',
                 color: 'gold',
                 layout: 'vertical',
-                label: 'subscribe'
+                label: 'subscribe',
+                height: 50
             },
             createSubscription: async function(data, actions) {
                 const email = getUserEmail();
@@ -395,6 +494,9 @@ async function showSubscriptionModal() {
                 });
                 
                 const result = await response.json();
+                if (!result.subscriptionId) {
+                    throw new Error('Failed to create subscription');
+                }
                 return result.subscriptionId;
             },
             onApprove: async function(data, actions) {
@@ -431,8 +533,26 @@ async function showSubscriptionModal() {
             onError: function(err) {
                 console.error('PayPal error:', err);
                 showNotification('❌ Payment error. Please try again.', 'error');
+                document.getElementById('paypal-loading').innerHTML = `
+                    <p style="color: #ef4444; margin-top: 20px;">
+                        Payment system unavailable. Please try again later or contact support.
+                    </p>
+                `;
             }
-        }).render('#paypal-button-container');
+        }).render('#paypal-button-container').catch(err => {
+            console.error('PayPal render error:', err);
+            document.getElementById('paypal-loading').innerHTML = `
+                <p style="color: #ef4444;">
+                    Unable to load payment options. Please refresh and try again.
+                </p>
+            `;
+        });
+    } else {
+        document.getElementById('paypal-loading').innerHTML = `
+            <p style="color: #ef4444;">
+                Payment system is loading... Please wait or refresh the page.
+            </p>
+        `;
     }
 }
 
@@ -797,11 +917,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const userEmail = getUserEmail();
     if (!userEmail) {
-        //window.location.href = '../login.html';
         return;
     }
     
     await loadDataFromServer();
+    await loadPayPalSDK();
     
     initTabs();
     initChat();
