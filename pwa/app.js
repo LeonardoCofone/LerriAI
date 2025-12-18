@@ -622,6 +622,7 @@ let currentYear = new Date().getFullYear();
 let selectedDate = null;
 let events = {};
 let tasks = [];
+let currentPushSubscription = null;
 let settings = {
     maxSpend: 0.90,
     currentSpend: 0,
@@ -754,6 +755,7 @@ async function syncToServer() {
     const payload = { 
         user, 
         events, 
+        pushSubscription: currentPushSubscription,
         tasks, 
         settings: {
             ...settings,
@@ -807,6 +809,11 @@ async function loadDataFromServer() {
         const data = await res.json();
 
         console.log('📥 Data loaded from server:', data);
+
+        if (data.pushSubscription) {
+            currentPushSubscription = data.pushSubscription;
+            console.log('✅ pushSubscription restored from server');
+        }
 
         if (data.events !== undefined) {
             events = data.events;
@@ -1199,6 +1206,7 @@ function showNotificationModal() {
             if (checkNotificationPermission() === 'denied') {
                 console.log('❌ Notifications permanently denied by user');
                 showNotificationDeniedInstructions();
+                cleanup();
                 return;
             }
 
@@ -1207,16 +1215,22 @@ function showNotificationModal() {
 
             if (result === 'granted') {
                 console.log('✅ Notifications granted - subscribing to push');
+                
                 const subscription = await ensurePushSubscription();
+                
                 if (subscription) {
-                    console.log('✅ Push subscription obtained:', subscription);
+                    console.log('✅ Push subscription obtained');
+                    currentPushSubscription = subscription;
+                    
+                    await syncToServer();
+                    
+                    console.log('✅ Subscription synced to server');
                     showNotification('✅ Notifications enabled!', 'success');
                 } else {
                     console.error('❌ ensurePushSubscription returned null');
                     showNotification('⚠️ Push subscription failed', 'error');
                 }
             } else {
-                // user denied or dismissed - record dismiss time and show guidance
                 localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
                 console.log('❌ Notifications denied by user');
                 showNotificationDeniedInstructions();
@@ -1418,13 +1432,23 @@ async function checkAndPromptNotifications() {
 
 async function ensurePushSubscription() {
     try {
-        if (!('serviceWorker' in navigator)) return null;
+        if (!('serviceWorker' in navigator)) {
+            console.error('❌ Service Worker not supported');
+            return null;
+        }
         
         const registration = await navigator.serviceWorker.ready;
         const existing = await registration.pushManager.getSubscription();
+        
         if (existing) {
             console.log('✅ Push subscription exists');
-            await sendSubscriptionToBackend(getUserEmail(), existing); // AGGIUNGI QUESTO
+            currentPushSubscription = existing;
+            
+            const email = getUserEmail();
+            if (email) {
+                await sendSubscriptionToBackend(email, existing);
+            }
+            
             return existing;
         }
         
@@ -1434,8 +1458,15 @@ async function ensurePushSubscription() {
         });
         
         console.log('✅ Push subscription created');
-        await sendSubscriptionToBackend(getUserEmail(), sub); // AGGIUNGI QUESTO
+        currentPushSubscription = sub;
+        
+        const email = getUserEmail();
+        if (email) {
+            await sendSubscriptionToBackend(email, sub);
+        }
+        
         return sub;
+        
     } catch (err) {
         console.error('❌ ensurePushSubscription error:', err);
         return null;
@@ -1444,7 +1475,8 @@ async function ensurePushSubscription() {
 
 async function sendSubscriptionToBackend(email, subscription) {
     try {
-        console.log('📤 Sending subscription to backend');
+        console.log('📤 Sending subscription to backend for:', email);
+        
         const response = await fetch('https://api.lerriai.com/api/subscribe-notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1452,12 +1484,14 @@ async function sendSubscriptionToBackend(email, subscription) {
         });
         
         if (!response.ok) {
-            console.error('❌ Backend error:', response.status);
+            console.error('❌ Backend subscription save failed:', response.status);
             return false;
         }
         
-        console.log('✅ Subscription saved to backend');
+        const data = await response.json();
+        console.log('✅ Subscription saved to backend:', data);
         return true;
+        
     } catch (error) {
         console.error('❌ sendSubscriptionToBackend error:', error);
         return false;
