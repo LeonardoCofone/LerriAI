@@ -1330,10 +1330,8 @@ function showNotificationModal() {
     });
 
     document.getElementById('lerri-notif-enable').addEventListener('click', async () => {
-        const btn = document.getElementById('lerri-notif-enable');
-        btn.disabled = true;
-        btn.textContent = '⏳ Enabling...';
-
+        cleanup();
+        
         try {
             const permission = await Notification.requestPermission();
 
@@ -1362,8 +1360,6 @@ function showNotificationModal() {
         } catch (err) {
             console.error('❌ Error:', err);
             showNotification('⚠️ Notification setup error', 'error');
-        } finally {
-            cleanup();
         }
     });
 }
