@@ -1,6 +1,6 @@
 const CACHE_NAME = 'lerri-v1';
 const urlsToCache = [
-  '/pwa/',
+  'pwa/',
   '/pwa/index.html',
   '/pwa/app.js',
   '/pwa/app.css',

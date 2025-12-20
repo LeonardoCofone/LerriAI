@@ -1462,58 +1462,27 @@ async function ensurePushSubscription() {
             return null;
         }
 
-        try {
-            const registrations = await navigator.serviceWorker.getRegistrations();
-            for (let registration of registrations) {
-                await registration.unregister();
-                console.log('🗑️ Old Service Worker removed');
-            }
-        } catch (error) {
-            console.error('Error unregistering SW:', error);
-        }
-
-        if ('caches' in window) {
-            try {
-                const cacheNames = await caches.keys();
-                for (let cacheName of cacheNames) {
-                    await caches.delete(cacheName);
-                    console.log('🗑️ Cache removed:', cacheName);
-                }
-            } catch (error) {
-                console.error('Error clearing caches:', error);
-            }
-        }
-
-        const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, {
-            scope: baseUrl
-        });
+        const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl });
         console.log('✅ Service Worker registered:', registration.scope);
 
         await navigator.serviceWorker.ready;
         console.log('✅ Service Worker ready');
 
-        const existing = await registration.pushManager.getSubscription();
-        if (existing) {
-            currentPushSubscription = existing;
-            const email = getUserEmail();
-            if (email) {
-                await sendSubscriptionToBackend(email, existing);
-            }
-            return existing;
+        let existing = await registration.pushManager.getSubscription();
+        if (!existing) {
+            existing = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
         }
 
-        const sub = await registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-        });
-
-        currentPushSubscription = sub;
+        currentPushSubscription = existing;
         const email = getUserEmail();
         if (email) {
-            await sendSubscriptionToBackend(email, sub);
+            await sendSubscriptionToBackend(email, existing);
         }
 
-        return sub;
+        return existing;
 
     } catch (err) {
         console.error('❌ ensurePushSubscription error:', err);
@@ -2664,41 +2633,11 @@ async function initServiceWorker() {
     }
 
     try {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (const registration of registrations) {
-            await registration.unregister();
-            console.log('🗑️ Old Service Worker removed');
-        }
-    } catch (error) {
-        console.error('Error unregistering SW:', error);
-    }
-
-    if ('caches' in window) {
-        try {
-            const cacheNames = await caches.keys();
-            for (const cacheName of cacheNames) {
-                await caches.delete(cacheName);
-                console.log('🗑️ Cache removed:', cacheName);
-            }
-        } catch (error) {
-            console.error('Error clearing caches:', error);
-        }
-    }
-
-    try {
-        const registration = await navigator.serviceWorker.register(
-            `${baseUrl}sw.js`,
-            { scope: baseUrl }
-        );
-
+        const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl });
         console.log('✅ Service Worker registered:', registration.scope);
 
-        const regs = await navigator.serviceWorker.getRegistrations();
-        if (!regs.length) {
-            throw new Error('Service Worker not available after registration');
-        }
-
-        console.log('✅ Service Worker available');
+        await navigator.serviceWorker.ready;
+        console.log('✅ Service Worker ready');
 
         if (checkPWAStatus()) {
             console.log('✅ PWA detected, checking notifications...');
