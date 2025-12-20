@@ -907,12 +907,11 @@ async function syncToServer() {
     }
 
     isSyncing = true;
-    console.log('🔄 Starting sync to server...');
 
     const payload = { 
         user, 
         events, 
-        pushSubscription: currentPushSubscription, // ✅ Include la subscription
+        pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
         tasks, 
         settings: {
             ...settings,
@@ -928,13 +927,6 @@ async function syncToServer() {
         messages: messagesArray 
     };
 
-    console.log('📦 Payload being sent:', {
-        user,
-        hasPushSubscription: !!currentPushSubscription,
-        eventsCount: Object.keys(events).length,
-        tasksCount: tasks.length
-    });
-
     try {
         const response = await fetch("https://api.lerriai.com/api/save-data", {
             method: "POST",
@@ -944,10 +936,8 @@ async function syncToServer() {
         
         if (response.ok) {
             console.log("✅ Sync completed successfully");
-            console.log("   - pushSubscription:", currentPushSubscription ? 'YES ✅' : 'NO ❌');
         } else {
-            const errorText = await response.text();
-            console.error("❌ Sync failed:", response.status, errorText);
+            console.error("❌ Sync failed:", response.status);
         }
     } catch (err) {
         console.error("❌ Sync error:", err);
@@ -1316,7 +1306,7 @@ function showNotificationModal() {
         <div style="background:#fff;border-radius:16px;padding:30px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
             <div style="font-size:48px;margin-bottom:16px">🔔</div>
             <h3 style="margin:0 0 12px;font-size:1.5rem;color:#1a202c">Enable Notifications</h3>
-            <p style="color:#718096;margin:0 0 20px;line-height:1.6">Stay updated with daily briefings, task reminders, and important alerts. You can disable them anytime.</p>
+            <p style="color:#718096;margin:0 0 20px;line-height:1.6">Stay updated with daily briefings, task reminders, and important alerts.</p>
             <div style="display:flex;gap:12px;justify-content:center">
                 <button id="lerri-notif-enable" style="background:#667eea;color:#fff;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-weight:600;font-size:1rem;transition:all 0.2s">Enable</button>
                 <button id="lerri-notif-dismiss" style="background:#e2e8f0;color:#4a5568;border:none;padding:12px 24px;border-radius:10px;cursor:pointer;font-weight:500;font-size:1rem;transition:all 0.2s">Not Now</button>
@@ -1324,28 +1314,7 @@ function showNotificationModal() {
         </div>
     `;
 
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-        #lerri-notif-enable:hover {
-            background: #5568d3 !important;
-            transform: translateY(-1px);
-        }
-        #lerri-notif-dismiss:hover {
-            background: #cbd5e0 !important;
-        }
-    `;
-    document.head.appendChild(style);
-
     document.body.appendChild(container);
-    console.log('✅ Notification modal displayed');
 
     const cleanup = () => {
         container.style.animation = 'fadeOut 0.3s ease-out';
@@ -1356,49 +1325,37 @@ function showNotificationModal() {
     };
 
     document.getElementById('lerri-notif-dismiss').addEventListener('click', () => {
-        console.log('❌ Notification prompt dismissed by user');
         localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
         cleanup();
     });
 
     document.getElementById('lerri-notif-enable').addEventListener('click', async () => {
+        const btn = document.getElementById('lerri-notif-enable');
+        btn.disabled = true;
+        btn.textContent = '⏳ Enabling...';
+
         try {
-            const btn = document.getElementById('lerri-notif-enable');
-            btn.disabled = true;
-            btn.textContent = '⏳ Enabling...';
+            const permission = await Notification.requestPermission();
 
-            console.log('📬 Requesting notification permission...');
-
-            if (checkNotificationPermission() === 'denied') {
-                console.log('❌ Notifications permanently denied by user');
-                showNotificationDeniedInstructions();
-                cleanup();
-                return;
-            }
-
-            const result = await Notification.requestPermission();
-            console.log('📬 Permission result:', result);
-
-            if (result === 'granted') {
-                console.log('✅ Notifications granted - subscribing to push');
+            if (permission === 'granted') {
+                const registration = await navigator.serviceWorker.ready;
                 
-                const subscription = await ensurePushSubscription();
-                
-                if (subscription) {
-                    console.log('✅ Push subscription obtained');
-                    currentPushSubscription = subscription;
-                    
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+
+                currentPushSubscription = subscription;
+
+                const email = getUserEmail();
+                if (email) {
+                    await sendSubscriptionToBackend(email, subscription);
                     await syncToServer();
-                    
-                    console.log('✅ Subscription synced to server');
-                    showNotification('✅ Notifications enabled!', 'success');
-                } else {
-                    console.error('❌ ensurePushSubscription returned null');
-                    showNotification('⚠️ Push subscription failed', 'error');
                 }
+
+                showNotification('✅ Notifications enabled!', 'success');
             } else {
                 localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
-                console.log('❌ Notifications denied by user');
                 showNotificationDeniedInstructions();
             }
 
@@ -1603,38 +1560,28 @@ async function ensurePushSubscription() {
             return null;
         }
         
-        console.log('🔄 Registering Service Worker...');
         const registration = await navigator.serviceWorker.register('/pwa/sw.js', {
             scope: '/pwa/'
         });
         
-        console.log('✅ Service Worker registered');
-        
         await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker ready');
         
         const existing = await registration.pushManager.getSubscription();
         
         if (existing) {
-            console.log('✅ Push subscription exists');
             currentPushSubscription = existing;
-            
             const email = getUserEmail();
             if (email) {
                 await sendSubscriptionToBackend(email, existing);
             }
-            
             return existing;
         }
-        
-        console.log('📝 Creating new push subscription...');
         
         const sub = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
         });
         
-        console.log('✅ Push subscription created');
         currentPushSubscription = sub;
         
         const email = getUserEmail();
@@ -1652,26 +1599,22 @@ async function ensurePushSubscription() {
 
 async function sendSubscriptionToBackend(email, subscription) {
     try {
-        console.log('📤 Sending subscription to backend for:', email);
-        console.log('📦 Subscription object:', JSON.stringify(subscription, null, 2));
-        
         const response = await fetch('https://api.lerriai.com/api/subscribe-notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 email, 
-                subscription: subscription.toJSON() // Converti in formato JSON standard
+                subscription: subscription.toJSON()
             })
         });
         
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Backend subscription save failed:', response.status, errorText);
+            console.error('❌ Backend subscription save failed:', response.status);
             return false;
         }
         
         const data = await response.json();
-        console.log('✅ Subscription saved to backend:', data);
+        console.log('✅ Subscription saved to backend');
         return true;
         
     } catch (error) {
