@@ -1344,11 +1344,15 @@ function showNotificationModal() {
                 });
 
                 currentPushSubscription = subscription;
+                console.log('✅ Subscription createddddddddd------:', subscription);
 
                 const email = getUserEmail();
                 if (email) {
-                    await sendSubscriptionToBackend(email, subscription);
+                    const saved = await sendSubscriptionToBackend(email, subscription);
+                    console.log('✅ BBBackend save result:', saved);
+                    
                     await syncToServer();
+                    console.log('✅ SSSSSync completed');
                 }
 
                 showNotification('✅ Notifications enabled!', 'success');
