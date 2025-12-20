@@ -15,14 +15,20 @@ const LANGUAGES = {
     "ar": "العربية"
 };
 
+const baseUrl = '/LerriAI_dev/pwa/';
+
 const VAPID_PUBLIC_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjgbqTHxKqzqU4bMYLNibnl4ltPQzIFkr0-c';
 let isProcessing = false;
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/pwa/sw.js')
+    console.log('📡 Registering service worker...');
+    console.log('🌐 Service worker URL:', `${baseUrl}sw.js`);
+    
+    navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl })
         .then(reg => console.log('✅ SW registered with scope:', reg.scope))
         .catch(err => console.error('❌ SW registration failed:', err));
 }
+
 
 
 
@@ -125,15 +131,15 @@ function setProcessingState(processing) {
 async function sendNotificationReale(title, body, data = {}) {
     if (!('serviceWorker' in navigator)) return;
     if (Notification.permission !== 'granted') return;
-    
+
     try {
         const regs = await navigator.serviceWorker.getRegistrations();
         if (!regs.length) throw new Error('Service worker not registered');
         const registration = regs[0];
         await registration.showNotification(title, {
-            body: body.substring(0, 100) + (body.length > 100 ? '...' : ''), // Max 100 caratteri
-            icon: '/pwa/icon/icon-192.png',
-            badge: '/pwa/icon/icon-192.png',
+            body: body.substring(0, 100) + (body.length > 100 ? '...' : ''),
+            icon: `${baseUrl}icon/icon-192.png`,
+            badge: `${baseUrl}icon/icon-192.png`,
             vibrate: [200, 100, 200],
             tag: 'lerri-notification',
             requireInteraction: false,
@@ -143,7 +149,6 @@ async function sendNotificationReale(title, body, data = {}) {
         console.error('Notification error:', error);
     }
 }
-
 // Dopo sendNotificationReale()
 async function initNotifications() {
     if ('serviceWorker' in navigator && 'Notification' in window) {
@@ -1457,7 +1462,6 @@ async function ensurePushSubscription() {
             return null;
         }
 
-        // --- Pulizia vecchi SW ---
         try {
             const registrations = await navigator.serviceWorker.getRegistrations();
             for (let registration of registrations) {
@@ -1468,7 +1472,6 @@ async function ensurePushSubscription() {
             console.error('Error unregistering SW:', error);
         }
 
-        // --- Pulizia cache ---
         if ('caches' in window) {
             try {
                 const cacheNames = await caches.keys();
@@ -1481,9 +1484,6 @@ async function ensurePushSubscription() {
             }
         }
 
-        // --- Registrazione nuovo SW ---
-        const baseUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-
         const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, {
             scope: baseUrl
         });
@@ -1492,7 +1492,6 @@ async function ensurePushSubscription() {
         await navigator.serviceWorker.ready;
         console.log('✅ Service Worker ready');
 
-        // --- Gestione push subscription ---
         const existing = await registration.pushManager.getSubscription();
         if (existing) {
             currentPushSubscription = existing;
@@ -2687,12 +2686,6 @@ async function initServiceWorker() {
     }
 
     try {
-        const baseUrl =
-            window.location.pathname.substring(
-                0,
-                window.location.pathname.lastIndexOf('/') + 1
-            );
-
         const registration = await navigator.serviceWorker.register(
             `${baseUrl}sw.js`,
             { scope: baseUrl }
