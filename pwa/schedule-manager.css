@@ -660,13 +660,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10001;
     padding: 1rem;
+    overflow-y: auto;
 }
 
 .slot-ghost {
@@ -738,6 +739,29 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    animation: modalSlideIn 0.3s ease;
+    margin: auto;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-close:hover {
@@ -812,13 +836,14 @@
 
 .emoji-grid-modal-wrapper {
     max-height: 240px;
-    overflow: auto;
+    overflow-y: auto;
     background: #fcfdff;
     border-radius: 10px;
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+    -webkit-overflow-scrolling: touch;
 }
 
 .emoji-selected-preview {
@@ -836,6 +861,7 @@
     font-size: 12px;
     text-transform: capitalize;
     cursor: pointer;
+    color: #2d3748;
     transition: all 0.2s ease;
 }
 

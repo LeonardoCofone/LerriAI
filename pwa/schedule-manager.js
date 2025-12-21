@@ -719,7 +719,7 @@ function openScheduleSlotEditor(slot) {
     }).join('');
 
     modal.innerHTML = `
-        <div class="modal-content modal-card">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3>Edit Slot — ${dayNamesDisplay[slot.day]} ${slot.start}</h3>
                 <button class="modal-close" id="schedSlotEditorCloseBtn">×</button>
@@ -751,17 +751,11 @@ function openScheduleSlotEditor(slot) {
             </div>
 
             <div class="modal-footer">
-                <div class="left-actions">
-                    ${slot.name ? '<button class="btn-danger" id="schedSlotEditorDeleteBtn">Delete</button>' : ''}
-                </div>
-                <div class="right-actions">
-                    <button class="btn-secondary" id="schedSlotEditorCancelBtn">Cancel</button>
-                    <button class="btn-primary" id="schedSlotEditorSaveBtn">Save</button>
-                </div>
+                <button class="btn-danger" id="schedSlotEditorDeleteBtn">🗑️ Delete</button>
+                <button class="btn-primary" id="schedSlotEditorSaveBtn">💾 Save</button>
             </div>
         </div>
     `;
-
     document.body.appendChild(modal);
     modal.style.display = 'flex';
 
