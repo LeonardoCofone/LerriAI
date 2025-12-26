@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initCursorGlow();
     initMobileMenu();
     initSmoothScroll();
-    initNavbarScroll();
     initCounterAnimation();
     initScrollAnimations();
     initTiltEffect();
