@@ -47,76 +47,256 @@
     <link rel="alternate" hreflang="en" href="https://www.lerriai.com/">
     <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
-
 <body>
-    <section class="hero">
-        <nav class="navbar">
-            <div class="container">
-                <div class="logo" id="hero">LerriAI</div>
-                <div class="nav-links">
-                    <a href="#features">Features</a>
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#pricing">Pricing</a>
-                    <a href="#cta">Get Started</a>
-                </div>
+    <!-- Neural Network Background Canvas -->
+    <canvas id="neural-canvas"></canvas>
+    
+    <!-- Cursor Glow Effect -->
+    <div class="cursor-glow"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#hero" class="logo">
+                <img src="pwa/icon/icon-512.png" alt="LerriAI" class="logo-img">
+                <span class="logo-text">LerriAI</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#pricing" class="nav-link">Pricing</a>
+                <a href="#cta" class="nav-btn">Get Started</a>
             </div>
-        </nav>
+            <button class="mobile-menu-btn" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="hero-orb hero-orb-1"></div>
+            <div class="hero-orb hero-orb-2"></div>
+            <div class="hero-orb hero-orb-3"></div>
+            <div class="hero-grid"></div>
+        </div>
         
         <div class="container hero-content">
-            <h1 class="hero-title">AI That Organizes Your Digital Life</h1>
+            <div class="hero-badge">
+                <span class="pulse-dot"></span>
+                <span>Multi-Agent AI System</span>
+            </div>
+            <h1 class="hero-title">
+                <span class="title-line">AI That Organizes</span>
+                <span class="title-line gradient-text">Your Digital Life</span>
+            </h1>
             <p class="hero-subtitle">Lerri is your personal AI assistant: managing emails, calendar, tasks, documents automatically. Smart, fast, and simple to use.</p>
-            <a href="#cta" class="hero-cta">Try It Free</a>
+            
+            <div class="hero-cta-group">
+                <a href="#cta" class="btn btn-primary">
+                    <span>Try It Free</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+                <a href="#how-it-works" class="btn btn-ghost">
+                    <span>See How It Works</span>
+                </a>
+            </div>
+            
+            <div class="hero-stats">
+                <div class="stat-item">
+                    <span class="stat-value" data-count="99">0</span>
+                    <span class="stat-label">% Accuracy</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value" data-count="24">0</span>
+                    <span class="stat-label">/7 Active</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <span class="stat-value" data-count="100">0</span>
+                    <span class="stat-label">% of control</span>
+                </div>
+            </div>
         </div>
         
         <div class="hero-visual">
+            <div class="agent-hub">
+                <div class="hub-core">
+                    <div class="hub-ring hub-ring-1"></div>
+                    <div class="hub-ring hub-ring-2"></div>
+                    <div class="hub-ring hub-ring-3"></div>
+                    <div class="hub-center">
+                        <img src="pwa/icon/icon-512.png" alt="LerriAI Core" class="hub-logo">
+                    </div>
+                </div>
+                <div class="agent-node agent-node-1" data-label="Email">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="M22 6L12 13L2 6"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="agent-node agent-node-2" data-label="Tasks">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="agent-node agent-node-3" data-label="Calendar">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <path d="M16 2v4M8 2v4M3 10h18"/>
+                            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="agent-node agent-node-4" data-label="Finance">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="agent-node agent-node-5" data-label="Voice">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/>
+                            <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                            <path d="M12 19v3M8 22h8"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="agent-node agent-node-6" data-label="Alerts">
+                    <div class="node-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </div>
+                </div>
+                <svg class="connection-lines" viewBox="0 0 400 400">
+                    <defs>
+                        <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00d4aa" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.3"/>
+                        </linearGradient>
+                    </defs>
+                    <line class="conn-line" x1="200" y1="200" x2="200" y2="60" stroke="url(#lineGrad)"/>
+                    <line class="conn-line" x1="200" y1="200" x2="320" y2="130" stroke="url(#lineGrad)"/>
+                    <line class="conn-line" x1="200" y1="200" x2="320" y2="270" stroke="url(#lineGrad)"/>
+                    <line class="conn-line" x1="200" y1="200" x2="200" y2="340" stroke="url(#lineGrad)"/>
+                    <line class="conn-line" x1="200" y1="200" x2="80" y2="270" stroke="url(#lineGrad)"/>
+                    <line class="conn-line" x1="200" y1="200" x2="80" y2="130" stroke="url(#lineGrad)"/>
+                </svg>
+            </div>
         </div>
     </section>
 
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">What Lerri Can Do For You</h2>
-            <p class="section-subtitle">A single intelligent pipeline of multi-agent AI assistant controlling your entire digital workflow</p>
+            <div class="section-header">
+                <span class="section-tag">Capabilities</span>
+                <h2 class="section-title">What Lerri Can Do For You</h2>
+                <p class="section-subtitle">A single intelligent pipeline of multi-agent AI assistant controlling your entire digital workflow</p>
+            </div>
             
             <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">📬</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="M22 6L12 13L2 6"/>
+                        </svg>
+                    </div>
                     <h3>Smart Email Management</h3>
                     <p>Lerri can send emails automatically, notifying you only about what matters most.</p>
-                </div>
+                    <div class="feature-tag">Automation</div>
+                </article>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">✅</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                    </div>
                     <h3>Automatic Task Organizer</h3>
                     <p>Create, edit, and track tasks effortlessly. Lerri ensures your daily priorities are always in order.</p>
-                </div>
+                    <div class="feature-tag">Productivity</div>
+                </article>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">📆</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <path d="M16 2v4M8 2v4M3 10h18"/>
+                            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/>
+                        </svg>
+                    </div>
                     <h3>Always Updated Calendar</h3>
                     <p>Schedule events, find free slots, and manage appointments with full context understanding. No manual effort required.</p>
-                </div>
+                    <div class="feature-tag">Scheduling</div>
+                </article>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                        </svg>
+                    </div>
                     <h3>Budget & Finance Tracking</h3>
                     <p>Monitor spending, set limits, and get instant reports. Lerri keeps your finances under control automatically.</p>
-                </div>
+                    <div class="feature-tag">Finance</div>
+                </article>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">🎤</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3z"/>
+                            <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+                            <path d="M12 19v3M8 22h8"/>
+                        </svg>
+                    </div>
                     <h3>Voice & Text Commands</h3>
                     <p>Interact naturally through chat or voice. Lerri interprets your intent and executes tasks accurately.</p>
-                </div>
+                    <div class="feature-tag">Interaction</div>
+                </article>
                 
-                <div class="feature-card">
-                    <div class="feature-icon">🔔</div>
+                <article class="feature-card" data-tilt>
+                    <div class="feature-glow"></div>
+                    <div class="feature-icon-wrap">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                    </div>
                     <h3>Smart Notifications</h3>
                     <p>Receive instant updates for every completed action. All events are logged and easy to review.</p>
-                </div>
+                    <div class="feature-tag">Alerts</div>
+                </article>
             </div>
         </div>
     </section>
@@ -124,75 +304,156 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
         <div class="container">
-            <h2 class="section-title">How Lerri Works</h2>
-            <p class="section-subtitle2">A smart multi-agent system that understands your needs, decides the best action, and keeps your life perfectly organized</p>
+            <div class="section-header">
+                <span class="section-tag">Process</span>
+                <h2 class="section-title">How Lerri Works</h2>
+                <p class="section-subtitle light">A smart multi-agent system that understands your needs, decides the best action, and keeps your life perfectly organized</p>
+            </div>
             
             <div class="workflow">
+                <div class="workflow-line"></div>
+                
                 <div class="workflow-step">
                     <div class="step-number">1</div>
-                    <h3>Tell Lerri What You Need</h3>
-                    <p>Send a message. Lerri instantly understands your request and knows what needs to be done.</p>
+                    <div class="step-content">
+                        <h3>Tell Lerri What You Need</h3>
+                        <p>Send a message. Lerri instantly understands your request and knows what needs to be done.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                                <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="workflow-arrow">→</div>
                 
                 <div class="workflow-step">
                     <div class="step-number">2</div>
-                    <h3>Smart Decision-Making</h3>
-                    <p>Lerri’s agents quickly decide the best action for your task—whether it’s scheduling, organizing emails, or tracking finances.</p>
+                    <div class="step-content">
+                        <h3>Smart Decision-Making</h3>
+                        <p>Lerri's agents quickly decide the best action for your task—whether it's scheduling, organizing emails, or tracking finances.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="workflow-arrow">→</div>
                 
                 <div class="workflow-step">
                     <div class="step-number">3</div>
-                    <h3>Seamless Execution</h3>
-                    <p>The right actions are carried out automatically and accurately, so you don’t have to worry about the details.</p>
+                    <div class="step-content">
+                        <h3>Seamless Execution</h3>
+                        <p>The right actions are carried out automatically and accurately, so you don't have to worry about the details.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="workflow-arrow">→</div>
                 
                 <div class="workflow-step">
                     <div class="step-number">4</div>
-                    <h3>Stay Updated</h3>
-                    <p>Lerri keeps you informed with clear notifications and updates, making sure everything stays on track.</p>
+                    <div class="step-content">
+                        <h3>Stay Updated</h3>
+                        <p>Lerri keeps you informed with clear notifications and updates, making sure everything stays on track.</p>
+                    </div>
+                    <div class="step-visual">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="tech-highlight">
-                <h3>Organize Your Life Effortlessly</h3>
-                <p>Lerri coordinates multiple intelligent agents in the background, turning complexity into simplicity so you can focus on what truly matters.</p>
+                <div class="tech-glow"></div>
+                <div class="tech-content">
+                    <h3>Organize Your Life Effortlessly</h3>
+                    <p>Lerri coordinates multiple intelligent agents in the background, turning complexity into simplicity so you can focus on what truly matters.</p>
+                </div>
+                <div class="tech-visual">
+                    <div class="neural-dots">
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-
     <!-- Pricing Section -->
     <section id="pricing" class="pricing">
         <div class="container">
-            <h2 class="section-title">Transparent & Flexible Pricing</h2>
-            <p class="section-subtitle">Pay only for what you use, no surprises</p>
+            <div class="section-header">
+                <span class="section-tag">Plans</span>
+                <h2 class="section-title">Transparent & Flexible Pricing</h2>
+                <p class="section-subtitle">Pay only for what you use, no surprises</p>
+            </div>
             
             <div class="pricing-card">
+                <div class="pricing-glow"></div>
                 <div class="pricing-header">
                     <div class="pricing-badge">Lerri Plan</div>
                     <div class="price-container">
-                        <span class="price-amount">€2.99</span>
+                        <span class="price-currency">€</span>
+                        <span class="price-amount">2.99</span>
                         <span class="price-period">/month</span>
                     </div>
-                    <p class="pricing-description">Accesso base a tutte le funzionalità e i moduli di Lerri.</p>
+                    <p class="pricing-tagline">Basic subscription to access all Lerri features and modules</p>
                 </div>
                 
                 <div class="pricing-body">
-                    <p class="pricing-description">Basic subscription to access all Lerri features and modules</p>
-                    
                     <ul class="pricing-features">
-                        <li>✓ Full access to all modules (Email, Task, Calendar, Finance)</li>
-                        <li>✓ Unlimited voice and text commands</li>
-                        <li>✓ Instant notifications for every completed action</li>
-                        <li>✓ Historical log of all activities</li>
-                        <li>✓ Priority support</li>
-                        <li>✓ Personal calendar and tasks management</li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Full access to all modules (Email, Task, Calendar, Finance)</span>
+                        </li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Unlimited voice and text commands</span>
+                        </li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Instant notifications for every completed action</span>
+                        </li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Historical log of all activities</span>
+                        </li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Priority support</span>
+                        </li>
+                        <li>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Personal calendar and tasks management</span>
+                        </li>
                     </ul>
                     
                     <div class="pricing-usage">
@@ -202,15 +463,26 @@
                             <li><strong>Voice Processing</strong>: €0.006 per audio minute</li>
                             <li><strong>Text message</strong>: €0.99 per 1000 messages</li>
                         </ul>
-                        <p class="pricing-estimate"><strong>Typical monthly estimate:</strong> €4 per active user (including subscription and usage)</p>
+                        <div class="pricing-estimate">
+                            <strong>Typical monthly estimate:</strong> €4 per active user (including subscription and usage)
+                        </div>
                     </div>
                     
                     <div class="pricing-note">
-                        <p><strong>💡 Note:</strong> Usage-based costs scale with activity. Low usage = low cost. Full transparency and no wasted resources.</p>
+                        <div class="note-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 16v-4M12 8h.01"/>
+                            </svg>
+                        </div>
+                        <p><strong>Note:</strong> Usage-based costs scale with activity. Low usage = low cost. Full transparency and no wasted resources.</p>
                     </div>
                 </div>
                 
-                <a href="#cta" class="pricing-button">Start with a generous Free Trial <br> (NO credit card required)</a>
+                <a href="#cta" class="pricing-button">
+                    <span>Start with a generous Free Trial</span>
+                    <small>(NO credit card required)</small>
+                </a>
             </div>
         </div>
     </section>
@@ -218,87 +490,149 @@
     <!-- Benefits Section -->
     <section class="benefits">
         <div class="container">
-            <h2 class="section-title">Why Choose Lerri</h2>
+            <div class="section-header">
+                <span class="section-tag">Advantages</span>
+                <h2 class="section-title">Why Choose Lerri</h2>
+            </div>
             
             <div class="benefits-grid">
-                
-                <div class="benefit-item">
-                    <h3>🎯 Zero Ambiguity</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                        </svg>
+                    </div>
+                    <h3>Zero Ambiguity</h3>
                     <p>One request = one precise action. No errors, no misunderstandings.</p>
-                </div>
+                </article>
                 
-                <div class="benefit-item">
-                    <h3>⚡ High Speed</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                    </div>
+                    <h3>High Speed</h3>
                     <p>Tasks are executed in seconds. Optimized multi-agent workflow ensures maximum performance.</p>
-                </div>
+                </article>
                 
-                <div class="benefit-item">
-                    <h3>🔒 Privacy & Security</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2"/>
+                            <path d="M7 11V7a5 5 0 0110 0v4"/>
+                            <circle cx="12" cy="16" r="1"/>
+                        </svg>
+                    </div>
+                    <h3>Privacy & Security</h3>
                     <p>Your data stays private. Lerri accesses only authorized services and encrypts all logs.</p>
-                </div>
+                </article>
 
-                <div class="benefit-item">
-                    <h3>🤖 Smart Automation</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <path d="M8 21h8M12 17v4"/>
+                            <path d="M7 8l3 3-3 3M12 14h5"/>
+                        </svg>
+                    </div>
+                    <h3>Smart Automation</h3>
                     <p>Lerri anticipates your needs and automates repetitive tasks, saving you time and effort.</p>
-                </div>
-
+                </article>
                 
-                <div class="benefit-item">
-                    <h3>📊 Full Traceability</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M3 3v18h18"/>
+                            <path d="M18 17V9M13 17V5M8 17v-3"/>
+                        </svg>
+                    </div>
+                    <h3>Full Traceability</h3>
                     <p>All actions are logged. You always know what was done, when, and why.</p>
-                </div>
+                </article>
                 
-                <div class="benefit-item">
-                    <h3>🌐 Centralized Control</h3>
+                <article class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                        </svg>
+                    </div>
+                    <h3>Centralized Control</h3>
                     <p>Emails, tasks, calendar, and drive all in one place. No more switching between apps everything is organized.</p>
-                </div>
+                </article>
             </div>
         </div>
     </section>
 
     <!-- CTA Section -->
     <section id="cta" class="cta-section">
+        <div class="cta-bg">
+            <div class="cta-orb cta-orb-1"></div>
+            <div class="cta-orb cta-orb-2"></div>
+        </div>
         <div class="container">
             <h2>Ready to Boost Your Productivity?</h2>
             <p>Kickstart your productivity with 80 free messages. No credit card required.</p>
-            <a href="login.html" class="cta-form">Get Started</a>
-            <!--<a href="coming_soon.html" class="cta-form">Get Started</a>-->
+            <a href="login.html" class="btn btn-cta">
+                <span>Get Started</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
             <p class="cta-note">Activate Lerri in under 3 minutes. Cancel anytime.</p>
         </div>
-
-
     </section>
 
+    <!-- Contact Section -->
     <section id="cont" class="contact-section">
-        <h2 class="section-title">Do you have any ideas to improve Lerri? Contact me!!</h2>
-        <form action="https://formsubmit.co/leonardo.cofone5@gmail.com" method="POST" aria-label="Modulo di contatto">
-          <h3 class="form-title">Contact Me</h3>
-          <label for="email">Email:</label><br />
-          <input type="email" id="email" name="email" placeholder="your.email@example.com" required aria-required="true" /><br />
+        <div class="container">
+            <h2 class="section-title">Do you have any ideas to improve Lerri? Contact me!!</h2>
+            <form action="https://formsubmit.co/leonardo.cofone5@gmail.com" method="POST" class="contact-form" aria-label="Contact form">
+                <h3 class="form-title">Contact Me</h3>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your.email@example.com" required aria-required="true">
+                </div>
 
-          <label for="subject">Subject:</label><br />
-          <input type="text" id="subject" name="subject" placeholder="Subject" required aria-required="true" /><br />
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" placeholder="Subject" required aria-required="true">
+                </div>
 
-          <label for="message">Message:</label><br />
-          <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required aria-required="true"></textarea><br />
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required aria-required="true"></textarea>
+                </div>
 
-          <button type="submit">Send</button>
+                <button type="submit" class="btn btn-submit">
+                    <span>Send Message</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"/>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"/>
+                    </svg>
+                </button>
 
-          <input type="hidden" name="_captcha" value="false" />
-          <input type="hidden" name="_cc" value="leonardo.lerriai@gmail.com" />
-          <input type="hidden" name="_subject" value="Nuovo messaggio dal sito LerriAI" />
-          <input type="hidden" name="_next" value="https://leonardocofone.github.io/Leonardo_Cofone/" />
-        </form>
-      </section>
-
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_cc" value="leonardo.lerriai@gmail.com">
+                <input type="hidden" name="_subject" value="Nuovo messaggio dal sito LerriAI">
+                <input type="hidden" name="_next" value="thankyou.html">
+            </form>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h4>Lerri</h4>
-                    <p><a href="#hero">Your AI-powered digital strategic assistant</a></p>
+                <div class="footer-section footer-brand">
+                    <a href="#hero" class="footer-logo">
+                        <span>LerriAI</span>
+                    </a>
+                    <p>Your AI-powered digital strategic assistant</p>
                 </div>
                 
                 <div class="footer-section">
@@ -311,6 +645,7 @@
                 <div class="footer-section">
                     <h4>Support</h4>
                     <a href="#cont">Contact Us</a>
+                    <a href="https://leonardocofone.github.io/Leonardo_Cofone/">the developer</a>
                 </div>
                 
                 <div class="footer-section">

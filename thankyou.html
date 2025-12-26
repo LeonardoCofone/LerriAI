@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lerri - Thank You</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root {
+    --color-primary: #1A53E4;
+    --color-secondary: #34A853;
+    --color-background: linear-gradient(135deg,#667eea,#764ba2,#f093fb,#f5576c);
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; 
+}
+
+body.thankyou-page {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--color-background);
+    background-size: 400% 400%;
+    animation: gradientShift 12s ease-in-out infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.75);
+    padding: 3.5rem 2.5rem;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    max-width: 380px;
+    width: 85%;
+    text-align: center;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transform: translateY(0);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.container:hover {
+    transform: translateY(-5px);
+}
+
+.success-icon-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.icon-success {
+    color: var(--color-secondary);
+    font-size: 5.5rem;
+    filter: drop-shadow(0 4px 10px rgba(52, 168, 83, 0.3));
+    animation: smoothFloat 3s ease-in-out infinite;
+}
+
+@keyframes smoothFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+h1 {
+    color: var(--color-primary);
+    margin-bottom: 0.8rem;
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.message {
+    color: #444;
+    margin-bottom: 2.5rem;
+    line-height: 1.7;
+    font-size: 1.05rem;
+    font-weight: 400;
+}
+
+.primary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    background: var(--color-primary);
+    color: white;
+    padding: 1rem 2.5rem;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(26, 83, 228, 0.3);
+}
+
+.primary-btn:hover {
+    background: #1541b3;
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(26, 83, 228, 0.4);
+}
+
+.footer-note {
+    margin-top: 2.5rem;
+    font-size: 0.85rem;
+    color: #777;
+    opacity: 0.8;
+}
+
+@media (max-width: 500px) {
+    .container {
+        padding: 2.5rem 1.5rem;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+}
+</style>
+</head>
+<body class="thankyou-page">
+
+<section class="container animate__animated animate__fadeInUp">
+    
+    <div class="success-icon-wrapper">
+        <i class="fa-solid fa-circle-check icon-success"></i>
+    </div>
+
+    <h1 class="animate__animated animate__fadeIn animate__delay-1s">Thank You!</h1>
+    
+    <p class="message animate__animated animate__fadeIn animate__delay-1s">
+        We've received your message. The <strong>Lerri</strong> team will get back to you shortly.
+    </p>
+
+    <div class="animate__animated animate__zoomIn animate__delay-2s">
+        <a href="index.html" class="primary-btn">
+            <i class="fa-solid fa-arrow-left"></i> Back to Home
+        </a>
+    </div>
+
+    <p class="footer-note animate__animated animate__fadeIn animate__delay-3s">
+        Check your inbox for a confirmation email.
+    </p>
+
+</section>
+
+</body>
+</html>
