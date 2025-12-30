@@ -5,14 +5,14 @@ const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleuser
 const LANGUAGES = {
     "it": "Italiano",
     "en": "English",
-    "es": "Español",
-    "fr": "Français",
+    "es": "EspaÃ±ol",
+    "fr": "FranÃ§ais",
     "de": "Deutsch",
-    "pt": "Português",
-    "ru": "Русский",
-    "ja": "日本語",
-    "zh": "中文",
-    "ar": "العربية"
+    "pt": "PortuguÃªs",
+    "ru": "Ð ÑƒÑÑÐºÐ¸Ð¹",
+    "ja": "æ—¥æœ¬èªž",
+    "zh": "ä¸­æ–‡",
+    "ar": "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"
 };
 
 const baseUrl = '/LerriAI_dev/pwa/';
@@ -21,12 +21,12 @@ const VAPID_PUBLIC_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjg
 let isProcessing = false;
 
 if ('serviceWorker' in navigator) {
-    console.log('📡 Registering service worker...');
-    console.log('🌐 Service worker URL:', `${baseUrl}sw.js`);
+    console.log('ðŸ“¡ Registering service worker...');
+    console.log('ðŸŒ Service worker URL:', `${baseUrl}sw.js`);
     
     navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl })
-        .then(reg => console.log('✅ SW registered with scope:', reg.scope))
-        .catch(err => console.error('❌ SW registration failed:', err));
+        .then(reg => console.log('âœ… SW registered with scope:', reg.scope))
+        .catch(err => console.error('âŒ SW registration failed:', err));
 }
 
 
@@ -43,11 +43,11 @@ function loadPayPalSDK() {
         script.async = true;
         script.onload = () => {
             window.paypalLoaded = true;
-            console.log('✅ PayPal SDK loaded');
+            console.log('âœ… PayPal SDK loaded');
             resolve();
         };
         script.onerror = () => {
-            console.error('❌ PayPal SDK load failed');
+            console.error('âŒ PayPal SDK load failed');
             reject(new Error('PayPal SDK failed to load'));
         };
         document.body.appendChild(script);
@@ -154,7 +154,7 @@ async function initNotifications() {
     if ('serviceWorker' in navigator && 'Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            console.log('✅ Notifications enabled');
+            console.log('âœ… Notifications enabled');
             const sub = await ensurePushSubscription();
             if (sub) {
                 await sendSubscriptionToBackend(getUserEmail(), sub);
@@ -183,7 +183,7 @@ function initDailyBriefingButton() {
     briefingBtn.id = 'daily-briefing-btn';
     briefingBtn.className = 'btn-icon';
     briefingBtn.setAttribute('aria-label', 'Daily Briefing');
-    briefingBtn.innerHTML = '📊';
+    briefingBtn.innerHTML = 'ðŸ“Š';
     briefingBtn.title = 'Get Daily Briefing';
 
     const infoWrapper = document.createElement('div');
@@ -192,7 +192,7 @@ function initDailyBriefingButton() {
     infoWrapper.style.alignItems = 'center';
 
     const infoIcon = document.createElement('span');
-    infoIcon.innerHTML = 'ℹ️';
+    infoIcon.innerHTML = 'â„¹ï¸';
     infoIcon.style.cursor = 'pointer';
     infoIcon.style.fontSize = '1.2rem';
 
@@ -260,25 +260,25 @@ function initDailyBriefingButton() {
 
         const email = getUserEmail();
         if (!email) {
-            showNotification('❌ Please login first', 'error');
+            showNotification('âŒ Please login first', 'error');
             return;
         }
 
         const briefingCost = COSTS.TEXT_MESSAGE;
 
         if (settings.currentSpend + briefingCost > settings.maxSpend) {
-            showNotification('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'error');
-            addMessage('⚠️ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
+            showNotification('âš ï¸ Budget limit reached! Increase your maximum budget to continue.', 'error');
+            addMessage('âš ï¸ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
             return;
         }
 
         setProcessingState(true);
 
         briefingBtn.disabled = true;
-        briefingBtn.innerHTML = '⏳';
+        briefingBtn.innerHTML = 'â³';
 
         try {
-            const loadingMsg = addMessage('📊 Generating your daily briefing...', 'bot', false);
+            const loadingMsg = addMessage('ðŸ“Š Generating your daily briefing...', 'bot', false);
 
             const response = await fetch('https://api.lerriai.com/api/trigger-briefing', {
                 method: 'POST',
@@ -308,21 +308,21 @@ function initDailyBriefingButton() {
 
             if (data.subscription) {
                 settings.subscription = data.subscription;
-                console.log('✅ Updated subscription from briefing:', settings.subscription);
+                console.log('âœ… Updated subscription from briefing:', settings.subscription);
             }
 
-            console.log(`💰 Briefing cost: €${briefingCost.toFixed(5)}`);
+            console.log(`ðŸ’° Briefing cost: â‚¬${briefingCost.toFixed(5)}`);
 
             await syncToServer();
             await updateTrialBanner();
             updateStats();
             updateBudgetDisplay();
 
-            showNotification('✅ Daily briefing generated!', 'success');
+            showNotification('âœ… Daily briefing generated!', 'success');
 
         } catch (error) {
             console.error('Briefing error:', error);
-            showNotification('❌ Failed to generate briefing. Try again.', 'error');
+            showNotification('âŒ Failed to generate briefing. Try again.', 'error');
         } finally { 
             setProcessingState(false);
         }
@@ -364,7 +364,7 @@ async function updateTrialBanner() {
             border-radius: 8px;
             margin-bottom: 15px;
         `;
-        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
+        trialBanner.textContent = `ðŸŽ Free Trial: ${status.messagesRemaining} messages remaining`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
     }
 }
@@ -378,25 +378,25 @@ async function showSubscriptionModal() {
     modal.innerHTML = `
         <div class="subscription-modal-overlay">
             <div class="subscription-modal-content">
-                <h2 class="premium-title">🚀 Upgrade to Premium</h2>
+                <h2 class="premium-title">ðŸš€ Upgrade to Premium</h2>
                 <p class="premium-subtitle">Unlock unlimited AI power</p>
                 
                 <div class="subscription-benefits">
-                    <p>✨ Unlimited messages</p>
-                    <p>🤖 Full AI assistant access</p>
-                    <p>📅 Advanced calendar features</p>
-                    <p>📧 Gmail integration</p>
-                    <p>☁️ Google Drive access</p>
+                    <p>âœ¨ Unlimited messages</p>
+                    <p>ðŸ¤– Full AI assistant access</p>
+                    <p>ðŸ“… Advanced calendar features</p>
+                    <p>ðŸ“§ Gmail integration</p>
+                    <p>â˜ï¸ Google Drive access</p>
                 </div>
                 
                 <div class="premium-divider"></div>
                 
                 <p class="subscription-price">
-                    €2.99 <span>/ month + usage</span>
+                    â‚¬2.99 <span>/ month + usage</span>
                 </p>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px;">
                     Base subscription + pay only for what you use<br>
-                    (typically under €1/month for usage)
+                    (typically under â‚¬1/month for usage)
                 </p>
                 
                 <div id="payment-element"></div>
@@ -431,7 +431,7 @@ async function showSubscriptionModal() {
         document.getElementById('submit-payment').addEventListener('click', async () => {
             const submitBtn = document.getElementById('submit-payment');
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Processing...';
+            submitBtn.textContent = 'â³ Processing...';
             
             const { error } = await stripe.confirmPayment({
                 elements,
@@ -441,7 +441,7 @@ async function showSubscriptionModal() {
             });
             
             if (error) {
-                showNotification('❌ Payment failed: ' + error.message, 'error');
+                showNotification('âŒ Payment failed: ' + error.message, 'error');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Subscribe Now';
             }
@@ -453,7 +453,7 @@ async function showSubscriptionModal() {
         
     } catch (error) {
         console.error('Subscription modal error:', error);
-        showNotification('❌ Failed to load payment form', 'error');
+        showNotification('âŒ Failed to load payment form', 'error');
         modal.remove();
     }
 }
@@ -461,7 +461,7 @@ async function showSubscriptionModal() {
 async function handleSubscriptionSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('subscription') === 'success') {
-        showNotification('✅ Subscription activated successfully!', 'success');
+        showNotification('âœ… Subscription activated successfully!', 'success');
         window.history.replaceState({}, document.title, window.location.pathname);
         await loadDataFromServer();
         await updateTrialBanner();
@@ -566,13 +566,9 @@ let messagesArray = [];
 
 const md = window.markdownit();
 
-function calculateMessageCost(isVoice = false, durationSeconds = 0, toolCount = 0) {
-    const baseCost = 0.00099;
-    const toolCost = toolCount > 1 ? (toolCount - 1) * 0.0005 : 0;
-    const totalBaseCost = baseCost + toolCost;
-    
-    if (!isVoice) return totalBaseCost;
-    return totalBaseCost + (durationSeconds * COSTS.VOICE_PER_SECOND);
+function calculateMessageCost(isVoice = false, durationSeconds = 0) {
+    if (!isVoice) return COSTS.TEXT_MESSAGE;
+    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
 }
 
 function calculateFileCost(files) {
@@ -656,9 +652,9 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
     }
 
     if (sender === 'bot' && 
-        text !== "⏳ Processing..." && 
-        !text.startsWith('📊 Generating') &&
-        !text.startsWith('⏳')) {
+        text !== "â³ Processing..." && 
+        !text.startsWith('ðŸ“Š Generating') &&
+        !text.startsWith('â³')) {
         
         const preview = text
             .replace(/[*_~`#\[\]]/g, '')
@@ -679,13 +675,13 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
 
 async function syncToServer() {
     if (isSyncing) {
-        console.log('⏳ Sync already in progress, skipping...');
+        console.log('â³ Sync already in progress, skipping...');
         return;
     }
     
     const user = getUserEmail();
     if (!user) {
-        console.log('❌ No user email, cannot sync');
+        console.log('âŒ No user email, cannot sync');
         return;
     }
 
@@ -718,12 +714,12 @@ async function syncToServer() {
         });
         
         if (response.ok) {
-            console.log("✅ Sync completed successfully");
+            console.log("âœ… Sync completed successfully");
         } else {
-            console.error("❌ Sync failed:", response.status);
+            console.error("âŒ Sync failed:", response.status);
         }
     } catch (err) {
-        console.error("❌ Sync error:", err);
+        console.error("âŒ Sync error:", err);
     } finally {
         isSyncing = false;
     }
@@ -747,11 +743,11 @@ async function loadDataFromServer() {
         
         const data = await res.json();
 
-        console.log('📥 Data loaded from server:', data);
+        console.log('ðŸ“¥ Data loaded from server:', data);
 
         if (data.pushSubscription) {
             currentPushSubscription = data.pushSubscription;
-            console.log('✅ pushSubscription restored from server');
+            console.log('âœ… pushSubscription restored from server');
         }
 
         if (data.events !== undefined) {
@@ -808,7 +804,7 @@ async function loadDataFromServer() {
             window.paypalLoaded = true;
         }
 
-        console.log('🕒 Schedule loaded:', {
+        console.log('ðŸ•’ Schedule loaded:', {
             slots: settings.schedule.slots.length,
             categories: settings.schedule.categories.length,
             sports: settings.schedule.sports.length,
@@ -840,10 +836,10 @@ async function loadDataFromServer() {
             updateBudgetDisplay();
         }
 
-        console.log("✅ Data loaded successfully from server");
+        console.log("âœ… Data loaded successfully from server");
 
     } catch (err) {
-        console.error("❌ Load error:", err);
+        console.error("âŒ Load error:", err);
     } finally {
         isLoading = false;
     }
@@ -879,15 +875,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     initLogout();
     initClearChat();
     
-    console.log('✅ App initialized, checking PWA status...');
+    console.log('âœ… App initialized, checking PWA status...');
     
     if (checkPWAStatus()) {
-        console.log('✅ PWA is installed, scheduling notification check...');
+        console.log('âœ… PWA is installed, scheduling notification check...');
         setTimeout(() => {
             checkAndPromptNotifications().catch(err => console.error('Notification prompt error:', err));
         }, 3000);
     } else {
-        console.log('ℹ️ PWA not installed yet, waiting for installation...');
+        console.log('â„¹ï¸ PWA not installed yet, waiting for installation...');
     }
 });
 
@@ -959,22 +955,22 @@ window.testPWA.reset = () => {
     localStorage.removeItem('pwa-installed');
     localStorage.removeItem('pwa-prompt-dismiss-time');
     localStorage.removeItem('notification-prompt-dismiss-time');
-    console.log('✅ Reset flags - ora ricarica la pagina (F5)');
+    console.log('âœ… Reset flags - ora ricarica la pagina (F5)');
 };
 
 window.testPWA.showBanner = () => {
     if (deferredPrompt) {
         showPWAInstallBanner();
-        console.log('✅ PWA banner shown');
+        console.log('âœ… PWA banner shown');
     } else {
-        console.log('⚠️ No deferredPrompt');
+        console.log('âš ï¸ No deferredPrompt');
     }
 };
 
 window.testPWA.forceNotifications = () => {
     localStorage.removeItem('notification-prompt-dismiss-time');
     showNotificationModal();
-    console.log('✅ Notification modal forced');
+    console.log('âœ… Notification modal forced');
 };
 
 window.testPWA.status = () => {
@@ -1008,7 +1004,7 @@ function initPWAInstallPrompt() {
         deferredPrompt = e;
         
         setTimeout(() => {
-            console.log('📢 Showing PWA banner...');
+            console.log('ðŸ“¢ Showing PWA banner...');
             showPWAInstallBanner();
         }, 1000);
     });
@@ -1026,9 +1022,9 @@ function initPWAInstallPrompt() {
     
     setTimeout(() => {
         if (deferredPrompt) {
-            console.log('✅ deferredPrompt is available');
+            console.log('âœ… deferredPrompt is available');
         } else {
-            console.log('⚠️ deferredPrompt not available');
+            console.log('âš ï¸ deferredPrompt not available');
         }
     }, 3000);
 }
@@ -1045,7 +1041,7 @@ function checkNotificationStatus() {
 
 function checkNotificationPermission() {
     if (!('Notification' in window)) {
-        console.log('❌ Notifications not supported');
+        console.log('âŒ Notifications not supported');
         return 'unsupported';
     }
     return Notification.permission;
@@ -1060,7 +1056,7 @@ function promptNotificationPermission() {
         return;
     }
 
-    console.log('🔔 Showing notification modal');
+    console.log('ðŸ”” Showing notification modal');
     showNotificationModal();
 }
 
@@ -1068,7 +1064,7 @@ function promptNotificationPermission() {
 
 function showNotificationModal() {
     if (document.getElementById('lerri-notification-modal')) {
-        console.log('⚠️ Modal already exists, skipping');
+        console.log('âš ï¸ Modal already exists, skipping');
         return;
     }
 
@@ -1087,7 +1083,7 @@ function showNotificationModal() {
 
     container.innerHTML = `
         <div style="background:#fff;border-radius:16px;padding:30px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-            <div style="font-size:48px;margin-bottom:16px">🔔</div>
+            <div style="font-size:48px;margin-bottom:16px">ðŸ””</div>
             <h3 style="margin:0 0 12px;font-size:1.5rem;color:#1a202c">Enable Notifications</h3>
             <p style="color:#718096;margin:0 0 20px;line-height:1.6">Stay updated with daily briefings, task reminders, and important alerts.</p>
             <div style="display:flex;gap:12px;justify-content:center">
@@ -1113,37 +1109,37 @@ function showNotificationModal() {
     });
 
     document.getElementById('lerri-notif-enable').addEventListener('click', async () => {
-        console.log('-----🔔 Enable clicked');
+        console.log('-----ðŸ”” Enable clicked');
 
         const enableBtn = document.getElementById('lerri-notif-enable');
         enableBtn.disabled = true;
-        enableBtn.textContent = '⏳ Loading...';
+        enableBtn.textContent = 'â³ Loading...';
 
         try {
-            console.log('-----⏳ Requesting notification permission');
+            console.log('-----â³ Requesting notification permission');
             const permission = await Notification.requestPermission();
-            console.log('-----📊 Permission result:', permission);
+            console.log('-----ðŸ“Š Permission result:', permission);
 
             if (permission === 'granted') {
-                console.log('-----✅ Permission granted');
+                console.log('-----âœ… Permission granted');
 
-                console.log('-----⏳ Waiting for service worker ready');
+                console.log('-----â³ Waiting for service worker ready');
                 await navigator.serviceWorker.ready;
-                console.log('-----✅ Service worker ready');
+                console.log('-----âœ… Service worker ready');
                 
-                console.log('-----⏳ Getting registration with baseUrl:', baseUrl);
+                console.log('-----â³ Getting registration with baseUrl:', baseUrl);
                 const registration = await navigator.serviceWorker.getRegistration(baseUrl);
-                console.log('-----📋 Registration result:', registration);
+                console.log('-----ðŸ“‹ Registration result:', registration);
                 
                 if (!registration) {
-                    console.error('-----❌ No registration found');
+                    console.error('-----âŒ No registration found');
                     throw new Error('Service worker not registered');
                 }
                 
-                console.log('-----✅ Service Worker found:', registration.scope);
+                console.log('-----âœ… Service Worker found:', registration.scope);
 
-                console.log('-----⏳ Subscribing to push notifications');
-                console.log('-----🔑 VAPID key:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
+                console.log('-----â³ Subscribing to push notifications');
+                console.log('-----ðŸ”‘ VAPID key:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
                 
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
@@ -1151,41 +1147,41 @@ function showNotificationModal() {
                 });
 
                 currentPushSubscription = subscription;
-                console.log('-----📩 Push subscription created successfully');
-                console.log('-----📩 Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
+                console.log('-----ðŸ“© Push subscription created successfully');
+                console.log('-----ðŸ“© Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
 
                 const email = getUserEmail();
-                console.log('-----📧 User email:', email);
+                console.log('-----ðŸ“§ User email:', email);
 
                 if (email) {
-                    console.log('-----⏳ Sending subscription to backend');
+                    console.log('-----â³ Sending subscription to backend');
                     const saved = await sendSubscriptionToBackend(email, subscription);
-                    console.log('-----✅ Backend save result:', saved);
+                    console.log('-----âœ… Backend save result:', saved);
 
-                    console.log('-----⏳ Syncing with server');
+                    console.log('-----â³ Syncing with server');
                     await syncToServer();
-                    console.log('-----✅ Sync completed');
+                    console.log('-----âœ… Sync completed');
                 }
 
                 cleanup();
-                showNotification('✅ Notifications enabled!', 'success');
-                console.log('-----🎉 Flow completed successfully');
+                showNotification('âœ… Notifications enabled!', 'success');
+                console.log('-----ðŸŽ‰ Flow completed successfully');
 
             } else if (permission === 'denied') {
-                console.warn('-----🚫 Permission denied');
+                console.warn('-----ðŸš« Permission denied');
                 localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
                 cleanup();
                 showNotificationDeniedInstructions();
             } else {
-                console.log('-----ℹ️ Permission dismissed/default');
+                console.log('-----â„¹ï¸ Permission dismissed/default');
                 cleanup();
             }
         } catch (err) {
-            console.error('-----❌ Full error object:', err);
-            console.error('-----❌ Error message:', err.message);
-            console.error('-----❌ Error stack:', err.stack);
+            console.error('-----âŒ Full error object:', err);
+            console.error('-----âŒ Error message:', err.message);
+            console.error('-----âŒ Error stack:', err.stack);
             cleanup();
-            showNotification('⚠️ Notification setup error: ' + err.message, 'error');
+            showNotification('âš ï¸ Notification setup error: ' + err.message, 'error');
         }
     });
 }
@@ -1204,9 +1200,9 @@ function showNotificationDeniedInstructions() {
     const instructions = `Notifications are blocked for this site.
 
 To enable them:
-- Chrome / Edge: Click the lock icon (🔒) next to the address bar → Site settings → Notifications → Allow.
+- Chrome / Edge: Click the lock icon (ðŸ”’) next to the address bar â†’ Site settings â†’ Notifications â†’ Allow.
 - Alternatively open: chrome://settings/content/notifications and remove this site from the blocked list.
-- Firefox: Click the info icon (i) → Permissions → Notifications → Allow.
+- Firefox: Click the info icon (i) â†’ Permissions â†’ Notifications â†’ Allow.
 - You can also test in an Incognito/Private window or another browser profile.
 - Or just ask Lerri how to do it! ;)
 
@@ -1301,9 +1297,9 @@ After changing the setting, reload this page and click Enable.`;
     document.getElementById('lerri-copy-notif-instr').addEventListener('click', async () => {
         try {
             await navigator.clipboard.writeText(instructions);
-            showNotification('📋 Instructions copied to clipboard', 'success');
+            showNotification('ðŸ“‹ Instructions copied to clipboard', 'success');
         } catch (err) {
-            showNotification('⚠️ Unable to copy — please select and copy manually', 'error');
+            showNotification('âš ï¸ Unable to copy â€” please select and copy manually', 'error');
         }
     });
 
@@ -1322,54 +1318,54 @@ async function checkAndPromptPWA() {
     const dismissTime = localStorage.getItem('pwa-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('📅 Days since dismiss:', daysSinceDismiss);
+    console.log('ðŸ“… Days since dismiss:', daysSinceDismiss);
     
     if (daysSinceDismiss < 7) {
-        console.log('⏳ PWA prompt dismissed recently, waiting...');
+        console.log('â³ PWA prompt dismissed recently, waiting...');
         return;
     }
 
     if (deferredPrompt) {
-        console.log('✅ Showing PWA banner...');
+        console.log('âœ… Showing PWA banner...');
         showPWAInstallBanner();
     } else {
-        console.log('⚠️ deferredPrompt not available yet');
+        console.log('âš ï¸ deferredPrompt not available yet');
     }
 }
 
 async function checkAndPromptNotifications() {
-    console.log('🔔 Checking notification status...');
+    console.log('ðŸ”” Checking notification status...');
     
     const status = checkNotificationStatus();
-    console.log('📊 Notification permission:', status);
+    console.log('ðŸ“Š Notification permission:', status);
     
     if (status === 'unsupported') {
-        console.log('❌ Notifications not supported in this browser');
+        console.log('âŒ Notifications not supported in this browser');
         return;
     }
     
     if (status === 'granted') {
-        console.log('✅ Notifications already granted, ensuring subscription...');
+        console.log('âœ… Notifications already granted, ensuring subscription...');
         await ensurePushSubscription();
         return;
     }
     
     if (status === 'denied') {
-        console.log('❌ Notifications denied by user');
+        console.log('âŒ Notifications denied by user');
         return;
     }
 
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('📅 Days since last dismiss:', daysSinceDismiss.toFixed(2));
+    console.log('ðŸ“… Days since last dismiss:', daysSinceDismiss.toFixed(2));
     
     if (daysSinceDismiss < 7) {
-        console.log('⏳ User dismissed recently, waiting 7 days before asking again');
+        console.log('â³ User dismissed recently, waiting 7 days before asking again');
         return;
     }
 
-    console.log('✅ Showing notification prompt...');
+    console.log('âœ… Showing notification prompt...');
     setTimeout(() => {
         promptNotificationPermission();
     }, 1000);
@@ -1378,21 +1374,21 @@ async function checkAndPromptNotifications() {
 async function ensurePushSubscription() {
     try {
         if (!('serviceWorker' in navigator)) {
-            console.error('❌ Service Worker not supported');
+            console.error('âŒ Service Worker not supported');
             return null;
         }
 
         await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker ready');
+        console.log('âœ… Service Worker ready');
 
         const registration = await navigator.serviceWorker.getRegistration(baseUrl);
         
         if (!registration) {
-            console.error('❌ No Service Worker registration found');
+            console.error('âŒ No Service Worker registration found');
             return null;
         }
 
-        console.log('✅ Service Worker registration found:', registration.scope);
+        console.log('âœ… Service Worker registration found:', registration.scope);
 
         let existing = await registration.pushManager.getSubscription();
         if (!existing) {
@@ -1400,9 +1396,9 @@ async function ensurePushSubscription() {
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
-            console.log('✅ New push subscription created');
+            console.log('âœ… New push subscription created');
         } else {
-            console.log('✅ Using existing push subscription');
+            console.log('âœ… Using existing push subscription');
         }
 
         currentPushSubscription = existing;
@@ -1414,7 +1410,7 @@ async function ensurePushSubscription() {
         return existing;
 
     } catch (err) {
-        console.error('❌ ensurePushSubscription error:', err);
+        console.error('âŒ ensurePushSubscription error:', err);
         return null;
     }
 }
@@ -1432,16 +1428,16 @@ async function sendSubscriptionToBackend(email, subscription) {
         });
         
         if (!response.ok) {
-            console.error('❌ Backend subscription save failed:', response.status);
+            console.error('âŒ Backend subscription save failed:', response.status);
             return false;
         }
         
         const data = await response.json();
-        console.log('✅ Subscription saved to backend');
+        console.log('âœ… Subscription saved to backend');
         return true;
         
     } catch (error) {
-        console.error('❌ sendSubscriptionToBackend error:', error);
+        console.error('âŒ sendSubscriptionToBackend error:', error);
         return false;
     }
 }
@@ -1464,18 +1460,18 @@ function initChat() {
 
     if (settings.currentSpend >= settings.maxSpend) {
         chatInput.disabled = true;
-        chatInput.placeholder = '⚠️ Budget esaurito';
+        chatInput.placeholder = 'âš ï¸ Budget esaurito';
         micBtn.disabled = true;
         const attachBtn = document.getElementById('attach-btn');
         if (attachBtn) attachBtn.disabled = true;
-        addMessage('⚠️ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
+        addMessage('âš ï¸ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
         return;
     }
 
     const welcomeMsg = messagesContainer.querySelector('.welcome-message');
     if (welcomeMsg) {
         welcomeMsg.innerHTML = `
-            <h3>👋 Hello ${userName}!</h3>
+            <h3>ðŸ‘‹ Hello ${userName}!</h3>
             <p>I'm Lerri, your digital strategic AI assistant. How can I help you today?</p>
         `;
     }
@@ -1497,299 +1493,308 @@ function initChat() {
     let startTime;
 
     micBtn.addEventListener("click", async () => {
-    if (isProcessing) return;
+        if (isProcessing) return;
 
-    if (!mediaRecorder || mediaRecorder.state === "inactive") {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream);
-            audioChunks = [];
-            startTime = Date.now();
+        if (!mediaRecorder || mediaRecorder.state === "inactive") {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                startTime = Date.now();
 
-            chatInput.placeholder = '🔴 Recording...';
-            chatInput.disabled = true;
-            micBtn.classList.add("recording");
+                chatInput.placeholder = 'ðŸ”´ Recording...';
+                chatInput.disabled = true;
+                micBtn.classList.add("recording");
 
-            mediaRecorder.ondataavailable = (e) => {
-                audioChunks.push(e.data);
-            };
+                mediaRecorder.ondataavailable = (e) => {
+                    audioChunks.push(e.data);
+                };
 
-            mediaRecorder.onstop = async () => {
-                chatInput.placeholder = 'Ask Lerri...';
-                chatInput.disabled = false;
+                mediaRecorder.onstop = async () => {
+                    chatInput.placeholder = 'Ask Lerri...';
+                    chatInput.disabled = false;
 
-                try {
-                    const trialStatus = await checkTrialStatus();
-                    if (!trialStatus.canSendMessage) {
-                        await showSubscriptionModal();
-                        
-                        if (typeof stream !== 'undefined') {
-                            stream.getTracks().forEach(track => track.stop());
+                    try {
+                        const trialStatus = await checkTrialStatus();
+                        if (!trialStatus.canSendMessage) {
+                            await showSubscriptionModal(); // Mostra il popup di abbonamento
+                            
+                            // Spegni il microfono e ferma tutto
+                            if (typeof stream !== 'undefined') {
+                                stream.getTracks().forEach(track => track.stop());
+                            }
+                            return; // ESCE DALLA FUNZIONE QUI (non invia nulla)
                         }
+                    } catch (err) {
+                        console.error("Errore verifica trial vocale:", err);
+                    }
+
+                    setProcessingState(true);
+                                    
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const durationMs = Date.now() - startTime;
+                    const durationSeconds = Math.round(durationMs / 1000);
+
+                    const voiceCost = calculateMessageCost(true, durationSeconds);
+                    const filesCost = calculateFileCost(attachedFiles);
+                    const totalCost = voiceCost + filesCost;
+
+                    if (settings.currentSpend + totalCost > settings.maxSpend) {
+                        addMessage('âš ï¸ Budget limit reached! Increase your maximum budget to continue.', 'bot');
+                        stream.getTracks().forEach(track => track.stop());
                         return;
                     }
-                } catch (err) {
-                    console.error("Errore verifica trial vocale:", err);
-                }
 
-                setProcessingState(true);
-                                
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                const durationMs = Date.now() - startTime;
-                const durationSeconds = Math.round(durationMs / 1000);
+                    const hasFiles = attachedFiles.length > 0;
+                    const filesList = attachedFiles.map(item => item.file.name).join(', ');
 
-                const hasFiles = attachedFiles.length > 0;
-                const filesList = attachedFiles.map(item => item.file.name).join(', ');
-
-                const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
-                                    
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const base64Audio = reader.result.split(',')[1];
-                    
-                    try {
-                        const filesData = await Promise.all(
-                            attachedFiles.map(item => fileToBase64(item.file))
-                        );
-
-                        const response = await fetch(BACKEND_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                audio_data: base64Audio,
-                                email: getUserEmail(),
-                                user_id: getUserIdentifier(),
-                                files: filesData
-                            })
-                        });
+                    const transcribingMsg = addMessage(`ðŸŽ¤ Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
+                                        
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                        const base64Audio = reader.result.split(',')[1];
                         
-                        const data = await response.json();
+                        try {
+                            const filesData = await Promise.all(
+                                attachedFiles.map(item => fileToBase64(item.file))
+                            );
 
-                        if (!response.ok) {
-                            if (data && data.error) {
-                                throw new Error(data.error);
-                            } else {
-                                throw new Error(`Server error: ${response.statusText}`);
-                            }
-                        }
-
-                        const transcribedText = data.transcription || '';
-                        const aiReply = data.value || data.reply || '';
-                        
-                        transcribingMsg.remove();
-                        
-                        if (transcribedText) {
-                            const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
+                            const response = await fetch(BACKEND_URL, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    audio_data: base64Audio,
+                                    email: getUserEmail(),
+                                    user_id: getUserIdentifier(),
+                                    files: filesData
+                                })
+                            });
                             
-                            if (hasFiles) {
-                                const filesListDiv = document.createElement('div');
-                                filesListDiv.className = 'message-files-list';
-                                filesListDiv.innerHTML = attachedFiles.map(item => `
-                                    <span class="message-file-badge">
-                                        <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
-                                        ${item.file.name}
-                                    </span>
-                                `).join('');
-                                userMsgElement.appendChild(filesListDiv);
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                if (data && data.error) {
+                                    throw new Error(data.error);
+                                } else {
+                                    throw new Error(`Server error: ${response.statusText}`);
+                                }
                             }
+
+                            const transcribedText = data.transcription || '';
+                            const aiReply = data.value || data.reply || '';
+                            
+                            transcribingMsg.remove();
+                            
+                            if (transcribedText) {
+                                const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
+                                
+                                if (hasFiles) {
+                                    const filesListDiv = document.createElement('div');
+                                    filesListDiv.className = 'message-files-list';
+                                    filesListDiv.innerHTML = attachedFiles.map(item => `
+                                        <span class="message-file-badge">
+                                            <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                                            ${item.file.name}
+                                        </span>
+                                    `).join('');
+                                    userMsgElement.appendChild(filesListDiv);
+                                }
+                            }
+                            
+                            if (aiReply) {
+                                addMessage(aiReply, 'bot', true, null, true);
+                            }
+
+                            settings.stats.messages++;
+                            settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
+                            settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
+                            settings.currentSpend += totalCost;
+                            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+                            console.log(`ðŸ’° Voice cost: â‚¬${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: â‚¬${filesCost.toFixed(2)}`);
+
+                            if (data.events) events = data.events;
+                            if (data.tasks) tasks = data.tasks;
+                            if (data.stats) {
+                                settings.stats.events = data.stats.events || settings.stats.events;
+                                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+                            }
+
+                            if (data.subscription) {
+                                settings.subscription = data.subscription;
+                                console.log('âœ… Updated subscription from voice:', settings.subscription);
+                            }
+
+                            await syncToServer();
+                            await updateTrialBanner();
+                            setProcessingState(false);
+                            updateStats();
+                            updateBudgetDisplay();
+                            
+                        } catch (error) {
+                            transcribingMsg.remove();
+                            // Mostra un messaggio di errore piÃ¹ specifico.
+                            addMessage(`âŒ Si Ã¨ verificato un errore: ${error.message}. Riprova.`, 'bot');
+                            console.error("Audio error:", error);
                         }
-                        
-                        if (aiReply) {
-                            addMessage(aiReply, 'bot', true, null, true);
-                        }
-
-                        settings.stats.messages++;
-                        settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
-                        settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
-                        
-                        const toolCount = data.toolCount || 0;
-                        const voiceCost = calculateMessageCost(true, durationSeconds, toolCount);
-                        const filesCost = calculateFileCost(attachedFiles);
-                        const totalCost = voiceCost + filesCost;
-                        
-                        settings.currentSpend += totalCost;
-                        settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
-
-                        console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s, ${toolCount} tools) + Files: €${filesCost.toFixed(2)}`);
-
-                        if (data.events) events = data.events;
-                        if (data.tasks) tasks = data.tasks;
-                        if (data.stats) {
-                            settings.stats.events = data.stats.events || settings.stats.events;
-                            settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-                        }
-
-                        if (data.subscription) {
-                            settings.subscription = data.subscription;
-                            console.log('✅ Updated subscription from voice:', settings.subscription);
-                        }
-
-                        await syncToServer();
-                        await updateTrialBanner();
-                        setProcessingState(false);
-                        updateStats();
-                        updateBudgetDisplay();
-                        
-                    } catch (error) {
-                        transcribingMsg.remove();
-                        addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
-                        console.error("Audio error:", error);
-                    }
+                    };
+                    
+                    reader.readAsDataURL(audioBlob);
+                    stream.getTracks().forEach(track => track.stop());
                 };
-                
-                reader.readAsDataURL(audioBlob);
-                stream.getTracks().forEach(track => track.stop());
-            };
 
-            mediaRecorder.start();
-            
-        } catch (error) {
-            console.error("Microphone error:", error);
-            addMessage("❌ Cannot access microphone.", 'bot');
-            chatInput.disabled = false;
-            chatInput.placeholder = 'Scrivi un messaggio...';
+                mediaRecorder.start();
+                
+            } catch (error) {
+                console.error("Microphone error:", error);
+                addMessage("âŒ Cannot access microphone.", 'bot');
+                chatInput.disabled = false;
+                chatInput.placeholder = 'Scrivi un messaggio...';
+            }
+        } else {
+            mediaRecorder.stop();
+            micBtn.classList.remove("recording");
         }
-    } else {
-        mediaRecorder.stop();
-        micBtn.classList.remove("recording");
-    }
-});
+    });
     
     chatForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    if (isProcessing) return;
-    
-    const msg = chatInput.value.trim();
-    if (!msg && attachedFiles.length === 0) return;
+        e.preventDefault();
+        
+        if (isProcessing) return;
+        
+        const msg = chatInput.value.trim();
+        if (!msg && attachedFiles.length === 0) return;
 
-    const trialStatus = await checkTrialStatus();
-    
-    if (!trialStatus.canSendMessage) {
-        await showSubscriptionModal();
-        return;
-    }
-    
-    if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 5) {
-        showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
-    }
+        const trialStatus = await checkTrialStatus();
+        
+        if (!trialStatus.canSendMessage) {
+            await showSubscriptionModal();
+            return;
+        }
+        
+        if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 5) {
+            showNotification(`âš ï¸ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
+        }
 
-    setProcessingState(true);
-    const attachBtn = document.getElementById('attach-btn');
-    if (attachBtn) attachBtn.disabled = true;
-    const briefingBtn = document.getElementById('daily-briefing-btn');
-    if (briefingBtn) briefingBtn.disabled = true;
+        const textCost = calculateMessageCost(false);
+        const filesCost = calculateFileCost(attachedFiles);
+        const totalCost = textCost + filesCost;
 
-    const hasFiles = attachedFiles.length > 0;
-    const filesList = attachedFiles.map(item => item.file.name).join(', ');
-    
-    let displayMsg = msg || '🔎 Analyzing attached files';
-    if (hasFiles && msg) {
-        displayMsg = msg;
-    }
-    
-    const userMsgElement = addMessage(displayMsg, 'user', true, null, true);
-    
-    if (hasFiles) {
-        const filesListDiv = document.createElement('div');
-        filesListDiv.className = 'message-files-list';
-        filesListDiv.innerHTML = attachedFiles.map(item => `
-            <span class="message-file-badge">
-                <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
-                ${item.file.name}
-            </span>
-        `).join('');
-        userMsgElement.appendChild(filesListDiv);
-    }
-    
-    chatInput.value = '';
+        if (settings.currentSpend + totalCost > settings.maxSpend) {
+            addMessage('âš ï¸ Budget limit reached!', 'bot');
+            return;
+        }
 
-    const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
+        setProcessingState(true);
+        const attachBtn = document.getElementById('attach-btn');
+        if (attachBtn) attachBtn.disabled = true;
+        const briefingBtn = document.getElementById('daily-briefing-btn');
+        if (briefingBtn) briefingBtn.disabled = true;
 
-    try {
-        const filesData = await Promise.all(
-            attachedFiles.map(item => fileToBase64(item.file))
-        );
-
-        let optimizedPrompt = msg;
+        const hasFiles = attachedFiles.length > 0;
+        const filesList = attachedFiles.map(item => item.file.name).join(', ');
+        
+        let displayMsg = msg || 'ðŸ”Ž Analyzing attached files';
+        if (hasFiles && msg) {
+            displayMsg = msg;
+        }
+        
+        const userMsgElement = addMessage(displayMsg, 'user', true, null, true);
         
         if (hasFiles) {
-            const fileContext = `\n\n[SYSTEM: The user has attached ${attachedFiles.length} document${attachedFiles.length > 1 ? 's' : ''}: ${filesList}. Analyze the content and respond accordingly.]`;
-            optimizedPrompt = (msg || 'Please analyze the attached documents and provide a summary.') + fileContext;
+            const filesListDiv = document.createElement('div');
+            filesListDiv.className = 'message-files-list';
+            filesListDiv.innerHTML = attachedFiles.map(item => `
+                <span class="message-file-badge">
+                    <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                    ${item.file.name}
+                </span>
+            `).join('');
+            userMsgElement.appendChild(filesListDiv);
         }
+        
+        chatInput.value = '';
 
-        const response = await fetch(BACKEND_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: optimizedPrompt,
-                email: getUserEmail(),
-                user_id: getUserIdentifier(),
-                files: filesData.length > 0 ? filesData : undefined
-            })
-        });
+        const loadingMsg = addMessage('â³ Processing...', 'bot', false);
 
-        if (response.status === 401) {
-            const errorData = await response.json();
-            if (errorData.needsReauth) {
-                loadingMsg.remove();
-                addReauthButton();
-                return;
+        try {
+            const filesData = await Promise.all(
+                attachedFiles.map(item => fileToBase64(item.file))
+            );
+
+            let optimizedPrompt = msg;
+            
+            if (hasFiles) {
+                const fileContext = `\n\n[SYSTEM: The user has attached ${attachedFiles.length} document${attachedFiles.length > 1 ? 's' : ''}: ${filesList}. Analyze the content and respond accordingly.]`;
+                optimizedPrompt = (msg || 'Please analyze the attached documents and provide a summary.') + fileContext;
             }
+
+            const response = await fetch(BACKEND_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: optimizedPrompt,
+                    email: getUserEmail(),
+                    user_id: getUserIdentifier(),
+                    files: filesData.length > 0 ? filesData : undefined
+                })
+            });
+
+            if (response.status === 401) {
+                const errorData = await response.json();
+                if (errorData.needsReauth) {
+                    loadingMsg.remove();
+                    addReauthButton();
+                    return;
+                }
+            }
+
+            if (!response.ok) throw new Error(await response.text());
+            const data = await response.json();
+            const replyText = data.value || data;
+
+            loadingMsg.remove();
+            addMessage(replyText, 'bot', true, null, true);
+
+            settings.stats.messages++;
+            settings.currentSpend += totalCost;
+            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+            console.log(`ðŸ’° Text cost: â‚¬${textCost.toFixed(5)} + Files: â‚¬${filesCost.toFixed(2)}`);
+
+            if (data.events) events = data.events;
+            if (data.tasks) tasks = data.tasks;
+            if (data.stats) {
+                settings.stats.events = data.stats.events || settings.stats.events;
+                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+            }
+
+            if (data.subscription) {
+                settings.subscription = data.subscription;
+            }
+
+            await syncToServer();
+            updateStats();
+            updateBudgetDisplay();
+            await updateTrialBanner();
+
+        } catch (error) {
+            loadingMsg.remove();
+            
+            if (error.status === 401 || (error.message && error.message.includes('401'))) {
+                addReauthButton();
+            } else {
+                addMessage('âŒ Server error. Try again.', 'bot');
+                showNotification('âŒ Server error. Please try again later.', 'error');
+            }
+            
+            console.error("Chat error:", error);
+        } finally {
+            setProcessingState(false);
+            if (attachBtn) attachBtn.disabled = false;
+            if (briefingBtn) briefingBtn.disabled = false;
         }
-
-        if (!response.ok) throw new Error(await response.text());
-        const data = await response.json();
-        const replyText = data.value || data;
-
-        loadingMsg.remove();
-        addMessage(replyText, 'bot', true, null, true);
-
-        settings.stats.messages++;
-        
-        const toolCount = data.toolCount || 0;
-        const filesCost = calculateFileCost(attachedFiles);
-        const textCost = calculateMessageCost(false, 0, toolCount);
-        const totalCost = textCost + filesCost;
-        
-        settings.currentSpend += totalCost;
-        settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
-
-        console.log(`💰 Text cost: €${textCost.toFixed(5)} (${toolCount} tools) + Files: €${filesCost.toFixed(2)}`);
-
-        if (data.events) events = data.events;
-        if (data.tasks) tasks = data.tasks;
-        if (data.stats) {
-            settings.stats.events = data.stats.events || settings.stats.events;
-            settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-        }
-
-        if (data.subscription) {
-            settings.subscription = data.subscription;
-        }
-
-        await syncToServer();
-        updateStats();
-        updateBudgetDisplay();
-        await updateTrialBanner();
-
-    } catch (error) {
-        loadingMsg.remove();
-        
-        if (error.status === 401 || (error.message && error.message.includes('401'))) {
-            addReauthButton();
-        } else {
-            addMessage('❌ Server error. Try again.', 'bot');
-            showNotification('❌ Server error. Please try again later.', 'error');
-        }
-        
-        console.error("Chat error:", error);
-    } finally {
-        setProcessingState(false);
-        if (attachBtn) attachBtn.disabled = false;
-        if (briefingBtn) briefingBtn.disabled = false;
-    }
-}); 
+    });
     initDailyBriefingButton();
     updateTrialBanner();
 }
@@ -1798,7 +1803,7 @@ function handleFileSelect(event) {
     const files = Array.from(event.target.files);
     
     if (attachedFiles.length + files.length > MAX_FILES) {
-        showNotification(`❌ Maximum ${MAX_FILES} files allowed`, 'error');
+        showNotification(`âŒ Maximum ${MAX_FILES} files allowed`, 'error');
         return;
     }
 
@@ -1815,12 +1820,12 @@ function handleFileSelect(event) {
 
     for (const file of files) {
         if (!validTypes.includes(file.type)) {
-            showNotification(`❌ File type not supported: ${file.name}`, 'error');
+            showNotification(`âŒ File type not supported: ${file.name}`, 'error');
             continue;
         }
 
         if (file.size > 2 * 1024 * 1024) {
-            showNotification(`❌ File too large (max 10MB): ${file.name}`, 'error');
+            showNotification(`âŒ File too large (max 10MB): ${file.name}`, 'error');
             continue;
         }
 
@@ -1858,7 +1863,7 @@ function updateAttachedFilesDisplay() {
     
     display.innerHTML = `
         <div class="files-count-badge">
-            📎 ${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} (${totalSizeMB} MB)
+            ðŸ“Ž ${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} (${totalSizeMB} MB)
         </div>
         ${attachedFiles.map((item, index) => `
             <div class="attached-file-chip">
@@ -1867,7 +1872,7 @@ function updateAttachedFilesDisplay() {
                     <span class="file-chip-name">${item.file.name}</span>
                     <span class="file-chip-size">${(item.file.size / 1024).toFixed(1)} KB</span>
                 </div>
-                <button type="button" class="remove-file-chip-btn" onclick="removeAttachedFile(${index})">×</button>
+                <button type="button" class="remove-file-chip-btn" onclick="removeAttachedFile(${index})">Ã—</button>
             </div>
         `).join('')}
     `;
@@ -1895,21 +1900,21 @@ function updateAttachedFilesUI() {
         <div class="attached-file-tag">
             <span class="file-icon">${getFileIcon(file.type)}</span>
             <span class="file-name">${file.name}</span>
-            <button type="button" class="remove-file-btn" onclick="removeAttachedFile(${index})">×</button>
+            <button type="button" class="remove-file-btn" onclick="removeAttachedFile(${index})">Ã—</button>
         </div>
     `).join('');
 
     const filesCost = attachedFiles.length * COSTS.FILE_ATTACHMENT;
     const costTag = document.createElement('div');
     costTag.className = 'files-cost-tag';
-    costTag.textContent = `+€${filesCost.toFixed(2)}`;
+    costTag.textContent = `+â‚¬${filesCost.toFixed(2)}`;
     container.appendChild(costTag);
 }
 
 function removeAttachedFile(index) {
     attachedFiles.splice(index, 1);
     updateAttachedFilesDisplay();
-    showNotification('📎 File removed', 'info');
+    showNotification('ðŸ“Ž File removed', 'info');
 }
 
 function clearAttachedFiles() {
@@ -1918,11 +1923,11 @@ function clearAttachedFiles() {
 }
 
 function getFileIcon(mimeType) {
-    if (mimeType.startsWith('image/')) return '🖼️';
-    if (mimeType.includes('pdf')) return '📄';
-    if (mimeType.includes('word')) return '📝';
-    if (mimeType.includes('text')) return '📃';
-    return '📎';
+    if (mimeType.startsWith('image/')) return 'ðŸ–¼ï¸';
+    if (mimeType.includes('pdf')) return 'ðŸ“„';
+    if (mimeType.includes('word')) return 'ðŸ“';
+    if (mimeType.includes('text')) return 'ðŸ“ƒ';
+    return 'ðŸ“Ž';
 }
 
 function fileToBase64(file) {
@@ -1982,7 +1987,7 @@ function initCalendar() {
 
         const btn = document.getElementById('import-google-calendar');
         const originalText = btn.textContent;
-        btn.textContent = '⏳';
+        btn.textContent = 'â³';
         btn.disabled = true;
 
         try {
@@ -2015,11 +2020,11 @@ function initCalendar() {
             generateCalendar();
             updateStats();
             
-            showNotification(`✅ Imported ${data.importedCount} events from Google Calendar`, 'success');
+            showNotification(`âœ… Imported ${data.importedCount} events from Google Calendar`, 'success');
 
         } catch (error) {
             console.error('Import error:', error);
-            showNotification('❌ Failed to import events. Try again.', 'error');
+            showNotification('âŒ Failed to import events. Try again.', 'error');
         } finally {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -2085,7 +2090,7 @@ function generateCalendar() {
                         dot.className = 'event-dot';
                         
                         const match = event.title.match(/^(\p{Emoji})/u);
-                        dot.textContent = match ? match[1] : '🕒';
+                        dot.textContent = match ? match[1] : 'ðŸ•’';
                         
                         eventsPreview.appendChild(dot);
                     });
@@ -2135,7 +2140,7 @@ function getRecurringEventsForDate(dateKey) {
                 const description = cat.slots.map(s => `${s.start}-${s.end}: ${s.emoji || ''} ${s.name || ''}`).join(' | ');
 
                 recurringEvents.push({
-                    title: `📁 ${cat.name}`,
+                    title: `ðŸ“ ${cat.name}`,
                     start: firstSlot.start,
                     end: lastSlot.end,
                     description: description,
@@ -2176,7 +2181,7 @@ function getRecurringEventsForDate(dateKey) {
         schedule.sports.forEach(sport => {
             if (Array.isArray(sport.days) && sport.days.includes(dayName)) {
                 recurringEvents.push({
-                    title: `${sport.emoji || '⚽'} ${sport.name}`,
+                    title: `${sport.emoji || 'âš½'} ${sport.name}`,
                     start: sport.startTime || '00:00',
                     end: sport.endTime || '23:59',
                     description: `Sport: ${sport.name}`,
@@ -2191,7 +2196,7 @@ function getRecurringEventsForDate(dateKey) {
         schedule.hobbies.forEach(hobby => {
             if (Array.isArray(hobby.days) && hobby.days.includes(dayName)) {
                 recurringEvents.push({
-                    title: `${hobby.emoji || '🎨'} ${hobby.name}`,
+                    title: `${hobby.emoji || 'ðŸŽ¨'} ${hobby.name}`,
                     start: hobby.startTime || '10:00',
                     end: hobby.endTime || '11:00',
                     description: `Hobby: ${hobby.name}`,
@@ -2253,7 +2258,7 @@ async function saveEvent() {
     const eventIdInput = document.getElementById('day-event-id');
     const recurringCheckbox = document.getElementById('event-recurring');
     
-    const selectedEmoji = emojiSelect.value || '🕒';
+    const selectedEmoji = emojiSelect.value || 'ðŸ•’';
     const titleText = titleInput.value.trim();
     
     if (!titleText) {
@@ -2305,8 +2310,8 @@ async function saveEvent() {
     generateCalendar();
     
     const message = isRecurring 
-        ? '✅ Event saved and repeated for 5 years' 
-        : '✅ Event saved successfully';
+        ? 'âœ… Event saved and repeated for 5 years' 
+        : 'âœ… Event saved successfully';
     showNotification(message, 'success');
 }
 
@@ -2315,7 +2320,7 @@ function editEvent(index) {
     const event = events[selectedDate][index];
     
     const emojiMatch = event.title.match(/^(\p{Emoji}+)\s/u);
-    const emoji = emojiMatch ? emojiMatch[1] : '🕒';
+    const emoji = emojiMatch ? emojiMatch[1] : 'ðŸ•’';
     const titleText = emojiMatch ? event.title.substring(emoji.length).trim() : event.title;
     
     document.getElementById('event-emoji-select').value = emoji;
@@ -2338,7 +2343,7 @@ async function deleteEvent(){
 }
 
 function clearEventForm() {
-    document.getElementById('event-emoji-select').value = '🕒';
+    document.getElementById('event-emoji-select').value = 'ðŸ•’';
     document.getElementById('day-event-title').value = '';
     document.getElementById('day-event-description').value = '';
     document.getElementById('day-event-start').value = '';
@@ -2479,7 +2484,7 @@ function initSettings(){
             if (typeof openScheduleManager === 'function') {
                 openScheduleManager();
             } else {
-                showNotification('❌ Errore caricamento. Ricarica la pagina.', 'error');
+                showNotification('âŒ Errore caricamento. Ricarica la pagina.', 'error');
             }
         });
     }
@@ -2568,7 +2573,7 @@ function updateStats(){
 
 async function initServiceWorker() {
     if (!('serviceWorker' in navigator)) {
-        console.log('❌ Service Workers not supported');
+        console.log('âŒ Service Workers not supported');
         return;
     }
 
@@ -2576,17 +2581,17 @@ async function initServiceWorker() {
         const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, { 
             scope: baseUrl 
         });
-        console.log('✅ Service Worker registered:', registration.scope);
+        console.log('âœ… Service Worker registered:', registration.scope);
 
         await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker ready and active');
+        console.log('âœ… Service Worker ready and active');
 
         registration.addEventListener('updatefound', () => {
-            console.log('🔄 Service Worker update found');
+            console.log('ðŸ”„ Service Worker update found');
         });
 
         if (checkPWAStatus()) {
-            console.log('✅ PWA detected, checking notifications after delay...');
+            console.log('âœ… PWA detected, checking notifications after delay...');
             setTimeout(async () => {
                 try {
                     await checkAndPromptNotifications();
@@ -2597,7 +2602,7 @@ async function initServiceWorker() {
         }
 
     } catch (error) {
-        console.error('❌ Service Worker registration error:', error);
+        console.error('âŒ Service Worker registration error:', error);
     }
 }
 
@@ -2689,7 +2694,7 @@ function initClearChat() {
         const messagesContainer = document.getElementById('messages');
         messagesContainer.innerHTML = `
             <div class="welcome-message">
-                <h3>👋 Hello ${localStorage.getItem('user_name') || 'User'}!</h3>
+                <h3>ðŸ‘‹ Hello ${localStorage.getItem('user_name') || 'User'}!</h3>
                 <p>I'm Lerri, your digital strategic AI assistant. How can I help you today?</p>
             </div>
         `;
@@ -2709,7 +2714,7 @@ function addReauthButton() {
     reauthDiv.className = 'reauth-container';
     reauthDiv.innerHTML = `
         <div class="reauth-message">
-            <p>🔐 Your authorization has expired. Please reconnect your Google account to continue.</p>
+            <p>ðŸ” Your authorization has expired. Please reconnect your Google account to continue.</p>
             <button id="reauth-btn" class="btn-primary">Reconnect Google Account</button>
         </div>
     `;
@@ -2753,10 +2758,10 @@ async function handleReauth() {
                         const reauthContainer = document.querySelector('.reauth-container');
                         if (reauthContainer) reauthContainer.remove();
                         
-                        addMessage('✅ Authorization renewed successfully! You can continue using the assistant.', 'bot');
-                        showNotification('✅ Authorization renewed successfully!', 'success');
+                        addMessage('âœ… Authorization renewed successfully! You can continue using the assistant.', 'bot');
+                        showNotification('âœ… Authorization renewed successfully!', 'success');
                     } else {
-                        showNotification('❌ Authorization renewal failed. Try again.', 'error');
+                        showNotification('âŒ Authorization renewal failed. Try again.', 'error');
                     }
                 }
             }
@@ -2764,7 +2769,7 @@ async function handleReauth() {
         
     } catch (error) {
         console.error('Reauth error:', error);
-        showNotification('❌ Error during authorization renewal', 'error');
+        showNotification('âŒ Error during authorization renewal', 'error');
     }
 }
 
@@ -2776,7 +2781,7 @@ function checkPWAInstallation() {
 }
 
 function showPWAInstallBanner() {
-    console.log('🎨 Creating PWA banner...');
+    console.log('ðŸŽ¨ Creating PWA banner...');
     
     const existingBanner = document.getElementById('pwa-install-banner');
     if (existingBanner) {
@@ -2785,7 +2790,7 @@ function showPWAInstallBanner() {
     }
     
     if (!deferredPrompt) {
-        console.log('⚠️ No deferredPrompt available, cannot show banner');
+        console.log('âš ï¸ No deferredPrompt available, cannot show banner');
         return;
     }
 
@@ -2793,14 +2798,14 @@ function showPWAInstallBanner() {
     banner.id = 'pwa-install-banner';
     banner.innerHTML = `
         <div class="pwa-banner-content">
-            <div class="pwa-banner-icon">📱</div>
+            <div class="pwa-banner-icon">ðŸ“±</div>
             <div class="pwa-banner-text">
                 <h3>Install LerriAI App</h3>
                 <p>Get instant access and work offline!</p>
             </div>
             <div class="pwa-banner-actions">
                 <button id="pwa-install-btn" class="btn-primary">Install Now</button>
-                <button id="pwa-dismiss-btn" class="btn-secondary">×</button>
+                <button id="pwa-dismiss-btn" class="btn-secondary">Ã—</button>
             </div>
         </div>
     `;
@@ -2891,33 +2896,33 @@ function showPWAInstallBanner() {
     document.head.appendChild(style);
 
     document.body.appendChild(banner);
-    console.log('✅ PWA banner displayed');
+    console.log('âœ… PWA banner displayed');
 
     document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-        console.log('🔘 Install button clicked');
+        console.log('ðŸ”˜ Install button clicked');
         if (!deferredPrompt) {
-            console.log('⚠️ No deferredPrompt available');
+            console.log('âš ï¸ No deferredPrompt available');
             return;
         }
 
         const installBtn = document.getElementById('pwa-install-btn');
         installBtn.disabled = true;
-        installBtn.textContent = '⏳ Installing...';
+        installBtn.textContent = 'â³ Installing...';
 
         try {
             await deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log('📊 Install outcome:', outcome);
+            console.log('ðŸ“Š Install outcome:', outcome);
 
             if (outcome === 'accepted') {
                 localStorage.setItem('pwa-installed', 'true');
                 localStorage.removeItem('pwa-prompt-dismiss-time');
-                showNotification('✅ App installed successfully!', 'success');
+                showNotification('âœ… App installed successfully!', 'success');
             } else {
                 localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
             }
         } catch (error) {
-            console.error('❌ Install error:', error);
+            console.error('âŒ Install error:', error);
         } finally {
             hidePWAInstallBanner();
             deferredPrompt = null;
@@ -2925,7 +2930,7 @@ function showPWAInstallBanner() {
     });
 
     document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
-        console.log('❌ Banner dismissed by user');
+        console.log('âŒ Banner dismissed by user');
         localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
         hidePWAInstallBanner();
     });
@@ -2967,7 +2972,7 @@ function hideNotificationPrompt() {
 }
 
 function diagnoseNotificationPermission() {
-    console.log('📡 Diagnosing notification permission...');
+    console.log('ðŸ“¡ Diagnosing notification permission...');
     try {
         console.log(' - Location:', location.href);
         console.log(' - Protocol:', location.protocol);
