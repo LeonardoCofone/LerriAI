@@ -213,15 +213,14 @@ function initSmoothScroll() {
 
 
 
-// ============================================
-// COUNTER ANIMATION
-// ============================================
 function initCounterAnimation() {
     const counters = document.querySelectorAll('.stat-value[data-count]');
     if (!counters.length) return;
     
     const animateCounter = (counter) => {
-        const target = parseInt(counter.dataset.count);
+        const rawValue = counter.dataset.count;
+        const target = parseFloat(rawValue);
+        const isFloat = rawValue.includes('.');
         const duration = 2000;
         const start = 0;
         const startTime = performance.now();
@@ -230,23 +229,25 @@ function initCounterAnimation() {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             
-            // Easing function
             const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-            const current = Math.floor(start + (target - start) * easeOutQuart);
+            const current = start + (target - start) * easeOutQuart;
             
-            counter.textContent = current;
+            if (isFloat) {
+                counter.textContent = current.toFixed(1);
+            } else {
+                counter.textContent = Math.floor(current);
+            }
             
             if (progress < 1) {
                 requestAnimationFrame(updateCounter);
             } else {
-                counter.textContent = target;
+                counter.textContent = rawValue;
             }
         };
         
         requestAnimationFrame(updateCounter);
     };
     
-    // Intersection Observer for triggering animation
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {

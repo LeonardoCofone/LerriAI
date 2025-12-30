@@ -668,6 +668,11 @@ body:hover .cursor-glow {
     color: var(--text-light);
 }
 
+img, svg, video, canvas {
+    max-width: 100%;
+    height: auto;
+}
+
 /* ============================================
    FEATURES SECTION
    ============================================ */
@@ -678,7 +683,7 @@ body:hover .cursor-glow {
 
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 24px;
 }
 
@@ -1492,6 +1497,17 @@ body:hover .cursor-glow {
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
+
+    .container {
+        padding: 0 16px;
+        width: 100%;
+        overflow-x: hidden;
+    }
+
+    .navbar .container {
+        flex-wrap: wrap;
+    }
+    
     .nav-links {
         display: none;
         position: absolute;

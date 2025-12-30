@@ -566,9 +566,13 @@ let messagesArray = [];
 
 const md = window.markdownit();
 
-function calculateMessageCost(isVoice = false, durationSeconds = 0) {
-    if (!isVoice) return COSTS.TEXT_MESSAGE;
-    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
+function calculateMessageCost(isVoice = false, durationSeconds = 0, toolCount = 0) {
+    const baseCost = 0.00099;
+    const toolCost = toolCount > 1 ? (toolCount - 1) * 0.0005 : 0;
+    const totalBaseCost = baseCost + toolCost;
+    
+    if (!isVoice) return totalBaseCost;
+    return totalBaseCost + (durationSeconds * COSTS.VOICE_PER_SECOND);
 }
 
 function calculateFileCost(files) {
@@ -1493,308 +1497,299 @@ function initChat() {
     let startTime;
 
     micBtn.addEventListener("click", async () => {
-        if (isProcessing) return;
+    if (isProcessing) return;
 
-        if (!mediaRecorder || mediaRecorder.state === "inactive") {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                startTime = Date.now();
+    if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            startTime = Date.now();
 
-                chatInput.placeholder = '🔴 Recording...';
-                chatInput.disabled = true;
-                micBtn.classList.add("recording");
+            chatInput.placeholder = '🔴 Recording...';
+            chatInput.disabled = true;
+            micBtn.classList.add("recording");
 
-                mediaRecorder.ondataavailable = (e) => {
-                    audioChunks.push(e.data);
-                };
+            mediaRecorder.ondataavailable = (e) => {
+                audioChunks.push(e.data);
+            };
 
-                mediaRecorder.onstop = async () => {
-                    chatInput.placeholder = 'Ask Lerri...';
-                    chatInput.disabled = false;
+            mediaRecorder.onstop = async () => {
+                chatInput.placeholder = 'Ask Lerri...';
+                chatInput.disabled = false;
 
-                    try {
-                        const trialStatus = await checkTrialStatus();
-                        if (!trialStatus.canSendMessage) {
-                            await showSubscriptionModal(); // Mostra il popup di abbonamento
-                            
-                            // Spegni il microfono e ferma tutto
-                            if (typeof stream !== 'undefined') {
-                                stream.getTracks().forEach(track => track.stop());
-                            }
-                            return; // ESCE DALLA FUNZIONE QUI (non invia nulla)
+                try {
+                    const trialStatus = await checkTrialStatus();
+                    if (!trialStatus.canSendMessage) {
+                        await showSubscriptionModal();
+                        
+                        if (typeof stream !== 'undefined') {
+                            stream.getTracks().forEach(track => track.stop());
                         }
-                    } catch (err) {
-                        console.error("Errore verifica trial vocale:", err);
-                    }
-
-                    setProcessingState(true);
-                                    
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const durationMs = Date.now() - startTime;
-                    const durationSeconds = Math.round(durationMs / 1000);
-
-                    const voiceCost = calculateMessageCost(true, durationSeconds);
-                    const filesCost = calculateFileCost(attachedFiles);
-                    const totalCost = voiceCost + filesCost;
-
-                    if (settings.currentSpend + totalCost > settings.maxSpend) {
-                        addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
-                        stream.getTracks().forEach(track => track.stop());
                         return;
                     }
+                } catch (err) {
+                    console.error("Errore verifica trial vocale:", err);
+                }
 
-                    const hasFiles = attachedFiles.length > 0;
-                    const filesList = attachedFiles.map(item => item.file.name).join(', ');
-
-                    const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
-                                        
-                    const reader = new FileReader();
-                    reader.onloadend = async () => {
-                        const base64Audio = reader.result.split(',')[1];
-                        
-                        try {
-                            const filesData = await Promise.all(
-                                attachedFiles.map(item => fileToBase64(item.file))
-                            );
-
-                            const response = await fetch(BACKEND_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    audio_data: base64Audio,
-                                    email: getUserEmail(),
-                                    user_id: getUserIdentifier(),
-                                    files: filesData
-                                })
-                            });
-                            
-                            const data = await response.json();
-
-                            if (!response.ok) {
-                                if (data && data.error) {
-                                    throw new Error(data.error);
-                                } else {
-                                    throw new Error(`Server error: ${response.statusText}`);
-                                }
-                            }
-
-                            const transcribedText = data.transcription || '';
-                            const aiReply = data.value || data.reply || '';
-                            
-                            transcribingMsg.remove();
-                            
-                            if (transcribedText) {
-                                const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
+                setProcessingState(true);
                                 
-                                if (hasFiles) {
-                                    const filesListDiv = document.createElement('div');
-                                    filesListDiv.className = 'message-files-list';
-                                    filesListDiv.innerHTML = attachedFiles.map(item => `
-                                        <span class="message-file-badge">
-                                            <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
-                                            ${item.file.name}
-                                        </span>
-                                    `).join('');
-                                    userMsgElement.appendChild(filesListDiv);
-                                }
-                            }
-                            
-                            if (aiReply) {
-                                addMessage(aiReply, 'bot', true, null, true);
-                            }
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const durationMs = Date.now() - startTime;
+                const durationSeconds = Math.round(durationMs / 1000);
 
-                            settings.stats.messages++;
-                            settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
-                            settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
-                            settings.currentSpend += totalCost;
-                            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+                const hasFiles = attachedFiles.length > 0;
+                const filesList = attachedFiles.map(item => item.file.name).join(', ');
 
-                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
-
-                            if (data.events) events = data.events;
-                            if (data.tasks) tasks = data.tasks;
-                            if (data.stats) {
-                                settings.stats.events = data.stats.events || settings.stats.events;
-                                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-                            }
-
-                            if (data.subscription) {
-                                settings.subscription = data.subscription;
-                                console.log('✅ Updated subscription from voice:', settings.subscription);
-                            }
-
-                            await syncToServer();
-                            await updateTrialBanner();
-                            setProcessingState(false);
-                            updateStats();
-                            updateBudgetDisplay();
-                            
-                        } catch (error) {
-                            transcribingMsg.remove();
-                            // Mostra un messaggio di errore più specifico.
-                            addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
-                            console.error("Audio error:", error);
-                        }
-                    };
+                const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
+                                    
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result.split(',')[1];
                     
-                    reader.readAsDataURL(audioBlob);
-                    stream.getTracks().forEach(track => track.stop());
-                };
+                    try {
+                        const filesData = await Promise.all(
+                            attachedFiles.map(item => fileToBase64(item.file))
+                        );
 
-                mediaRecorder.start();
+                        const response = await fetch(BACKEND_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                audio_data: base64Audio,
+                                email: getUserEmail(),
+                                user_id: getUserIdentifier(),
+                                files: filesData
+                            })
+                        });
+                        
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            if (data && data.error) {
+                                throw new Error(data.error);
+                            } else {
+                                throw new Error(`Server error: ${response.statusText}`);
+                            }
+                        }
+
+                        const transcribedText = data.transcription || '';
+                        const aiReply = data.value || data.reply || '';
+                        
+                        transcribingMsg.remove();
+                        
+                        if (transcribedText) {
+                            const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
+                            
+                            if (hasFiles) {
+                                const filesListDiv = document.createElement('div');
+                                filesListDiv.className = 'message-files-list';
+                                filesListDiv.innerHTML = attachedFiles.map(item => `
+                                    <span class="message-file-badge">
+                                        <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                                        ${item.file.name}
+                                    </span>
+                                `).join('');
+                                userMsgElement.appendChild(filesListDiv);
+                            }
+                        }
+                        
+                        if (aiReply) {
+                            addMessage(aiReply, 'bot', true, null, true);
+                        }
+
+                        settings.stats.messages++;
+                        settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
+                        settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
+                        
+                        const toolCount = data.toolCount || 0;
+                        const voiceCost = calculateMessageCost(true, durationSeconds, toolCount);
+                        const filesCost = calculateFileCost(attachedFiles);
+                        const totalCost = voiceCost + filesCost;
+                        
+                        settings.currentSpend += totalCost;
+                        settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+                        console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s, ${toolCount} tools) + Files: €${filesCost.toFixed(2)}`);
+
+                        if (data.events) events = data.events;
+                        if (data.tasks) tasks = data.tasks;
+                        if (data.stats) {
+                            settings.stats.events = data.stats.events || settings.stats.events;
+                            settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+                        }
+
+                        if (data.subscription) {
+                            settings.subscription = data.subscription;
+                            console.log('✅ Updated subscription from voice:', settings.subscription);
+                        }
+
+                        await syncToServer();
+                        await updateTrialBanner();
+                        setProcessingState(false);
+                        updateStats();
+                        updateBudgetDisplay();
+                        
+                    } catch (error) {
+                        transcribingMsg.remove();
+                        addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
+                        console.error("Audio error:", error);
+                    }
+                };
                 
-            } catch (error) {
-                console.error("Microphone error:", error);
-                addMessage("❌ Cannot access microphone.", 'bot');
-                chatInput.disabled = false;
-                chatInput.placeholder = 'Scrivi un messaggio...';
-            }
-        } else {
-            mediaRecorder.stop();
-            micBtn.classList.remove("recording");
+                reader.readAsDataURL(audioBlob);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            
+        } catch (error) {
+            console.error("Microphone error:", error);
+            addMessage("❌ Cannot access microphone.", 'bot');
+            chatInput.disabled = false;
+            chatInput.placeholder = 'Scrivi un messaggio...';
         }
-    });
+    } else {
+        mediaRecorder.stop();
+        micBtn.classList.remove("recording");
+    }
+});
     
     chatForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        if (isProcessing) return;
-        
-        const msg = chatInput.value.trim();
-        if (!msg && attachedFiles.length === 0) return;
+    e.preventDefault();
+    
+    if (isProcessing) return;
+    
+    const msg = chatInput.value.trim();
+    if (!msg && attachedFiles.length === 0) return;
 
-        const trialStatus = await checkTrialStatus();
-        
-        if (!trialStatus.canSendMessage) {
-            await showSubscriptionModal();
-            return;
-        }
-        
-        if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 5) {
-            showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
-        }
+    const trialStatus = await checkTrialStatus();
+    
+    if (!trialStatus.canSendMessage) {
+        await showSubscriptionModal();
+        return;
+    }
+    
+    if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 5) {
+        showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
+    }
 
-        const textCost = calculateMessageCost(false);
-        const filesCost = calculateFileCost(attachedFiles);
-        const totalCost = textCost + filesCost;
+    setProcessingState(true);
+    const attachBtn = document.getElementById('attach-btn');
+    if (attachBtn) attachBtn.disabled = true;
+    const briefingBtn = document.getElementById('daily-briefing-btn');
+    if (briefingBtn) briefingBtn.disabled = true;
 
-        if (settings.currentSpend + totalCost > settings.maxSpend) {
-            addMessage('⚠️ Budget limit reached!', 'bot');
-            return;
-        }
+    const hasFiles = attachedFiles.length > 0;
+    const filesList = attachedFiles.map(item => item.file.name).join(', ');
+    
+    let displayMsg = msg || '🔎 Analyzing attached files';
+    if (hasFiles && msg) {
+        displayMsg = msg;
+    }
+    
+    const userMsgElement = addMessage(displayMsg, 'user', true, null, true);
+    
+    if (hasFiles) {
+        const filesListDiv = document.createElement('div');
+        filesListDiv.className = 'message-files-list';
+        filesListDiv.innerHTML = attachedFiles.map(item => `
+            <span class="message-file-badge">
+                <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
+                ${item.file.name}
+            </span>
+        `).join('');
+        userMsgElement.appendChild(filesListDiv);
+    }
+    
+    chatInput.value = '';
 
-        setProcessingState(true);
-        const attachBtn = document.getElementById('attach-btn');
-        if (attachBtn) attachBtn.disabled = true;
-        const briefingBtn = document.getElementById('daily-briefing-btn');
-        if (briefingBtn) briefingBtn.disabled = true;
+    const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
 
-        const hasFiles = attachedFiles.length > 0;
-        const filesList = attachedFiles.map(item => item.file.name).join(', ');
-        
-        let displayMsg = msg || '🔎 Analyzing attached files';
-        if (hasFiles && msg) {
-            displayMsg = msg;
-        }
-        
-        const userMsgElement = addMessage(displayMsg, 'user', true, null, true);
+    try {
+        const filesData = await Promise.all(
+            attachedFiles.map(item => fileToBase64(item.file))
+        );
+
+        let optimizedPrompt = msg;
         
         if (hasFiles) {
-            const filesListDiv = document.createElement('div');
-            filesListDiv.className = 'message-files-list';
-            filesListDiv.innerHTML = attachedFiles.map(item => `
-                <span class="message-file-badge">
-                    <span class="file-chip-icon">${getFileIcon(item.file.type)}</span>
-                    ${item.file.name}
-                </span>
-            `).join('');
-            userMsgElement.appendChild(filesListDiv);
+            const fileContext = `\n\n[SYSTEM: The user has attached ${attachedFiles.length} document${attachedFiles.length > 1 ? 's' : ''}: ${filesList}. Analyze the content and respond accordingly.]`;
+            optimizedPrompt = (msg || 'Please analyze the attached documents and provide a summary.') + fileContext;
+        }
+
+        const response = await fetch(BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message: optimizedPrompt,
+                email: getUserEmail(),
+                user_id: getUserIdentifier(),
+                files: filesData.length > 0 ? filesData : undefined
+            })
+        });
+
+        if (response.status === 401) {
+            const errorData = await response.json();
+            if (errorData.needsReauth) {
+                loadingMsg.remove();
+                addReauthButton();
+                return;
+            }
+        }
+
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json();
+        const replyText = data.value || data;
+
+        loadingMsg.remove();
+        addMessage(replyText, 'bot', true, null, true);
+
+        settings.stats.messages++;
+        
+        const toolCount = data.toolCount || 0;
+        const filesCost = calculateFileCost(attachedFiles);
+        const textCost = calculateMessageCost(false, 0, toolCount);
+        const totalCost = textCost + filesCost;
+        
+        settings.currentSpend += totalCost;
+        settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+        console.log(`💰 Text cost: €${textCost.toFixed(5)} (${toolCount} tools) + Files: €${filesCost.toFixed(2)}`);
+
+        if (data.events) events = data.events;
+        if (data.tasks) tasks = data.tasks;
+        if (data.stats) {
+            settings.stats.events = data.stats.events || settings.stats.events;
+            settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+        }
+
+        if (data.subscription) {
+            settings.subscription = data.subscription;
+        }
+
+        await syncToServer();
+        updateStats();
+        updateBudgetDisplay();
+        await updateTrialBanner();
+
+    } catch (error) {
+        loadingMsg.remove();
+        
+        if (error.status === 401 || (error.message && error.message.includes('401'))) {
+            addReauthButton();
+        } else {
+            addMessage('❌ Server error. Try again.', 'bot');
+            showNotification('❌ Server error. Please try again later.', 'error');
         }
         
-        chatInput.value = '';
-
-        const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
-
-        try {
-            const filesData = await Promise.all(
-                attachedFiles.map(item => fileToBase64(item.file))
-            );
-
-            let optimizedPrompt = msg;
-            
-            if (hasFiles) {
-                const fileContext = `\n\n[SYSTEM: The user has attached ${attachedFiles.length} document${attachedFiles.length > 1 ? 's' : ''}: ${filesList}. Analyze the content and respond accordingly.]`;
-                optimizedPrompt = (msg || 'Please analyze the attached documents and provide a summary.') + fileContext;
-            }
-
-            const response = await fetch(BACKEND_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: optimizedPrompt,
-                    email: getUserEmail(),
-                    user_id: getUserIdentifier(),
-                    files: filesData.length > 0 ? filesData : undefined
-                })
-            });
-
-            if (response.status === 401) {
-                const errorData = await response.json();
-                if (errorData.needsReauth) {
-                    loadingMsg.remove();
-                    addReauthButton();
-                    return;
-                }
-            }
-
-            if (!response.ok) throw new Error(await response.text());
-            const data = await response.json();
-            const replyText = data.value || data;
-
-            loadingMsg.remove();
-            addMessage(replyText, 'bot', true, null, true);
-
-            settings.stats.messages++;
-            settings.currentSpend += totalCost;
-            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
-
-            console.log(`💰 Text cost: €${textCost.toFixed(5)} + Files: €${filesCost.toFixed(2)}`);
-
-            if (data.events) events = data.events;
-            if (data.tasks) tasks = data.tasks;
-            if (data.stats) {
-                settings.stats.events = data.stats.events || settings.stats.events;
-                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-            }
-
-            if (data.subscription) {
-                settings.subscription = data.subscription;
-            }
-
-            await syncToServer();
-            updateStats();
-            updateBudgetDisplay();
-            await updateTrialBanner();
-
-        } catch (error) {
-            loadingMsg.remove();
-            
-            if (error.status === 401 || (error.message && error.message.includes('401'))) {
-                addReauthButton();
-            } else {
-                addMessage('❌ Server error. Try again.', 'bot');
-                showNotification('❌ Server error. Please try again later.', 'error');
-            }
-            
-            console.error("Chat error:", error);
-        } finally {
-            setProcessingState(false);
-            if (attachBtn) attachBtn.disabled = false;
-            if (briefingBtn) briefingBtn.disabled = false;
-        }
-    });
+        console.error("Chat error:", error);
+    } finally {
+        setProcessingState(false);
+        if (attachBtn) attachBtn.disabled = false;
+        if (briefingBtn) briefingBtn.disabled = false;
+    }
+}); 
     initDailyBriefingButton();
     updateTrialBanner();
 }
