@@ -5,14 +5,14 @@ const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleuser
 const LANGUAGES = {
     "it": "Italiano",
     "en": "English",
-    "es": "EspaÃ±ol",
-    "fr": "FranÃ§ais",
+    "es": "Español",
+    "fr": "Français",
     "de": "Deutsch",
-    "pt": "PortuguÃªs",
-    "ru": "Ð ÑƒÑÑÐºÐ¸Ð¹",
-    "ja": "æ—¥æœ¬èªž",
-    "zh": "ä¸­æ–‡",
-    "ar": "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©"
+    "pt": "Português",
+    "ru": "Русский",
+    "ja": "日本語",
+    "zh": "中文",
+    "ar": "العربية"
 };
 
 const baseUrl = '/LerriAI_dev/pwa/';
@@ -21,12 +21,12 @@ const VAPID_PUBLIC_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjg
 let isProcessing = false;
 
 if ('serviceWorker' in navigator) {
-    console.log('ðŸ“¡ Registering service worker...');
-    console.log('ðŸŒ Service worker URL:', `${baseUrl}sw.js`);
+    console.log('📡 Registering service worker...');
+    console.log('🌐 Service worker URL:', `${baseUrl}sw.js`);
     
     navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl })
-        .then(reg => console.log('âœ… SW registered with scope:', reg.scope))
-        .catch(err => console.error('âŒ SW registration failed:', err));
+        .then(reg => console.log('✅ SW registered with scope:', reg.scope))
+        .catch(err => console.error('❌ SW registration failed:', err));
 }
 
 
@@ -43,11 +43,11 @@ function loadPayPalSDK() {
         script.async = true;
         script.onload = () => {
             window.paypalLoaded = true;
-            console.log('âœ… PayPal SDK loaded');
+            console.log('✅ PayPal SDK loaded');
             resolve();
         };
         script.onerror = () => {
-            console.error('âŒ PayPal SDK load failed');
+            console.error('❌ PayPal SDK load failed');
             reject(new Error('PayPal SDK failed to load'));
         };
         document.body.appendChild(script);
@@ -154,7 +154,7 @@ async function initNotifications() {
     if ('serviceWorker' in navigator && 'Notification' in window) {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            console.log('âœ… Notifications enabled');
+            console.log('✅ Notifications enabled');
             const sub = await ensurePushSubscription();
             if (sub) {
                 await sendSubscriptionToBackend(getUserEmail(), sub);
@@ -183,7 +183,7 @@ function initDailyBriefingButton() {
     briefingBtn.id = 'daily-briefing-btn';
     briefingBtn.className = 'btn-icon';
     briefingBtn.setAttribute('aria-label', 'Daily Briefing');
-    briefingBtn.innerHTML = 'ðŸ“Š';
+    briefingBtn.innerHTML = '📊';
     briefingBtn.title = 'Get Daily Briefing';
 
     const infoWrapper = document.createElement('div');
@@ -192,7 +192,7 @@ function initDailyBriefingButton() {
     infoWrapper.style.alignItems = 'center';
 
     const infoIcon = document.createElement('span');
-    infoIcon.innerHTML = 'â„¹ï¸';
+    infoIcon.innerHTML = 'ℹ️';
     infoIcon.style.cursor = 'pointer';
     infoIcon.style.fontSize = '1.2rem';
 
@@ -260,25 +260,25 @@ function initDailyBriefingButton() {
 
         const email = getUserEmail();
         if (!email) {
-            showNotification('âŒ Please login first', 'error');
+            showNotification('❌ Please login first', 'error');
             return;
         }
 
         const briefingCost = COSTS.TEXT_MESSAGE;
 
         if (settings.currentSpend + briefingCost > settings.maxSpend) {
-            showNotification('âš ï¸ Budget limit reached! Increase your maximum budget to continue.', 'error');
-            addMessage('âš ï¸ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
+            showNotification('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'error');
+            addMessage('⚠️ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
             return;
         }
 
         setProcessingState(true);
 
         briefingBtn.disabled = true;
-        briefingBtn.innerHTML = 'â³';
+        briefingBtn.innerHTML = '⏳';
 
         try {
-            const loadingMsg = addMessage('ðŸ“Š Generating your daily briefing...', 'bot', false);
+            const loadingMsg = addMessage('📊 Generating your daily briefing...', 'bot', false);
 
             const response = await fetch('https://api.lerriai.com/api/trigger-briefing', {
                 method: 'POST',
@@ -308,21 +308,21 @@ function initDailyBriefingButton() {
 
             if (data.subscription) {
                 settings.subscription = data.subscription;
-                console.log('âœ… Updated subscription from briefing:', settings.subscription);
+                console.log('✅ Updated subscription from briefing:', settings.subscription);
             }
 
-            console.log(`ðŸ’° Briefing cost: â‚¬${briefingCost.toFixed(5)}`);
+            console.log(`💰 Briefing cost: €${briefingCost.toFixed(5)}`);
 
             await syncToServer();
             await updateTrialBanner();
             updateStats();
             updateBudgetDisplay();
 
-            showNotification('âœ… Daily briefing generated!', 'success');
+            showNotification('✅ Daily briefing generated!', 'success');
 
         } catch (error) {
             console.error('Briefing error:', error);
-            showNotification('âŒ Failed to generate briefing. Try again.', 'error');
+            showNotification('❌ Failed to generate briefing. Try again.', 'error');
         } finally { 
             setProcessingState(false);
         }
@@ -364,7 +364,7 @@ async function updateTrialBanner() {
             border-radius: 8px;
             margin-bottom: 15px;
         `;
-        trialBanner.textContent = `ðŸŽ Free Trial: ${status.messagesRemaining} messages remaining`;
+        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
     }
 }
@@ -378,25 +378,25 @@ async function showSubscriptionModal() {
     modal.innerHTML = `
         <div class="subscription-modal-overlay">
             <div class="subscription-modal-content">
-                <h2 class="premium-title">ðŸš€ Upgrade to Premium</h2>
+                <h2 class="premium-title">🚀 Upgrade to Premium</h2>
                 <p class="premium-subtitle">Unlock unlimited AI power</p>
                 
                 <div class="subscription-benefits">
-                    <p>âœ¨ Unlimited messages</p>
-                    <p>ðŸ¤– Full AI assistant access</p>
-                    <p>ðŸ“… Advanced calendar features</p>
-                    <p>ðŸ“§ Gmail integration</p>
-                    <p>â˜ï¸ Google Drive access</p>
+                    <p>✨ Unlimited messages</p>
+                    <p>🤖 Full AI assistant access</p>
+                    <p>📅 Advanced calendar features</p>
+                    <p>📧 Gmail integration</p>
+                    <p>☁️ Google Drive access</p>
                 </div>
                 
                 <div class="premium-divider"></div>
                 
                 <p class="subscription-price">
-                    â‚¬2.99 <span>/ month + usage</span>
+                    €2.99 <span>/ month + usage</span>
                 </p>
                 <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px;">
                     Base subscription + pay only for what you use<br>
-                    (typically under â‚¬1/month for usage)
+                    (typically under €1/month for usage)
                 </p>
                 
                 <div id="payment-element"></div>
@@ -431,7 +431,7 @@ async function showSubscriptionModal() {
         document.getElementById('submit-payment').addEventListener('click', async () => {
             const submitBtn = document.getElementById('submit-payment');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'â³ Processing...';
+            submitBtn.textContent = '⏳ Processing...';
             
             const { error } = await stripe.confirmPayment({
                 elements,
@@ -441,7 +441,7 @@ async function showSubscriptionModal() {
             });
             
             if (error) {
-                showNotification('âŒ Payment failed: ' + error.message, 'error');
+                showNotification('❌ Payment failed: ' + error.message, 'error');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Subscribe Now';
             }
@@ -453,7 +453,7 @@ async function showSubscriptionModal() {
         
     } catch (error) {
         console.error('Subscription modal error:', error);
-        showNotification('âŒ Failed to load payment form', 'error');
+        showNotification('❌ Failed to load payment form', 'error');
         modal.remove();
     }
 }
@@ -461,7 +461,7 @@ async function showSubscriptionModal() {
 async function handleSubscriptionSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('subscription') === 'success') {
-        showNotification('âœ… Subscription activated successfully!', 'success');
+        showNotification('✅ Subscription activated successfully!', 'success');
         window.history.replaceState({}, document.title, window.location.pathname);
         await loadDataFromServer();
         await updateTrialBanner();
@@ -652,9 +652,9 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
     }
 
     if (sender === 'bot' && 
-        text !== "â³ Processing..." && 
-        !text.startsWith('ðŸ“Š Generating') &&
-        !text.startsWith('â³')) {
+        text !== "⏳ Processing..." && 
+        !text.startsWith('📊 Generating') &&
+        !text.startsWith('⏳')) {
         
         const preview = text
             .replace(/[*_~`#\[\]]/g, '')
@@ -675,13 +675,13 @@ function addMessage(text, sender, save = true, audioBlob = null, skipSync = fals
 
 async function syncToServer() {
     if (isSyncing) {
-        console.log('â³ Sync already in progress, skipping...');
+        console.log('⏳ Sync already in progress, skipping...');
         return;
     }
     
     const user = getUserEmail();
     if (!user) {
-        console.log('âŒ No user email, cannot sync');
+        console.log('❌ No user email, cannot sync');
         return;
     }
 
@@ -714,12 +714,12 @@ async function syncToServer() {
         });
         
         if (response.ok) {
-            console.log("âœ… Sync completed successfully");
+            console.log("✅ Sync completed successfully");
         } else {
-            console.error("âŒ Sync failed:", response.status);
+            console.error("❌ Sync failed:", response.status);
         }
     } catch (err) {
-        console.error("âŒ Sync error:", err);
+        console.error("❌ Sync error:", err);
     } finally {
         isSyncing = false;
     }
@@ -743,11 +743,11 @@ async function loadDataFromServer() {
         
         const data = await res.json();
 
-        console.log('ðŸ“¥ Data loaded from server:', data);
+        console.log('📥 Data loaded from server:', data);
 
         if (data.pushSubscription) {
             currentPushSubscription = data.pushSubscription;
-            console.log('âœ… pushSubscription restored from server');
+            console.log('✅ pushSubscription restored from server');
         }
 
         if (data.events !== undefined) {
@@ -804,7 +804,7 @@ async function loadDataFromServer() {
             window.paypalLoaded = true;
         }
 
-        console.log('ðŸ•’ Schedule loaded:', {
+        console.log('🕒 Schedule loaded:', {
             slots: settings.schedule.slots.length,
             categories: settings.schedule.categories.length,
             sports: settings.schedule.sports.length,
@@ -836,10 +836,10 @@ async function loadDataFromServer() {
             updateBudgetDisplay();
         }
 
-        console.log("âœ… Data loaded successfully from server");
+        console.log("✅ Data loaded successfully from server");
 
     } catch (err) {
-        console.error("âŒ Load error:", err);
+        console.error("❌ Load error:", err);
     } finally {
         isLoading = false;
     }
@@ -875,15 +875,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     initLogout();
     initClearChat();
     
-    console.log('âœ… App initialized, checking PWA status...');
+    console.log('✅ App initialized, checking PWA status...');
     
     if (checkPWAStatus()) {
-        console.log('âœ… PWA is installed, scheduling notification check...');
+        console.log('✅ PWA is installed, scheduling notification check...');
         setTimeout(() => {
             checkAndPromptNotifications().catch(err => console.error('Notification prompt error:', err));
         }, 3000);
     } else {
-        console.log('â„¹ï¸ PWA not installed yet, waiting for installation...');
+        console.log('ℹ️ PWA not installed yet, waiting for installation...');
     }
 });
 
@@ -955,22 +955,22 @@ window.testPWA.reset = () => {
     localStorage.removeItem('pwa-installed');
     localStorage.removeItem('pwa-prompt-dismiss-time');
     localStorage.removeItem('notification-prompt-dismiss-time');
-    console.log('âœ… Reset flags - ora ricarica la pagina (F5)');
+    console.log('✅ Reset flags - ora ricarica la pagina (F5)');
 };
 
 window.testPWA.showBanner = () => {
     if (deferredPrompt) {
         showPWAInstallBanner();
-        console.log('âœ… PWA banner shown');
+        console.log('✅ PWA banner shown');
     } else {
-        console.log('âš ï¸ No deferredPrompt');
+        console.log('⚠️ No deferredPrompt');
     }
 };
 
 window.testPWA.forceNotifications = () => {
     localStorage.removeItem('notification-prompt-dismiss-time');
     showNotificationModal();
-    console.log('âœ… Notification modal forced');
+    console.log('✅ Notification modal forced');
 };
 
 window.testPWA.status = () => {
@@ -1004,7 +1004,7 @@ function initPWAInstallPrompt() {
         deferredPrompt = e;
         
         setTimeout(() => {
-            console.log('ðŸ“¢ Showing PWA banner...');
+            console.log('📢 Showing PWA banner...');
             showPWAInstallBanner();
         }, 1000);
     });
@@ -1022,9 +1022,9 @@ function initPWAInstallPrompt() {
     
     setTimeout(() => {
         if (deferredPrompt) {
-            console.log('âœ… deferredPrompt is available');
+            console.log('✅ deferredPrompt is available');
         } else {
-            console.log('âš ï¸ deferredPrompt not available');
+            console.log('⚠️ deferredPrompt not available');
         }
     }, 3000);
 }
@@ -1041,7 +1041,7 @@ function checkNotificationStatus() {
 
 function checkNotificationPermission() {
     if (!('Notification' in window)) {
-        console.log('âŒ Notifications not supported');
+        console.log('❌ Notifications not supported');
         return 'unsupported';
     }
     return Notification.permission;
@@ -1056,7 +1056,7 @@ function promptNotificationPermission() {
         return;
     }
 
-    console.log('ðŸ”” Showing notification modal');
+    console.log('🔔 Showing notification modal');
     showNotificationModal();
 }
 
@@ -1064,7 +1064,7 @@ function promptNotificationPermission() {
 
 function showNotificationModal() {
     if (document.getElementById('lerri-notification-modal')) {
-        console.log('âš ï¸ Modal already exists, skipping');
+        console.log('⚠️ Modal already exists, skipping');
         return;
     }
 
@@ -1083,7 +1083,7 @@ function showNotificationModal() {
 
     container.innerHTML = `
         <div style="background:#fff;border-radius:16px;padding:30px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-            <div style="font-size:48px;margin-bottom:16px">ðŸ””</div>
+            <div style="font-size:48px;margin-bottom:16px">🔔</div>
             <h3 style="margin:0 0 12px;font-size:1.5rem;color:#1a202c">Enable Notifications</h3>
             <p style="color:#718096;margin:0 0 20px;line-height:1.6">Stay updated with daily briefings, task reminders, and important alerts.</p>
             <div style="display:flex;gap:12px;justify-content:center">
@@ -1109,37 +1109,37 @@ function showNotificationModal() {
     });
 
     document.getElementById('lerri-notif-enable').addEventListener('click', async () => {
-        console.log('-----ðŸ”” Enable clicked');
+        console.log('-----🔔 Enable clicked');
 
         const enableBtn = document.getElementById('lerri-notif-enable');
         enableBtn.disabled = true;
-        enableBtn.textContent = 'â³ Loading...';
+        enableBtn.textContent = '⏳ Loading...';
 
         try {
-            console.log('-----â³ Requesting notification permission');
+            console.log('-----⏳ Requesting notification permission');
             const permission = await Notification.requestPermission();
-            console.log('-----ðŸ“Š Permission result:', permission);
+            console.log('-----📊 Permission result:', permission);
 
             if (permission === 'granted') {
-                console.log('-----âœ… Permission granted');
+                console.log('-----✅ Permission granted');
 
-                console.log('-----â³ Waiting for service worker ready');
+                console.log('-----⏳ Waiting for service worker ready');
                 await navigator.serviceWorker.ready;
-                console.log('-----âœ… Service worker ready');
+                console.log('-----✅ Service worker ready');
                 
-                console.log('-----â³ Getting registration with baseUrl:', baseUrl);
+                console.log('-----⏳ Getting registration with baseUrl:', baseUrl);
                 const registration = await navigator.serviceWorker.getRegistration(baseUrl);
-                console.log('-----ðŸ“‹ Registration result:', registration);
+                console.log('-----📋 Registration result:', registration);
                 
                 if (!registration) {
-                    console.error('-----âŒ No registration found');
+                    console.error('-----❌ No registration found');
                     throw new Error('Service worker not registered');
                 }
                 
-                console.log('-----âœ… Service Worker found:', registration.scope);
+                console.log('-----✅ Service Worker found:', registration.scope);
 
-                console.log('-----â³ Subscribing to push notifications');
-                console.log('-----ðŸ”‘ VAPID key:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
+                console.log('-----⏳ Subscribing to push notifications');
+                console.log('-----🔑 VAPID key:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
                 
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
@@ -1147,41 +1147,41 @@ function showNotificationModal() {
                 });
 
                 currentPushSubscription = subscription;
-                console.log('-----ðŸ“© Push subscription created successfully');
-                console.log('-----ðŸ“© Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
+                console.log('-----📩 Push subscription created successfully');
+                console.log('-----📩 Subscription endpoint:', subscription.endpoint.substring(0, 50) + '...');
 
                 const email = getUserEmail();
-                console.log('-----ðŸ“§ User email:', email);
+                console.log('-----📧 User email:', email);
 
                 if (email) {
-                    console.log('-----â³ Sending subscription to backend');
+                    console.log('-----⏳ Sending subscription to backend');
                     const saved = await sendSubscriptionToBackend(email, subscription);
-                    console.log('-----âœ… Backend save result:', saved);
+                    console.log('-----✅ Backend save result:', saved);
 
-                    console.log('-----â³ Syncing with server');
+                    console.log('-----⏳ Syncing with server');
                     await syncToServer();
-                    console.log('-----âœ… Sync completed');
+                    console.log('-----✅ Sync completed');
                 }
 
                 cleanup();
-                showNotification('âœ… Notifications enabled!', 'success');
-                console.log('-----ðŸŽ‰ Flow completed successfully');
+                showNotification('✅ Notifications enabled!', 'success');
+                console.log('-----🎉 Flow completed successfully');
 
             } else if (permission === 'denied') {
-                console.warn('-----ðŸš« Permission denied');
+                console.warn('-----🚫 Permission denied');
                 localStorage.setItem('notification-prompt-dismiss-time', Date.now().toString());
                 cleanup();
                 showNotificationDeniedInstructions();
             } else {
-                console.log('-----â„¹ï¸ Permission dismissed/default');
+                console.log('-----ℹ️ Permission dismissed/default');
                 cleanup();
             }
         } catch (err) {
-            console.error('-----âŒ Full error object:', err);
-            console.error('-----âŒ Error message:', err.message);
-            console.error('-----âŒ Error stack:', err.stack);
+            console.error('-----❌ Full error object:', err);
+            console.error('-----❌ Error message:', err.message);
+            console.error('-----❌ Error stack:', err.stack);
             cleanup();
-            showNotification('âš ï¸ Notification setup error: ' + err.message, 'error');
+            showNotification('⚠️ Notification setup error: ' + err.message, 'error');
         }
     });
 }
@@ -1200,9 +1200,9 @@ function showNotificationDeniedInstructions() {
     const instructions = `Notifications are blocked for this site.
 
 To enable them:
-- Chrome / Edge: Click the lock icon (ðŸ”’) next to the address bar â†’ Site settings â†’ Notifications â†’ Allow.
+- Chrome / Edge: Click the lock icon (🔒) next to the address bar → Site settings → Notifications → Allow.
 - Alternatively open: chrome://settings/content/notifications and remove this site from the blocked list.
-- Firefox: Click the info icon (i) â†’ Permissions â†’ Notifications â†’ Allow.
+- Firefox: Click the info icon (i) → Permissions → Notifications → Allow.
 - You can also test in an Incognito/Private window or another browser profile.
 - Or just ask Lerri how to do it! ;)
 
@@ -1297,9 +1297,9 @@ After changing the setting, reload this page and click Enable.`;
     document.getElementById('lerri-copy-notif-instr').addEventListener('click', async () => {
         try {
             await navigator.clipboard.writeText(instructions);
-            showNotification('ðŸ“‹ Instructions copied to clipboard', 'success');
+            showNotification('📋 Instructions copied to clipboard', 'success');
         } catch (err) {
-            showNotification('âš ï¸ Unable to copy â€” please select and copy manually', 'error');
+            showNotification('⚠️ Unable to copy — please select and copy manually', 'error');
         }
     });
 
@@ -1318,54 +1318,54 @@ async function checkAndPromptPWA() {
     const dismissTime = localStorage.getItem('pwa-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('ðŸ“… Days since dismiss:', daysSinceDismiss);
+    console.log('📅 Days since dismiss:', daysSinceDismiss);
     
     if (daysSinceDismiss < 7) {
-        console.log('â³ PWA prompt dismissed recently, waiting...');
+        console.log('⏳ PWA prompt dismissed recently, waiting...');
         return;
     }
 
     if (deferredPrompt) {
-        console.log('âœ… Showing PWA banner...');
+        console.log('✅ Showing PWA banner...');
         showPWAInstallBanner();
     } else {
-        console.log('âš ï¸ deferredPrompt not available yet');
+        console.log('⚠️ deferredPrompt not available yet');
     }
 }
 
 async function checkAndPromptNotifications() {
-    console.log('ðŸ”” Checking notification status...');
+    console.log('🔔 Checking notification status...');
     
     const status = checkNotificationStatus();
-    console.log('ðŸ“Š Notification permission:', status);
+    console.log('📊 Notification permission:', status);
     
     if (status === 'unsupported') {
-        console.log('âŒ Notifications not supported in this browser');
+        console.log('❌ Notifications not supported in this browser');
         return;
     }
     
     if (status === 'granted') {
-        console.log('âœ… Notifications already granted, ensuring subscription...');
+        console.log('✅ Notifications already granted, ensuring subscription...');
         await ensurePushSubscription();
         return;
     }
     
     if (status === 'denied') {
-        console.log('âŒ Notifications denied by user');
+        console.log('❌ Notifications denied by user');
         return;
     }
 
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('ðŸ“… Days since last dismiss:', daysSinceDismiss.toFixed(2));
+    console.log('📅 Days since last dismiss:', daysSinceDismiss.toFixed(2));
     
     if (daysSinceDismiss < 7) {
-        console.log('â³ User dismissed recently, waiting 7 days before asking again');
+        console.log('⏳ User dismissed recently, waiting 7 days before asking again');
         return;
     }
 
-    console.log('âœ… Showing notification prompt...');
+    console.log('✅ Showing notification prompt...');
     setTimeout(() => {
         promptNotificationPermission();
     }, 1000);
@@ -1374,21 +1374,21 @@ async function checkAndPromptNotifications() {
 async function ensurePushSubscription() {
     try {
         if (!('serviceWorker' in navigator)) {
-            console.error('âŒ Service Worker not supported');
+            console.error('❌ Service Worker not supported');
             return null;
         }
 
         await navigator.serviceWorker.ready;
-        console.log('âœ… Service Worker ready');
+        console.log('✅ Service Worker ready');
 
         const registration = await navigator.serviceWorker.getRegistration(baseUrl);
         
         if (!registration) {
-            console.error('âŒ No Service Worker registration found');
+            console.error('❌ No Service Worker registration found');
             return null;
         }
 
-        console.log('âœ… Service Worker registration found:', registration.scope);
+        console.log('✅ Service Worker registration found:', registration.scope);
 
         let existing = await registration.pushManager.getSubscription();
         if (!existing) {
@@ -1396,9 +1396,9 @@ async function ensurePushSubscription() {
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
-            console.log('âœ… New push subscription created');
+            console.log('✅ New push subscription created');
         } else {
-            console.log('âœ… Using existing push subscription');
+            console.log('✅ Using existing push subscription');
         }
 
         currentPushSubscription = existing;
@@ -1410,7 +1410,7 @@ async function ensurePushSubscription() {
         return existing;
 
     } catch (err) {
-        console.error('âŒ ensurePushSubscription error:', err);
+        console.error('❌ ensurePushSubscription error:', err);
         return null;
     }
 }
@@ -1428,16 +1428,16 @@ async function sendSubscriptionToBackend(email, subscription) {
         });
         
         if (!response.ok) {
-            console.error('âŒ Backend subscription save failed:', response.status);
+            console.error('❌ Backend subscription save failed:', response.status);
             return false;
         }
         
         const data = await response.json();
-        console.log('âœ… Subscription saved to backend');
+        console.log('✅ Subscription saved to backend');
         return true;
         
     } catch (error) {
-        console.error('âŒ sendSubscriptionToBackend error:', error);
+        console.error('❌ sendSubscriptionToBackend error:', error);
         return false;
     }
 }
@@ -1460,18 +1460,18 @@ function initChat() {
 
     if (settings.currentSpend >= settings.maxSpend) {
         chatInput.disabled = true;
-        chatInput.placeholder = 'âš ï¸ Budget esaurito';
+        chatInput.placeholder = '⚠️ Budget esaurito';
         micBtn.disabled = true;
         const attachBtn = document.getElementById('attach-btn');
         if (attachBtn) attachBtn.disabled = true;
-        addMessage('âš ï¸ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
+        addMessage('⚠️ You have reached your monthly spending limit. Increase your budget in your settings to continue.', 'bot', false);
         return;
     }
 
     const welcomeMsg = messagesContainer.querySelector('.welcome-message');
     if (welcomeMsg) {
         welcomeMsg.innerHTML = `
-            <h3>ðŸ‘‹ Hello ${userName}!</h3>
+            <h3>👋 Hello ${userName}!</h3>
             <p>I'm Lerri, your digital strategic AI assistant. How can I help you today?</p>
         `;
     }
@@ -1502,7 +1502,7 @@ function initChat() {
                 audioChunks = [];
                 startTime = Date.now();
 
-                chatInput.placeholder = 'ðŸ”´ Recording...';
+                chatInput.placeholder = '🔴 Recording...';
                 chatInput.disabled = true;
                 micBtn.classList.add("recording");
 
@@ -1540,7 +1540,7 @@ function initChat() {
                     const totalCost = voiceCost + filesCost;
 
                     if (settings.currentSpend + totalCost > settings.maxSpend) {
-                        addMessage('âš ï¸ Budget limit reached! Increase your maximum budget to continue.', 'bot');
+                        addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
                         stream.getTracks().forEach(track => track.stop());
                         return;
                     }
@@ -1548,7 +1548,7 @@ function initChat() {
                     const hasFiles = attachedFiles.length > 0;
                     const filesList = attachedFiles.map(item => item.file.name).join(', ');
 
-                    const transcribingMsg = addMessage(`ðŸŽ¤ Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
+                    const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
                                         
                     const reader = new FileReader();
                     reader.onloadend = async () => {
@@ -1611,7 +1611,7 @@ function initChat() {
                             settings.currentSpend += totalCost;
                             settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
 
-                            console.log(`ðŸ’° Voice cost: â‚¬${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: â‚¬${filesCost.toFixed(2)}`);
+                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
 
                             if (data.events) events = data.events;
                             if (data.tasks) tasks = data.tasks;
@@ -1622,7 +1622,7 @@ function initChat() {
 
                             if (data.subscription) {
                                 settings.subscription = data.subscription;
-                                console.log('âœ… Updated subscription from voice:', settings.subscription);
+                                console.log('✅ Updated subscription from voice:', settings.subscription);
                             }
 
                             await syncToServer();
@@ -1633,8 +1633,8 @@ function initChat() {
                             
                         } catch (error) {
                             transcribingMsg.remove();
-                            // Mostra un messaggio di errore piÃ¹ specifico.
-                            addMessage(`âŒ Si Ã¨ verificato un errore: ${error.message}. Riprova.`, 'bot');
+                            // Mostra un messaggio di errore più specifico.
+                            addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
                             console.error("Audio error:", error);
                         }
                     };
@@ -1647,7 +1647,7 @@ function initChat() {
                 
             } catch (error) {
                 console.error("Microphone error:", error);
-                addMessage("âŒ Cannot access microphone.", 'bot');
+                addMessage("❌ Cannot access microphone.", 'bot');
                 chatInput.disabled = false;
                 chatInput.placeholder = 'Scrivi un messaggio...';
             }
@@ -1673,7 +1673,7 @@ function initChat() {
         }
         
         if (trialStatus.messagesRemaining >= 0 && trialStatus.messagesRemaining <= 5) {
-            showNotification(`âš ï¸ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
+            showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
         }
 
         const textCost = calculateMessageCost(false);
@@ -1681,7 +1681,7 @@ function initChat() {
         const totalCost = textCost + filesCost;
 
         if (settings.currentSpend + totalCost > settings.maxSpend) {
-            addMessage('âš ï¸ Budget limit reached!', 'bot');
+            addMessage('⚠️ Budget limit reached!', 'bot');
             return;
         }
 
@@ -1694,7 +1694,7 @@ function initChat() {
         const hasFiles = attachedFiles.length > 0;
         const filesList = attachedFiles.map(item => item.file.name).join(', ');
         
-        let displayMsg = msg || 'ðŸ”Ž Analyzing attached files';
+        let displayMsg = msg || '🔎 Analyzing attached files';
         if (hasFiles && msg) {
             displayMsg = msg;
         }
@@ -1715,7 +1715,7 @@ function initChat() {
         
         chatInput.value = '';
 
-        const loadingMsg = addMessage('â³ Processing...', 'bot', false);
+        const loadingMsg = addMessage('⏳ Processing...', 'bot', false);
 
         try {
             const filesData = await Promise.all(
@@ -1760,7 +1760,7 @@ function initChat() {
             settings.currentSpend += totalCost;
             settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
 
-            console.log(`ðŸ’° Text cost: â‚¬${textCost.toFixed(5)} + Files: â‚¬${filesCost.toFixed(2)}`);
+            console.log(`💰 Text cost: €${textCost.toFixed(5)} + Files: €${filesCost.toFixed(2)}`);
 
             if (data.events) events = data.events;
             if (data.tasks) tasks = data.tasks;
@@ -1784,8 +1784,8 @@ function initChat() {
             if (error.status === 401 || (error.message && error.message.includes('401'))) {
                 addReauthButton();
             } else {
-                addMessage('âŒ Server error. Try again.', 'bot');
-                showNotification('âŒ Server error. Please try again later.', 'error');
+                addMessage('❌ Server error. Try again.', 'bot');
+                showNotification('❌ Server error. Please try again later.', 'error');
             }
             
             console.error("Chat error:", error);
@@ -1803,7 +1803,7 @@ function handleFileSelect(event) {
     const files = Array.from(event.target.files);
     
     if (attachedFiles.length + files.length > MAX_FILES) {
-        showNotification(`âŒ Maximum ${MAX_FILES} files allowed`, 'error');
+        showNotification(`❌ Maximum ${MAX_FILES} files allowed`, 'error');
         return;
     }
 
@@ -1820,12 +1820,12 @@ function handleFileSelect(event) {
 
     for (const file of files) {
         if (!validTypes.includes(file.type)) {
-            showNotification(`âŒ File type not supported: ${file.name}`, 'error');
+            showNotification(`❌ File type not supported: ${file.name}`, 'error');
             continue;
         }
 
         if (file.size > 2 * 1024 * 1024) {
-            showNotification(`âŒ File too large (max 10MB): ${file.name}`, 'error');
+            showNotification(`❌ File too large (max 10MB): ${file.name}`, 'error');
             continue;
         }
 
@@ -1863,7 +1863,7 @@ function updateAttachedFilesDisplay() {
     
     display.innerHTML = `
         <div class="files-count-badge">
-            ðŸ“Ž ${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} (${totalSizeMB} MB)
+            📎 ${attachedFiles.length} file${attachedFiles.length > 1 ? 's' : ''} (${totalSizeMB} MB)
         </div>
         ${attachedFiles.map((item, index) => `
             <div class="attached-file-chip">
@@ -1872,7 +1872,7 @@ function updateAttachedFilesDisplay() {
                     <span class="file-chip-name">${item.file.name}</span>
                     <span class="file-chip-size">${(item.file.size / 1024).toFixed(1)} KB</span>
                 </div>
-                <button type="button" class="remove-file-chip-btn" onclick="removeAttachedFile(${index})">Ã—</button>
+                <button type="button" class="remove-file-chip-btn" onclick="removeAttachedFile(${index})">×</button>
             </div>
         `).join('')}
     `;
@@ -1900,21 +1900,21 @@ function updateAttachedFilesUI() {
         <div class="attached-file-tag">
             <span class="file-icon">${getFileIcon(file.type)}</span>
             <span class="file-name">${file.name}</span>
-            <button type="button" class="remove-file-btn" onclick="removeAttachedFile(${index})">Ã—</button>
+            <button type="button" class="remove-file-btn" onclick="removeAttachedFile(${index})">×</button>
         </div>
     `).join('');
 
     const filesCost = attachedFiles.length * COSTS.FILE_ATTACHMENT;
     const costTag = document.createElement('div');
     costTag.className = 'files-cost-tag';
-    costTag.textContent = `+â‚¬${filesCost.toFixed(2)}`;
+    costTag.textContent = `+€${filesCost.toFixed(2)}`;
     container.appendChild(costTag);
 }
 
 function removeAttachedFile(index) {
     attachedFiles.splice(index, 1);
     updateAttachedFilesDisplay();
-    showNotification('ðŸ“Ž File removed', 'info');
+    showNotification('📎 File removed', 'info');
 }
 
 function clearAttachedFiles() {
@@ -1923,11 +1923,11 @@ function clearAttachedFiles() {
 }
 
 function getFileIcon(mimeType) {
-    if (mimeType.startsWith('image/')) return 'ðŸ–¼ï¸';
-    if (mimeType.includes('pdf')) return 'ðŸ“„';
-    if (mimeType.includes('word')) return 'ðŸ“';
-    if (mimeType.includes('text')) return 'ðŸ“ƒ';
-    return 'ðŸ“Ž';
+    if (mimeType.startsWith('image/')) return '🖼️';
+    if (mimeType.includes('pdf')) return '📄';
+    if (mimeType.includes('word')) return '📝';
+    if (mimeType.includes('text')) return '📃';
+    return '📎';
 }
 
 function fileToBase64(file) {
@@ -1987,7 +1987,7 @@ function initCalendar() {
 
         const btn = document.getElementById('import-google-calendar');
         const originalText = btn.textContent;
-        btn.textContent = 'â³';
+        btn.textContent = '⏳';
         btn.disabled = true;
 
         try {
@@ -2020,11 +2020,11 @@ function initCalendar() {
             generateCalendar();
             updateStats();
             
-            showNotification(`âœ… Imported ${data.importedCount} events from Google Calendar`, 'success');
+            showNotification(`✅ Imported ${data.importedCount} events from Google Calendar`, 'success');
 
         } catch (error) {
             console.error('Import error:', error);
-            showNotification('âŒ Failed to import events. Try again.', 'error');
+            showNotification('❌ Failed to import events. Try again.', 'error');
         } finally {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -2090,7 +2090,7 @@ function generateCalendar() {
                         dot.className = 'event-dot';
                         
                         const match = event.title.match(/^(\p{Emoji})/u);
-                        dot.textContent = match ? match[1] : 'ðŸ•’';
+                        dot.textContent = match ? match[1] : '🕒';
                         
                         eventsPreview.appendChild(dot);
                     });
@@ -2140,7 +2140,7 @@ function getRecurringEventsForDate(dateKey) {
                 const description = cat.slots.map(s => `${s.start}-${s.end}: ${s.emoji || ''} ${s.name || ''}`).join(' | ');
 
                 recurringEvents.push({
-                    title: `ðŸ“ ${cat.name}`,
+                    title: `📁 ${cat.name}`,
                     start: firstSlot.start,
                     end: lastSlot.end,
                     description: description,
@@ -2181,7 +2181,7 @@ function getRecurringEventsForDate(dateKey) {
         schedule.sports.forEach(sport => {
             if (Array.isArray(sport.days) && sport.days.includes(dayName)) {
                 recurringEvents.push({
-                    title: `${sport.emoji || 'âš½'} ${sport.name}`,
+                    title: `${sport.emoji || '⚽'} ${sport.name}`,
                     start: sport.startTime || '00:00',
                     end: sport.endTime || '23:59',
                     description: `Sport: ${sport.name}`,
@@ -2196,7 +2196,7 @@ function getRecurringEventsForDate(dateKey) {
         schedule.hobbies.forEach(hobby => {
             if (Array.isArray(hobby.days) && hobby.days.includes(dayName)) {
                 recurringEvents.push({
-                    title: `${hobby.emoji || 'ðŸŽ¨'} ${hobby.name}`,
+                    title: `${hobby.emoji || '🎨'} ${hobby.name}`,
                     start: hobby.startTime || '10:00',
                     end: hobby.endTime || '11:00',
                     description: `Hobby: ${hobby.name}`,
@@ -2258,7 +2258,7 @@ async function saveEvent() {
     const eventIdInput = document.getElementById('day-event-id');
     const recurringCheckbox = document.getElementById('event-recurring');
     
-    const selectedEmoji = emojiSelect.value || 'ðŸ•’';
+    const selectedEmoji = emojiSelect.value || '🕒';
     const titleText = titleInput.value.trim();
     
     if (!titleText) {
@@ -2310,8 +2310,8 @@ async function saveEvent() {
     generateCalendar();
     
     const message = isRecurring 
-        ? 'âœ… Event saved and repeated for 5 years' 
-        : 'âœ… Event saved successfully';
+        ? '✅ Event saved and repeated for 5 years' 
+        : '✅ Event saved successfully';
     showNotification(message, 'success');
 }
 
@@ -2320,7 +2320,7 @@ function editEvent(index) {
     const event = events[selectedDate][index];
     
     const emojiMatch = event.title.match(/^(\p{Emoji}+)\s/u);
-    const emoji = emojiMatch ? emojiMatch[1] : 'ðŸ•’';
+    const emoji = emojiMatch ? emojiMatch[1] : '🕒';
     const titleText = emojiMatch ? event.title.substring(emoji.length).trim() : event.title;
     
     document.getElementById('event-emoji-select').value = emoji;
@@ -2343,7 +2343,7 @@ async function deleteEvent(){
 }
 
 function clearEventForm() {
-    document.getElementById('event-emoji-select').value = 'ðŸ•’';
+    document.getElementById('event-emoji-select').value = '🕒';
     document.getElementById('day-event-title').value = '';
     document.getElementById('day-event-description').value = '';
     document.getElementById('day-event-start').value = '';
@@ -2484,7 +2484,7 @@ function initSettings(){
             if (typeof openScheduleManager === 'function') {
                 openScheduleManager();
             } else {
-                showNotification('âŒ Errore caricamento. Ricarica la pagina.', 'error');
+                showNotification('❌ Errore caricamento. Ricarica la pagina.', 'error');
             }
         });
     }
@@ -2573,7 +2573,7 @@ function updateStats(){
 
 async function initServiceWorker() {
     if (!('serviceWorker' in navigator)) {
-        console.log('âŒ Service Workers not supported');
+        console.log('❌ Service Workers not supported');
         return;
     }
 
@@ -2581,17 +2581,17 @@ async function initServiceWorker() {
         const registration = await navigator.serviceWorker.register(`${baseUrl}sw.js`, { 
             scope: baseUrl 
         });
-        console.log('âœ… Service Worker registered:', registration.scope);
+        console.log('✅ Service Worker registered:', registration.scope);
 
         await navigator.serviceWorker.ready;
-        console.log('âœ… Service Worker ready and active');
+        console.log('✅ Service Worker ready and active');
 
         registration.addEventListener('updatefound', () => {
-            console.log('ðŸ”„ Service Worker update found');
+            console.log('🔄 Service Worker update found');
         });
 
         if (checkPWAStatus()) {
-            console.log('âœ… PWA detected, checking notifications after delay...');
+            console.log('✅ PWA detected, checking notifications after delay...');
             setTimeout(async () => {
                 try {
                     await checkAndPromptNotifications();
@@ -2602,7 +2602,7 @@ async function initServiceWorker() {
         }
 
     } catch (error) {
-        console.error('âŒ Service Worker registration error:', error);
+        console.error('❌ Service Worker registration error:', error);
     }
 }
 
@@ -2694,7 +2694,7 @@ function initClearChat() {
         const messagesContainer = document.getElementById('messages');
         messagesContainer.innerHTML = `
             <div class="welcome-message">
-                <h3>ðŸ‘‹ Hello ${localStorage.getItem('user_name') || 'User'}!</h3>
+                <h3>👋 Hello ${localStorage.getItem('user_name') || 'User'}!</h3>
                 <p>I'm Lerri, your digital strategic AI assistant. How can I help you today?</p>
             </div>
         `;
@@ -2714,7 +2714,7 @@ function addReauthButton() {
     reauthDiv.className = 'reauth-container';
     reauthDiv.innerHTML = `
         <div class="reauth-message">
-            <p>ðŸ” Your authorization has expired. Please reconnect your Google account to continue.</p>
+            <p>🔐 Your authorization has expired. Please reconnect your Google account to continue.</p>
             <button id="reauth-btn" class="btn-primary">Reconnect Google Account</button>
         </div>
     `;
@@ -2758,10 +2758,10 @@ async function handleReauth() {
                         const reauthContainer = document.querySelector('.reauth-container');
                         if (reauthContainer) reauthContainer.remove();
                         
-                        addMessage('âœ… Authorization renewed successfully! You can continue using the assistant.', 'bot');
-                        showNotification('âœ… Authorization renewed successfully!', 'success');
+                        addMessage('✅ Authorization renewed successfully! You can continue using the assistant.', 'bot');
+                        showNotification('✅ Authorization renewed successfully!', 'success');
                     } else {
-                        showNotification('âŒ Authorization renewal failed. Try again.', 'error');
+                        showNotification('❌ Authorization renewal failed. Try again.', 'error');
                     }
                 }
             }
@@ -2769,7 +2769,7 @@ async function handleReauth() {
         
     } catch (error) {
         console.error('Reauth error:', error);
-        showNotification('âŒ Error during authorization renewal', 'error');
+        showNotification('❌ Error during authorization renewal', 'error');
     }
 }
 
@@ -2781,7 +2781,7 @@ function checkPWAInstallation() {
 }
 
 function showPWAInstallBanner() {
-    console.log('ðŸŽ¨ Creating PWA banner...');
+    console.log('🎨 Creating PWA banner...');
     
     const existingBanner = document.getElementById('pwa-install-banner');
     if (existingBanner) {
@@ -2790,7 +2790,7 @@ function showPWAInstallBanner() {
     }
     
     if (!deferredPrompt) {
-        console.log('âš ï¸ No deferredPrompt available, cannot show banner');
+        console.log('⚠️ No deferredPrompt available, cannot show banner');
         return;
     }
 
@@ -2798,14 +2798,14 @@ function showPWAInstallBanner() {
     banner.id = 'pwa-install-banner';
     banner.innerHTML = `
         <div class="pwa-banner-content">
-            <div class="pwa-banner-icon">ðŸ“±</div>
+            <div class="pwa-banner-icon">📱</div>
             <div class="pwa-banner-text">
                 <h3>Install LerriAI App</h3>
                 <p>Get instant access and work offline!</p>
             </div>
             <div class="pwa-banner-actions">
                 <button id="pwa-install-btn" class="btn-primary">Install Now</button>
-                <button id="pwa-dismiss-btn" class="btn-secondary">Ã—</button>
+                <button id="pwa-dismiss-btn" class="btn-secondary">×</button>
             </div>
         </div>
     `;
@@ -2896,33 +2896,33 @@ function showPWAInstallBanner() {
     document.head.appendChild(style);
 
     document.body.appendChild(banner);
-    console.log('âœ… PWA banner displayed');
+    console.log('✅ PWA banner displayed');
 
     document.getElementById('pwa-install-btn').addEventListener('click', async () => {
-        console.log('ðŸ”˜ Install button clicked');
+        console.log('🔘 Install button clicked');
         if (!deferredPrompt) {
-            console.log('âš ï¸ No deferredPrompt available');
+            console.log('⚠️ No deferredPrompt available');
             return;
         }
 
         const installBtn = document.getElementById('pwa-install-btn');
         installBtn.disabled = true;
-        installBtn.textContent = 'â³ Installing...';
+        installBtn.textContent = '⏳ Installing...';
 
         try {
             await deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            console.log('ðŸ“Š Install outcome:', outcome);
+            console.log('📊 Install outcome:', outcome);
 
             if (outcome === 'accepted') {
                 localStorage.setItem('pwa-installed', 'true');
                 localStorage.removeItem('pwa-prompt-dismiss-time');
-                showNotification('âœ… App installed successfully!', 'success');
+                showNotification('✅ App installed successfully!', 'success');
             } else {
                 localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
             }
         } catch (error) {
-            console.error('âŒ Install error:', error);
+            console.error('❌ Install error:', error);
         } finally {
             hidePWAInstallBanner();
             deferredPrompt = null;
@@ -2930,7 +2930,7 @@ function showPWAInstallBanner() {
     });
 
     document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
-        console.log('âŒ Banner dismissed by user');
+        console.log('❌ Banner dismissed by user');
         localStorage.setItem('pwa-prompt-dismiss-time', Date.now().toString());
         hidePWAInstallBanner();
     });
@@ -2972,7 +2972,7 @@ function hideNotificationPrompt() {
 }
 
 function diagnoseNotificationPermission() {
-    console.log('ðŸ“¡ Diagnosing notification permission...');
+    console.log('📡 Diagnosing notification permission...');
     try {
         console.log(' - Location:', location.href);
         console.log(' - Protocol:', location.protocol);
