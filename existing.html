@@ -6,151 +6,320 @@
 <title>LerriAI - Login</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 <style>
+/* ============================================
+   LerriAI - BRIGHT DESIGN LOGIN
+   Fresh, Modern, Luminous Theme
+   ============================================ */
+
 :root {
-    --color-primary: #1A53E4;
-    --color-secondary: #34A853;
-    --color-danger: #f44336;
-    --color-background: linear-gradient(135deg,#667eea,#764ba2);
+    /* Primary Colors - Vibrant Sky Blue & Teal */
+    --primary: #0ea5e9;
+    --primary-light: #38bdf8;
+    --primary-dark: #0284c7;
+    --primary-glow: rgba(14, 165, 233, 0.4);
+    
+    /* Accent Colors - Coral & Orange */
+    --accent: #f97316;
+    --accent-light: #fb923c;
+    --accent-glow: rgba(249, 115, 22, 0.3);
+    
+    /* Secondary - Teal/Emerald */
+    --secondary: #14b8a6;
+    --secondary-light: #2dd4bf;
+    --secondary-glow: rgba(20, 184, 166, 0.3);
+    
+    /* Background - Light & Fresh */
+    --bg-primary: #f0f9ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e0f2fe;
+    --bg-glass: rgba(255, 255, 255, 0.85);
+    
+    /* Text Colors */
+    --text-primary: #0c4a6e;
+    --text-secondary: #0369a1;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --text-white: #ffffff;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 50%, #10b981 100%);
+    --gradient-hero: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+    --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #f97316 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(14, 165, 233, 0.08);
+    --shadow-md: 0 8px 30px rgba(14, 165, 233, 0.12);
+    --shadow-lg: 0 20px 60px rgba(14, 165, 233, 0.15);
+    --shadow-glow: 0 0 40px rgba(14, 165, 233, 0.25);
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-full: 9999px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Fonts */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-html, body {
-    height: 100%;
+*, *::before, *::after {
     margin: 0;
-    padding: 0;
-    overflow: hidden; /* blocca scroll esterno */
-}
-
-body.login-page {
-    font-family: 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-    background: var(--color-background);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: #333;
     padding: 0;
     box-sizing: border-box;
 }
 
-.container {
-    background: rgba(255,255,255,0.98);
-    padding: 2rem;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 450px;
-    max-height: 100vh; /* mai più alto dello schermo */
-    overflow-y: auto; /* scroll solo se necessario nel container */
-    width: 90%;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s;
+html, body {
+    height: 100%;
+    overflow: hidden;
 }
 
-.icon {
-    color: var(--color-primary);
-    font-size: 4rem;
-    margin-bottom: 1rem;
+body.login-page {
+    font-family: var(--font-body);
+    background: var(--gradient-hero);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-primary);
+    padding: 20px;
+    position: relative;
+}
+
+/* Animated Background Orbs */
+body.login-page::before,
+body.login-page::after {
+    content: '';
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+    animation: float 8s ease-in-out infinite;
+}
+
+body.login-page::before {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, transparent 70%);
+    top: -100px;
+    right: -50px;
+}
+
+body.login-page::after {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, transparent 70%);
+    bottom: -80px;
+    left: -80px;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.03); }
+}
+
+/* Grid Background */
+.grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.container {
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    max-width: 420px;
+    max-height: 95vh;
+    overflow-y: auto;
+    width: 100%;
+    text-align: center;
+    transition: var(--transition-normal);
+    border: 1px solid rgba(14, 165, 233, 0.15);
+    position: relative;
+    z-index: 1;
+}
+
+.container:hover {
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+/* Logo */
+.logo-container {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-img {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.logo-text {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 h1 {
-    color: var(--color-primary);
+    font-family: var(--font-display);
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 0.5rem;
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 700;
 }
 
 .subtitle {
-    color: #666;
+    color: var(--text-muted);
     margin-bottom: 1.5rem;
     line-height: 1.6;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 .form-group {
     margin-bottom: 1.2rem;
     text-align: left;
+    position: relative;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.4rem;
-    color: #555;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 input {
     width: 100%;
-    padding: 0.8rem;
-    border-radius: 12px;
-    border: 2px solid #e0e0e0;
+    padding: 0.9rem 1rem;
+    border-radius: var(--radius-md);
+    border: 2px solid rgba(14, 165, 233, 0.2);
     font-size: 0.95rem;
-    transition: all 0.3s;
+    font-family: var(--font-body);
+    transition: var(--transition-normal);
     box-sizing: border-box;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 input:focus {
     outline: none;
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(26,83,228,0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+input::placeholder {
+    color: var(--text-light);
 }
 
 button.primary-btn {
     width: 100%;
-    background: var(--color-primary);
-    color: white;
+    background: var(--gradient-primary);
+    color: var(--text-white);
     border: none;
-    padding: 0.9rem;
-    border-radius: 12px;
+    padding: 1rem;
+    border-radius: var(--radius-full);
     font-size: 1rem;
     font-weight: 700;
+    font-family: var(--font-body);
     cursor: pointer;
-    transition: all 0.3s;
+    transition: var(--transition-normal);
     margin-top: 1rem;
+    box-shadow: 0 8px 30px var(--primary-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 button.primary-btn:hover {
-    background: var(--color-secondary);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(52,168,83,0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px var(--primary-glow);
+}
+
+button.primary-btn:active {
+    transform: translateY(-1px);
 }
 
 button.primary-btn:disabled {
-    background: #ccc;
+    background: var(--text-light);
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
 }
 
 .loading {
     display: none;
     margin-top: 1rem;
-    color: var(--color-primary);
+    color: var(--primary);
     font-weight: 600;
+    font-size: 0.9rem;
 }
 
 .loading.active {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.loading i {
+    color: var(--secondary);
 }
 
 .link-section {
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid rgba(14, 165, 233, 0.15);
 }
 
 .link-section p {
-    color: #666;
+    color: var(--text-muted);
     margin: 0;
+    font-size: 0.9rem;
 }
 
 .link-section a {
-    color: var(--color-primary);
+    color: var(--primary);
     text-decoration: none;
     font-weight: 600;
+    transition: var(--transition-normal);
 }
 
 .link-section a:hover {
-    color: var(--color-secondary);
+    color: var(--secondary);
     text-decoration: underline;
 }
 
@@ -158,16 +327,17 @@ button.primary-btn:disabled {
     position: fixed;
     top: 20px;
     right: 20px;
-    background: white;
+    background: var(--bg-secondary);
     padding: 1rem 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
     display: none;
     align-items: center;
     gap: 1rem;
     z-index: 9999;
     max-width: 400px;
     animation: slideIn 0.3s ease;
+    border-left: 4px solid var(--primary);
 }
 
 @keyframes slideIn {
@@ -175,75 +345,101 @@ button.primary-btn:disabled {
     to { transform: translateX(0); opacity: 1; }
 }
 
-.form-group {
-    position: relative;
-}
-
 .notification.show {
     display: flex;
 }
 
 .notification.error {
-    border-left: 4px solid var(--color-danger);
+    border-left-color: var(--accent);
+}
+
+.notification.error i {
+    color: var(--accent);
 }
 
 .notification.success {
-    border-left: 4px solid var(--color-secondary);
+    border-left-color: var(--secondary);
+}
+
+.notification.success i {
+    color: var(--secondary);
+}
+
+.notification i {
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.notification span {
+    color: var(--text-primary);
+    font-size: 0.9rem;
 }
 
 .show-pass {
     position: absolute;
-    right: 12px;
-    top: 70%;
+    right: 14px;
+    top: 68%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #666;
+    color: var(--text-muted);
     font-size: 1rem;
-    transition: all 0.3s;
+    transition: var(--transition-normal);
 }
 
 .show-pass:hover {
-    color: var(--color-primary);
-    transform: translateY(-50%) scale(1.2);
+    color: var(--primary);
+    transform: translateY(-50%) scale(1.1);
 }
 
 @media (max-height: 600px), (max-width: 500px) {
     .container {
-        padding: 1rem;
-        max-width: 90%;
-        font-size: 0.85rem;
+        padding: 1.5rem;
+        max-width: 95%;
     }
 
     h1 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
 
     .subtitle {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         margin-bottom: 1rem;
     }
 
     input, button {
-        font-size: 0.85rem;
-        padding: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.7rem;
     }
 
-    .icon {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
+    .logo-container {
+        margin-bottom: 1rem;
+    }
+    
+    .logo-img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .logo-text {
+        font-size: 1.4rem;
     }
 
     .link-section {
         margin-top: 1rem;
     }
 }
-
 </style>
-<link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 </head>
 <body class="login-page">
 
+<div class="grid-bg"></div>
+
 <section class="container animate__animated animate__fadeIn">
+    <div class="logo-container animate__animated animate__fadeInDown">
+        <img src="pwa/icon/icon-512.png" alt="LerriAI" class="logo-img">
+        <span class="logo-text">LerriAI</span>
+    </div>
+    
     <h1 class="animate__animated animate__fadeInUp">Welcome Back</h1>
     <p class="subtitle animate__animated animate__fadeInUp animate__delay-1s">
         Log in with your email and password

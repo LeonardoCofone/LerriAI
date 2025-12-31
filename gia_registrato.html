@@ -6,107 +6,227 @@
 <title>Access Detected</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 <style>
 :root {
-    --color-primary: #1A53E4;
-    --color-secondary: #34A853;
-    --color-danger: #f44336;
-    --color-warning: #ffd700;
-    --color-background: linear-gradient(135deg,#667eea,#764ba2,#f093fb,#f5576c);
+    --color-primary: #0ea5e9;
+    --color-primary-dark: #0284c7;
+    --color-secondary: #14b8a6;
+    --color-accent: #f97316;
+    --color-warning: #fbbf24;
+    --color-danger: #ef4444;
+    --color-text: #1e293b;
+    --color-text-light: #64748b;
+    --color-white: #ffffff;
+    --gradient-primary: linear-gradient(135deg, #0ea5e9, #14b8a6);
+    --gradient-accent: linear-gradient(135deg, #f97316, #fbbf24);
+    --gradient-bg: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 25%, #ccfbf1 50%, #fef3c7 75%, #ffedd5 100%);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
 }
 
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* blocca scroll esterno */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #fff;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--color-text);
 }
 
 body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background: var(--color-background);
+    background: var(--gradient-bg);
     background-size: 400% 400%;
-    animation: gradientShift 8s ease infinite;
+    animation: gradientShift 15s ease infinite;
     text-align: center;
+    position: relative;
 }
 
 @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
+    0%, 100% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
+/* Background Elements */
+.bg-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(14, 165, 233, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14, 165, 233, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bg-orb-1 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.4), rgba(20, 184, 166, 0.3));
+    top: -100px;
+    right: -100px;
+    animation: float 8s ease-in-out infinite;
+}
+
+.bg-orb-2 {
+    width: 350px;
+    height: 350px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(251, 191, 36, 0.3));
+    bottom: -80px;
+    left: -80px;
+    animation: float 10s ease-in-out infinite reverse;
+}
+
+.bg-orb-3 {
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.3), rgba(14, 165, 233, 0.2));
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: float 12s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+}
+
+/* Container */
 .container {
-    background: rgba(255, 255, 255, 0.15);
-    padding: 2.5rem 2rem;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 3rem 2.5rem;
     border-radius: 2rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    max-width: 500px;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(14, 165, 233, 0.1);
+    max-width: 480px;
     width: 90%;
     position: relative;
-    animation: containerPulse 2s ease-in-out infinite alternate;
+    z-index: 1;
 }
 
-@keyframes containerPulse {
-    0% { transform: scale(1); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-    100% { transform: scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+/* Logo */
+.logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
 }
 
+/* Icon */
 .icon {
     font-size: 4rem;
-    margin-bottom: 1rem;
-    color: var(--color-warning);
-    animation: iconBounce 1.5s ease-in-out infinite;
+    margin-bottom: 1.5rem;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: iconBounce 2s ease-in-out infinite;
+    display: inline-block;
 }
 
 @keyframes iconBounce {
     0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); }
-    60% { transform: translateY(-5px); }
+    40% { transform: translateY(-15px); }
+    60% { transform: translateY(-8px); }
 }
 
 h1 {
-    font-size: 2.5rem;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
     margin-bottom: 1rem;
     font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    color: #fff;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
 }
 
 p {
-    font-size: 1.3rem;
-    letter-spacing: 0.5px;
-    line-height: 1.6;
+    font-size: 1.1rem;
+    letter-spacing: 0.2px;
+    line-height: 1.7;
     margin-bottom: 2rem;
-    color: #fff;
+    color: var(--color-text-light);
 }
 
+/* Button */
 .button {
-    display: inline-block;
-    padding: 0.8rem 2rem;
-    background: linear-gradient(45deg, #ff6b6b, #ffa500);
-    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 1rem 2.5rem;
+    background: var(--gradient-primary);
+    color: var(--color-white);
     text-decoration: none;
     border-radius: 50px;
+    font-family: 'Space Grotesk', sans-serif;
     font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    font-size: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 10px 30px -10px rgba(14, 165, 233, 0.5),
+        0 0 0 0 rgba(14, 165, 233, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
 }
 
 .button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    background: linear-gradient(45deg, #ffa500, #ff6b6b);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+        0 20px 40px -15px rgba(14, 165, 233, 0.6),
+        0 0 30px rgba(14, 165, 233, 0.3);
 }
 
+.button:hover::before {
+    left: 100%;
+}
+
+/* Particles */
 .particles {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -118,37 +238,90 @@ p {
 
 .particle {
     position: absolute;
-    background: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
-    animation: float 6s linear infinite;
+    animation: particleFloat 8s linear infinite;
 }
 
-.particle:nth-child(1) { width: 10px; height: 10px; top: 10%; left: 20%; animation-delay: 0s; }
-.particle:nth-child(2) { width: 15px; height: 15px; top: 30%; left: 70%; animation-delay: 1s; }
-.particle:nth-child(3) { width: 8px; height: 8px; top: 60%; left: 40%; animation-delay: 2s; }
-.particle:nth-child(4) { width: 12px; height: 12px; top: 80%; left: 10%; animation-delay: 3s; }
-.particle:nth-child(5) { width: 6px; height: 6px; top: 50%; left: 90%; animation-delay: 4s; }
+.particle:nth-child(1) { 
+    width: 12px; height: 12px; 
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.6), rgba(20, 184, 166, 0.4));
+    top: 15%; left: 15%; 
+    animation-delay: 0s; 
+}
+.particle:nth-child(2) { 
+    width: 18px; height: 18px; 
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.5), rgba(251, 191, 36, 0.4));
+    top: 25%; left: 75%; 
+    animation-delay: 1.5s; 
+}
+.particle:nth-child(3) { 
+    width: 10px; height: 10px; 
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.5), rgba(14, 165, 233, 0.4));
+    top: 55%; left: 35%; 
+    animation-delay: 3s; 
+}
+.particle:nth-child(4) { 
+    width: 14px; height: 14px; 
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.4), rgba(249, 115, 22, 0.3));
+    top: 75%; left: 15%; 
+    animation-delay: 4.5s; 
+}
+.particle:nth-child(5) { 
+    width: 8px; height: 8px; 
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.5), rgba(249, 115, 22, 0.4));
+    top: 45%; left: 85%; 
+    animation-delay: 6s; 
+}
 
-@keyframes float {
+@keyframes particleFloat {
     0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
     100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
 }
 
-
+/* Responsive */
 @media (max-width: 500px) {
-    .container { padding: 2rem 1rem; }
-    h1 { font-size: 2rem; }
-    p { font-size: 1.1rem; }
+    .container { 
+        padding: 2rem 1.5rem; 
+        border-radius: 1.5rem;
+    }
+    .logo { font-size: 1.75rem; }
+    h1 { font-size: 1.6rem; }
+    p { font-size: 1rem; }
     .icon { font-size: 3rem; }
-    .button { padding: 0.6rem 1.5rem; font-size: 0.95rem; }
+    .button { 
+        padding: 0.9rem 2rem; 
+        font-size: 0.95rem; 
+    }
+    .bg-orb-1, .bg-orb-2 { opacity: 0.3; }
 }
 
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container {
+    animation: fadeInUp 0.8s ease-out;
+}
 </style>
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 </head>
 <body>
+  <!-- Background Elements -->
+  <div class="bg-grid"></div>
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  
   <div class="particles">
     <div class="particle"></div>
     <div class="particle"></div>
@@ -156,7 +329,9 @@ p {
     <div class="particle"></div>
     <div class="particle"></div>
   </div>
+  
   <div class="container animate__animated animate__zoomIn">
+    <div class="logo">LerriAI</div>
     <div class="icon animate__animated animate__bounceIn">
       <i class="fas fa-exclamation-triangle"></i>
     </div>
@@ -164,7 +339,9 @@ p {
     <p class="animate__animated animate__fadeInUp animate__delay-2s">
       You have deleted your account with this email. Please try to log in with another email or contact support if you encounter issues.
     </p>
-    <a href="login.html" class="button animate__animated animate__fadeInUp animate__delay-3s">Back to Login</a>
+    <a href="login.html" class="button animate__animated animate__fadeInUp animate__delay-3s">
+      <i class="fas fa-arrow-left"></i> Back to Login
+    </a>
   </div>
 </body>
 </html>
