@@ -2251,7 +2251,7 @@ async function saveEvent() {
     const eventIdInput = document.getElementById('day-event-id');
     const recurringCheckbox = document.getElementById('event-recurring');
     
-    const selectedEmoji = emojiSelect.value || '🕒';
+    const selectedEmoji = emojiSelect.value || '🕐';
     const titleText = titleInput.value.trim();
     
     if (!titleText) {
@@ -2296,7 +2296,28 @@ async function saveEvent() {
         settings.stats.events++;
     }
 
-    await syncToServer();
+    try {
+        const response = await fetch("https://api.lerriai.com/api/save-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user: getUserEmail(),
+                events: events,
+                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                settings: settings,
+                messages: messagesArray
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save event');
+        }
+    } catch (error) {
+        console.error('Save event error:', error);
+        showNotification('❌ Failed to save event', 'error');
+        return;
+    }
+
     updateStats();
     loadDayEvents();
     clearEventForm();
@@ -2307,6 +2328,7 @@ async function saveEvent() {
         : '✅ Event saved successfully';
     showNotification(message, 'success');
 }
+
 
 
 function editEvent(index) {
@@ -2329,7 +2351,29 @@ async function deleteEvent(){
     if(!eventId) return;
     events[selectedDate].splice(parseInt(eventId), 1);
     if(events[selectedDate].length === 0) delete events[selectedDate];
-    await syncToServer();
+    
+    try {
+        const response = await fetch("https://api.lerriai.com/api/save-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user: getUserEmail(),
+                events: events,
+                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                settings: settings,
+                messages: messagesArray
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete event');
+        }
+    } catch (error) {
+        console.error('Delete event error:', error);
+        showNotification('❌ Failed to delete event', 'error');
+        return;
+    }
+    
     loadDayEvents();
     clearEventForm();
     generateCalendar();
@@ -2376,8 +2420,30 @@ async function addTask(){
         createdAt:new Date().toISOString()
     });
     
-    settings.stats.tasks++; 
-    await syncToServer(); 
+    settings.stats.tasks++;
+    
+    try {
+        const response = await fetch("https://api.lerriai.com/api/save-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user: getUserEmail(),
+                tasks: tasks,
+                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                settings: settings,
+                messages: messagesArray
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save task');
+        }
+    } catch (error) {
+        console.error('Add task error:', error);
+        showNotification('❌ Failed to save task', 'error');
+        return;
+    }
+    
     updateStats(); 
     renderTasks(); 
     document.getElementById('task-form').reset();
@@ -2408,15 +2474,59 @@ function renderTasks(filter='all'){
 async function toggleTask(id){
     const task=tasks.find(t=>t.id===id);
     if(task){ 
-        task.completed=!task.completed; 
-        await syncToServer(); 
+        task.completed=!task.completed;
+        
+        try {
+            const response = await fetch("https://api.lerriai.com/api/save-data", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user: getUserEmail(),
+                    tasks: tasks,
+                    pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                    settings: settings,
+                    messages: messagesArray
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update task');
+            }
+        } catch (error) {
+            console.error('Toggle task error:', error);
+            showNotification('❌ Failed to update task', 'error');
+            return;
+        }
+        
         renderTasks(); 
     }
 }
 
 async function deleteTask(id){ 
-    tasks=tasks.filter(t=>t.id!==id); 
-    await syncToServer(); 
+    tasks=tasks.filter(t=>t.id!==id);
+    
+    try {
+        const response = await fetch("https://api.lerriai.com/api/save-data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                user: getUserEmail(),
+                tasks: tasks,
+                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                settings: settings,
+                messages: messagesArray
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to delete task');
+        }
+    } catch (error) {
+        console.error('Delete task error:', error);
+        showNotification('❌ Failed to delete task', 'error');
+        return;
+    }
+    
     renderTasks(); 
 }
 
