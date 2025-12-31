@@ -404,9 +404,6 @@ async function showSubscriptionModal() {
                     Subscribe Now
                 </button>
                 
-                <button id="close-subscription-modal" class="btn-secondary" style="width: 100%; margin-top: 10px;">
-                    Maybe Later
-                </button>
             </div>
         </div>
     `;
