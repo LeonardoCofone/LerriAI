@@ -862,6 +862,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
     
+    if (!checkPWAStatus()) {
+        const checkInterval = setInterval(() => {
+            if (deferredPrompt) {
+                clearInterval(checkInterval);
+                showPWAInstallBanner();
+            }
+        }, 100);
+        
+        setTimeout(() => clearInterval(checkInterval), 5000);
+    }
+    
     await loadDataFromServer();
     await loadPayPalSDK();
     
@@ -887,7 +898,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-setTimeout(() => checkAndPromptPWA(), 2000);
+//setTimeout(() => checkAndPromptPWA(), 2000);
 
 function initTabs() {
     const tabs = document.querySelectorAll('#nav-tabs li');
@@ -1003,30 +1014,24 @@ function initPWAInstallPrompt() {
         e.preventDefault();
         deferredPrompt = e;
         
-        setTimeout(() => {
-            console.log('📢 Showing PWA banner...');
-            showPWAInstallBanner();
-        }, 1000);
+        console.log('📢 Showing mandatory PWA banner immediately...');
+        showPWAInstallBanner();
     });
 
     window.addEventListener('appinstalled', () => {
         localStorage.setItem('pwa-installed', 'true');
         localStorage.removeItem('pwa-prompt-dismiss-time');
-        hidePWAInstallBanner();
+        const overlay = document.getElementById('pwa-install-overlay');
+        if (overlay) {
+            document.body.style.overflow = '';
+            overlay.remove();
+        }
         deferredPrompt = null;
         
         setTimeout(() => {
             checkAndPromptNotifications().catch(err => console.error('Notification prompt error:', err));
         }, 2000);
     });
-    
-    setTimeout(() => {
-        if (deferredPrompt) {
-            console.log('✅ deferredPrompt is available');
-        } else {
-            console.log('⚠️ deferredPrompt not available');
-        }
-    }, 3000);
 }
 
 initPWAInstallPrompt();
@@ -1315,21 +1320,11 @@ async function checkAndPromptPWA() {
         return;
     }
 
-    const dismissTime = localStorage.getItem('pwa-prompt-dismiss-time');
-    const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
-    
-    console.log('📅 Days since dismiss:', daysSinceDismiss);
-    
-    if (daysSinceDismiss < 7) {
-        console.log('⏳ PWA prompt dismissed recently, waiting...');
-        return;
-    }
-
     if (deferredPrompt) {
-        console.log('✅ Showing PWA banner...');
+        console.log('✅ Showing mandatory PWA banner...');
         showPWAInstallBanner();
     } else {
-        console.log('⚠️ deferredPrompt not available yet');
+        console.log('⚠️ deferredPrompt not available yet, will show when ready');
     }
 }
 
