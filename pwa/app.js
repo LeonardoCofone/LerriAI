@@ -689,9 +689,7 @@ async function syncToServer() {
 
     const payload = { 
         user, 
-        events, 
         pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
-        tasks, 
         settings: {
             ...settings,
             subscription: settings.subscription || {
