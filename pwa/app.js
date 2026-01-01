@@ -517,13 +517,13 @@ function initEmojiSelect() {
     });
 }
 
-const COSTS = {
-    TEXT_MESSAGE: 0.00099,
-    VOICE_PER_SECOND: 0.005 / 60,
-    VOICE_BASE: 0.00099,
-    FILE_BASE: 0.002,
-    FILE_PER_MB: 0.003
-};
+//const COSTS = {
+//    TEXT_MESSAGE: 0.00099,
+//    VOICE_PER_SECOND: 0.005 / 60,
+//    VOICE_BASE: 0.00099,
+//    FILE_BASE: 0.002,
+//    FILE_PER_MB: 0.003
+//};
 
 let attachedFiles = [];
 let fileMessageCounter = 0;
@@ -564,8 +564,7 @@ let messagesArray = [];
 const md = window.markdownit();
 
 function calculateMessageCost(isVoice = false, durationSeconds = 0) {
-    if (!isVoice) return COSTS.TEXT_MESSAGE;
-    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
+    return 0;
 }
 
 function calculateFileCost(files) {
@@ -1348,12 +1347,6 @@ async function checkAndPromptNotifications() {
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('📅 Days since last dismiss:', daysSinceDismiss.toFixed(2));
-    
-    if (daysSinceDismiss < 7) {
-        console.log('⏳ User dismissed recently, waiting 7 days before asking again');
-        return;
-    }
 
     console.log('✅ Showing notification prompt...');
     setTimeout(() => {
@@ -1525,15 +1518,6 @@ function initChat() {
                     const durationMs = Date.now() - startTime;
                     const durationSeconds = Math.round(durationMs / 1000);
 
-                    const voiceCost = calculateMessageCost(true, durationSeconds);
-                    const filesCost = calculateFileCost(attachedFiles);
-                    const totalCost = voiceCost + filesCost;
-
-                    if (settings.currentSpend + totalCost > settings.maxSpend) {
-                        addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
-                        stream.getTracks().forEach(track => track.stop());
-                        return;
-                    }
 
                     const hasFiles = attachedFiles.length > 0;
                     const filesList = attachedFiles.map(item => item.file.name).join(', ');
@@ -1595,11 +1579,14 @@ function initChat() {
                                 addMessage(aiReply, 'bot', true, null, true);
                             }
 
+                            // TROVA QUESTO E MODIFICA:
                             settings.stats.messages++;
                             settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
                             settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
-                            settings.currentSpend += totalCost;
-                            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+
+                            if (data.currentSpend !== undefined) {
+                                settings.currentSpend = data.currentSpend;
+                            }
 
                             console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
 
@@ -1666,11 +1653,8 @@ function initChat() {
             showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
         }
 
-        // RIMOSSO IL CALCOLO DEL COSTO QUI - ora viene gestito dal backend
-        const filesCost = calculateFileCost(attachedFiles);
 
-        // Controllo budget solo per i file (il costo del messaggio viene dal backend)
-        if (settings.currentSpend + filesCost > settings.maxSpend) {
+        if (settings.currentSpend >= settings.maxSpend) {
             addMessage('⚠️ Budget limit reached!', 'bot');
             return;
         }
@@ -1762,7 +1746,7 @@ function initChat() {
             }
 
             const actualCost = data.messageCost || 0.00099;
-            console.log(`💰 Message cost from backend: €${actualCost.toFixed(5)}`);
+            console.log(`💰 Message costtttt from backend: €${actualCost.toFixed(5)}`);
 
             await syncToServer();
             updateStats();
