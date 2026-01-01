@@ -517,13 +517,13 @@ function initEmojiSelect() {
     });
 }
 
-const COSTS = {
-    TEXT_MESSAGE: 0.00099,
-    VOICE_PER_SECOND: 0.005 / 60,
-    VOICE_BASE: 0.00099,
-    FILE_BASE: 0.002,
-    FILE_PER_MB: 0.003
-};
+//const COSTS = {
+//    TEXT_MESSAGE: 0.00099,
+//    VOICE_PER_SECOND: 0.005 / 60,
+//    VOICE_BASE: 0.00099,
+//    FILE_BASE: 0.002,
+//    FILE_PER_MB: 0.003
+//};
 
 let attachedFiles = [];
 let fileMessageCounter = 0;
@@ -564,8 +564,7 @@ let messagesArray = [];
 const md = window.markdownit();
 
 function calculateMessageCost(isVoice = false, durationSeconds = 0) {
-    if (!isVoice) return COSTS.TEXT_MESSAGE;
-    return COSTS.VOICE_BASE + (durationSeconds * COSTS.VOICE_PER_SECOND);
+    return 0;
 }
 
 function calculateFileCost(files) {
@@ -1348,12 +1347,6 @@ async function checkAndPromptNotifications() {
     const dismissTime = localStorage.getItem('notification-prompt-dismiss-time');
     const daysSinceDismiss = dismissTime ? (Date.now() - parseInt(dismissTime, 10)) / (1000 * 60 * 60 * 24) : 999;
     
-    console.log('📅 Days since last dismiss:', daysSinceDismiss.toFixed(2));
-    
-    if (daysSinceDismiss < 7) {
-        console.log('⏳ User dismissed recently, waiting 7 days before asking again');
-        return;
-    }
 
     console.log('✅ Showing notification prompt...');
     setTimeout(() => {
@@ -1444,7 +1437,7 @@ function initChat() {
     updateTrialBanner();
     
     if (!email) {
-        //window.location.href = '../login.html';
+        window.location.href = '../login.html';
         return;
     }
 
@@ -1501,54 +1494,58 @@ function initChat() {
                 };
 
                 mediaRecorder.onstop = async () => {
+                    console.log("🛑 Registrazione terminata. Inizio elaborazione...");
+                    
                     chatInput.placeholder = 'Ask Lerri...';
                     chatInput.disabled = false;
 
+                    // --- CONTROLLO TRIAL ---
                     try {
                         const trialStatus = await checkTrialStatus();
+                        console.log("🔍 Stato Trial:", trialStatus);
+
                         if (!trialStatus.canSendMessage) {
-                            await showSubscriptionModal(); // Mostra il popup di abbonamento
+                            console.warn("🚫 Limite trial raggiunto o abbonamento necessario.");
+                            await showSubscriptionModal();
                             
-                            // Spegni il microfono e ferma tutto
+                            // Ferma lo stream se esiste
                             if (typeof stream !== 'undefined') {
                                 stream.getTracks().forEach(track => track.stop());
                             }
-                            return; // ESCE DALLA FUNZIONE QUI (non invia nulla)
+                            return;
                         }
                     } catch (err) {
-                        console.error("Errore verifica trial vocale:", err);
+                        console.error("❌ Errore verifica trial vocale:", err);
                     }
 
                     setProcessingState(true);
-                                    
+
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const durationMs = Date.now() - startTime;
                     const durationSeconds = Math.round(durationMs / 1000);
-
-                    const voiceCost = calculateMessageCost(true, durationSeconds);
-                    const filesCost = calculateFileCost(attachedFiles);
-                    const totalCost = voiceCost + filesCost;
-
-                    if (settings.currentSpend + totalCost > settings.maxSpend) {
-                        addMessage('⚠️ Budget limit reached! Increase your maximum budget to continue.', 'bot');
-                        stream.getTracks().forEach(track => track.stop());
-                        return;
-                    }
+                    
+                    console.log(`⏱️--------------- Durata Audio: ${durationSeconds} secondi`);
 
                     const hasFiles = attachedFiles.length > 0;
                     const filesList = attachedFiles.map(item => item.file.name).join(', ');
+                    console.log(`📎--------- File allegati: ${hasFiles ? filesList : 'Nessuno'}`);
 
                     const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
-                                        
+                    
                     const reader = new FileReader();
+                    
                     reader.onloadend = async () => {
                         const base64Audio = reader.result.split(',')[1];
+                        console.log("✅ --------------Audio convertito in Base64 pronto per l'invio.");
                         
                         try {
                             const filesData = await Promise.all(
                                 attachedFiles.map(item => fileToBase64(item.file))
                             );
+                            console.log(`📂 ${filesData.length} file convertiti per l'upload.`);
 
+                            console.log("🚀 --------------Invio richiesta al server...");
+                            
                             const response = await fetch(BACKEND_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -1556,11 +1553,15 @@ function initChat() {
                                     audio_data: base64Audio,
                                     email: getUserEmail(),
                                     user_id: getUserIdentifier(),
-                                    files: filesData
+                                    files: filesData,
+                                    audio_duration: durationSeconds
                                 })
                             });
+
+                            console.log(`📡 --------Risposta server status: ${response.status}`);
                             
                             const data = await response.json();
+                            console.log("📥 ----Dati ricevuti dal server:", data);
 
                             if (!response.ok) {
                                 if (data && data.error) {
@@ -1570,11 +1571,13 @@ function initChat() {
                                 }
                             }
 
+                            transcribingMsg.remove();
+                            
                             const transcribedText = data.transcription || '';
                             const aiReply = data.value || data.reply || '';
                             
-                            transcribingMsg.remove();
-                            
+                            console.log(`📝 -----------Trascrizione: "${transcribedText.substring(0, 30)}..."`);
+
                             if (transcribedText) {
                                 const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
                                 
@@ -1595,42 +1598,45 @@ function initChat() {
                                 addMessage(aiReply, 'bot', true, null, true);
                             }
 
-                            settings.stats.messages++;
-                            settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
-                            settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
-                            settings.currentSpend += totalCost;
-                            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
-
-                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
-
-                            if (data.events) events = data.events;
-                            if (data.tasks) tasks = data.tasks;
-                            if (data.stats) {
-                                settings.stats.events = data.stats.events || settings.stats.events;
-                                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+                            if (data.currentSpend !== undefined) {
+                                console.log(`💰--------------- Aggiornamento budget da server: Vecchio=${settings.currentSpend} -> Nuovo=${data.currentSpend}`);
+                                settings.currentSpend = data.currentSpend;
+                            } else {
+                                console.warn("⚠️--------------------- Il server non ha restituito currentSpend!");
                             }
 
+                            if (data.stats) {
+                                settings.stats = data.stats;
+                            }
                             if (data.subscription) {
                                 settings.subscription = data.subscription;
-                                console.log('✅ Updated subscription from voice:', settings.subscription);
                             }
+                            if (data.events) events = data.events;
+                            if (data.tasks) tasks = data.tasks;
+
+                            console.log(`💸 ---------Costo calcolato dal server per questo messaggio: €${data.messageCost || 'N/A'}`);
 
                             await syncToServer();
-                            await updateTrialBanner();
-                            setProcessingState(false);
                             updateStats();
                             updateBudgetDisplay();
+                            await updateTrialBanner();
                             
                         } catch (error) {
                             transcribingMsg.remove();
-                            // Mostra un messaggio di errore più specifico.
+                            console.error("❌ ERRORE durante elaborazione audio:", error);
                             addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
-                            console.error("Audio error:", error);
+                        } finally {
+                            setProcessingState(false);
+                            console.log("🏁 Processo audio terminato.");
                         }
                     };
                     
                     reader.readAsDataURL(audioBlob);
-                    stream.getTracks().forEach(track => track.stop());
+                    
+                    // Ferma i microfoni
+                    if (typeof stream !== 'undefined') {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
                 };
 
                 mediaRecorder.start();
@@ -1666,11 +1672,8 @@ function initChat() {
             showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
         }
 
-        const textCost = calculateMessageCost(false);
-        const filesCost = calculateFileCost(attachedFiles);
-        const totalCost = textCost + filesCost;
 
-        if (settings.currentSpend + totalCost > settings.maxSpend) {
+        if (settings.currentSpend >= settings.maxSpend) {
             addMessage('⚠️ Budget limit reached!', 'bot');
             return;
         }
@@ -1684,7 +1687,7 @@ function initChat() {
         const hasFiles = attachedFiles.length > 0;
         const filesList = attachedFiles.map(item => item.file.name).join(', ');
         
-        let displayMsg = msg || '🔎 Analyzing attached files';
+        let displayMsg = msg || '📎 Analyzing attached files';
         if (hasFiles && msg) {
             displayMsg = msg;
         }
@@ -1746,22 +1749,23 @@ function initChat() {
             loadingMsg.remove();
             addMessage(replyText, 'bot', true, null, true);
 
-            settings.stats.messages++;
-            settings.currentSpend += totalCost;
-            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
+            if (data.stats) {
+                settings.stats = data.stats;
+            }
 
-            console.log(`💰 Text cost: €${textCost.toFixed(5)} + Files: €${filesCost.toFixed(2)}`);
+            if (data.currentSpend !== undefined) {
+                settings.currentSpend = data.currentSpend;
+            }
 
             if (data.events) events = data.events;
             if (data.tasks) tasks = data.tasks;
-            if (data.stats) {
-                settings.stats.events = data.stats.events || settings.stats.events;
-                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-            }
 
             if (data.subscription) {
                 settings.subscription = data.subscription;
             }
+
+            const actualCost = data.messageCost || 0.00099;
+            console.log(`💰 Message costtttt from backend: €${actualCost.toFixed(5)}`);
 
             await syncToServer();
             updateStats();

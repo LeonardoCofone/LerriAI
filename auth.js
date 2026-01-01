@@ -1,42 +1,56 @@
-const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
-const API_URL = "https://api.lerriai.com/api/register";
-const API_LOGIN_URL = "https://api.lerriai.com/api/login";
+var CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
+var API_URL = "https://api.lerriai.com/api/register";
+var API_LOGIN_URL = "https://api.lerriai.com/api/login";
+var googleLoaded = false;
 
-function showNotification(message, type = "info") {
-    const notification = document.getElementById("notification");
-    const notificationText = document.getElementById("notificationText");
-    const icon = notification.querySelector("i");
+function showNotification(message, type) {
+    type = type || "info";
+    var notification = document.getElementById("notification");
+    var notificationText = document.getElementById("notificationText");
+    var icon = notification.querySelector("i");
 
     if (!notification || !notificationText) return;
 
     notification.classList.remove("error", "success", "info", "show");
 
     icon.className = "";
-    if (type === "error") icon.className = "fas fa-exclamation-circle";
-    else if (type === "success") icon.className = "fas fa-check-circle";
-    else icon.className = "fas fa-info-circle";
+    if (type === "error") {
+        icon.className = "fas fa-exclamation-circle";
+    } else if (type === "success") {
+        icon.className = "fas fa-check-circle";
+    } else {
+        icon.className = "fas fa-info-circle";
+    }
 
     notificationText.textContent = message;
     notification.classList.add(type, "show");
 
-    setTimeout(() => {
+    setTimeout(function() {
         notification.classList.remove("show");
     }, 5000);
 }
 
-function showLoading(show = true) {
-    const loading = document.getElementById("loadingIndicator");
+function showLoading(show) {
+    if (show === undefined) show = true;
+    var loading = document.getElementById("loadingIndicator");
     if (loading) {
-        loading.classList.toggle("active", show);
+        if (show) {
+            loading.classList.add("active");
+        } else {
+            loading.classList.remove("active");
+        }
     }
 }
 
-function disableForm(formId, disable = true) {
-    const form = document.getElementById(formId);
+function disableForm(formId, disable) {
+    if (disable === undefined) disable = true;
+    var form = document.getElementById(formId);
     if (!form) return;
     
-    const inputs = form.querySelectorAll("input, button, select");
-    inputs.forEach(input => input.disabled = disable);
+    var inputs = form.querySelectorAll("input, button, select");
+    inputs.forEach(function(input) {
+        input.disabled = disable;
+    });
 }
 
 function validateName(name) {
@@ -56,7 +70,7 @@ function validatePassword(password) {
 }
 
 function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showNotification("Invalid email", "error");
         return false;
@@ -64,36 +78,96 @@ function validateEmail(email) {
     return true;
 }
 
-if (document.getElementById("registerForm")) {
-    let userName = "";
-    let userPassword = "";
-    let userLanguage = "it";
+function showPopupNotification(message) {
+    var notif = document.createElement("div");
+    notif.className = "popup-notification";
+    notif.textContent = message;
+    document.body.appendChild(notif);
 
-    const form = document.getElementById("registerForm");
-    const googleBtn = document.getElementById("google-login-btn");
-    const languageSelect = document.getElementById("languageSelect");
+    setTimeout(function() {
+        notif.classList.add("show");
+    }, 10);
 
-    const savedEmail = localStorage.getItem("user_email");
+    setTimeout(function() {
+        notif.classList.remove("show");
+        setTimeout(function() {
+            notif.remove();
+        }, 400);
+    }, 2500);
+}
+
+function checkOnboardingAndRedirect(email) {
+    var controller = new AbortController();
+    var timeoutId = setTimeout(function() {
+        controller.abort();
+    }, 5000);
+
+    fetch("https://api.lerriai.com/api/check-onboarding?email=" + encodeURIComponent(email), {
+        signal: controller.signal
+    })
+    .then(function(response) {
+        clearTimeout(timeoutId);
+        return response.json();
+    })
+    .then(function(onboardingStatus) {
+        if (onboardingStatus.completed) {
+            window.location.href = "pwa/index.html";
+        } else {
+            window.location.href = "onboarding.html";
+        }
+    })
+    .catch(function(error) {
+        clearTimeout(timeoutId);
+        window.location.href = "onboarding.html";
+    });
+}
+
+function waitForGoogle(callback, maxAttempts) {
+    maxAttempts = maxAttempts || 50;
+    var attempts = 0;
+    
+    function check() {
+        if (typeof google !== "undefined" && google.accounts && google.accounts.oauth2) {
+            googleLoaded = true;
+            callback();
+        } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(check, 100);
+        } else {
+            showNotification("Failed to load Google. Please refresh the page.", "error");
+            showLoading(false);
+            disableForm("registerForm", false);
+        }
+    }
+    check();
+}
+
+function initRegisterForm() {
+    var userName = "";
+    var userPassword = "";
+    var userLanguage = "it";
+
+    var form = document.getElementById("registerForm");
+    var googleBtn = document.getElementById("google-login-btn");
+    var languageSelect = document.getElementById("languageSelect");
+    var termsCheckbox = document.getElementById("termsCheckbox");
+
+    if (!form || !googleBtn) return;
+
+    var savedEmail = localStorage.getItem("user_email");
     if (savedEmail) {
-        (async () => {
-            try {
-                const response = await fetch(`https://api.lerriai.com/api/check-onboarding?email=${encodeURIComponent(savedEmail)}`);
-                const onboardingStatus = await response.json();
-                
-                if (onboardingStatus.completed) {
-                    window.location.href = "pwa/index.html";
-                } else {
-                    window.location.href = "onboarding.html";
-                }
-            } catch (error) {
-                console.error("Error checking onboarding:", error);
-                window.location.href = "onboarding.html";
-            }
-        })();
+        showLoading(true);
+        checkOnboardingAndRedirect(savedEmail);
+        return;
     }
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", function(e) {
         e.preventDefault();
+        
+        if (termsCheckbox && !termsCheckbox.checked) {
+            showPopupNotification("You must accept the Terms of Service and Privacy Policy.");
+            return;
+        }
         
         userName = document.getElementById("nameInput").value.trim();
         userPassword = document.getElementById("passwordInput").value;
@@ -104,135 +178,104 @@ if (document.getElementById("registerForm")) {
 
         disableForm("registerForm", true);
         showLoading(true);
-        
-        googleBtn.click();
-    });
 
-    googleBtn.onclick = () => {
-        if (!userName || !userPassword) {
-            showNotification("Error: missing data", "error");
-            return;
-        }
-
-        const tokenClient = google.accounts.oauth2.initCodeClient({
-            client_id: CLIENT_ID,
-            scope: [
-                'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile',
-                'https://www.googleapis.com/auth/drive.file',
-                'https://www.googleapis.com/auth/calendar.readonly',
-                'https://www.googleapis.com/auth/gmail.send'
-            ].join(" "),
-
-            ux_mode: "popup",
-            redirect_uri: "postmessage",
-            callback: async (response) => {
-                if (!response || !response.code) {
-                    showNotification("Error during Google authentication", "error");
-                    disableForm("registerForm", false);
-                    showLoading(false);
-                    return;
-                }
-
-                const payload = {
-                    name: userName,
-                    password: userPassword,
-                    oauth_code: response.code
-                };
-
-                try {
-                    const res = await fetch(API_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const data = await res.json();
-                    showLoading(false);
-
-                    if (data.success) {
-                        localStorage.setItem("user_email", data.email);
-                        localStorage.setItem("user_name", data.name);
-                        localStorage.setItem("user_language", userLanguage);
-
-                        await fetch("https://api.lerriai.com/api/set-language", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: data.email, language: userLanguage })
-                        });
-
-                        showNotification(`✅ Welcome, ${data.name}!`, "success");
-
-                        try {
-                            const onboardingRes = await fetch(`https://api.lerriai.com/api/check-onboarding?email=${encodeURIComponent(data.email)}`);
-                            const onboardingStatus = await onboardingRes.json();
-
-                            if (onboardingStatus.completed) {
-                                console.log("----Onboarding already completed");
-                                setTimeout(() => {
-                                    window.location.href = "pwa/index.html";
-                                }, 1500);
-                            } else {
-                                console.log("----Starting onboarding");
-                                setTimeout(() => {
-                                    window.location.href = "onboarding.html";
-                                }, 1500);
-                            }
-                        } catch (err) {
-                            console.error("Error checking onboarding:", err);
-                            window.location.href = "onboarding.html";
-                        }
-
-                    } else if (data.redirect) {
-                        showNotification("Account already exists", "error");
-                        setTimeout(() => {
-                            window.location.href = data.redirect;
-                        }, 2000);
-                    } else {
-                        showNotification(data.error || "Registration error", "error");
-                        disableForm("registerForm", false);
-                    }
-
-                } catch (error) {
-                    showNotification("Server connection error", "error");
-                    showLoading(false);
-                    disableForm("registerForm", false);
-                }
-            }
+        waitForGoogle(function() {
+            startGoogleAuth(userName, userPassword, userLanguage);
         });
-
-        tokenClient.requestCode();
-    };
-
+    });
 }
 
-if (document.getElementById("loginForm")) {
-    const form = document.getElementById("loginForm");
-
-    const savedEmail = localStorage.getItem("user_email");
-    if (savedEmail) {
-        (async () => {
-            try {
-                const response = await fetch(`https://api.lerriai.com/api/check-onboarding?email=${encodeURIComponent(savedEmail)}`);
-                const onboardingStatus = await response.json();
-                
-                if (onboardingStatus.completed) {
-                    window.location.href = "pwa/index.html";
-                } else {
-                    window.location.href = "onboarding.html";
-                }
-            } catch (error) {
-                console.error("Error checking onboarding:", error);
-                window.location.href = "onboarding.html";
+function startGoogleAuth(userName, userPassword, userLanguage) {
+    var tokenClient = google.accounts.oauth2.initCodeClient({
+        client_id: CLIENT_ID,
+        scope: [
+            'https://www.googleapis.com/auth/userinfo.email',
+            'https://www.googleapis.com/auth/userinfo.profile',
+            'https://www.googleapis.com/auth/drive.file',
+            'https://www.googleapis.com/auth/calendar.readonly',
+            'https://www.googleapis.com/auth/gmail.send'
+        ].join(" "),
+        ux_mode: "popup",
+        redirect_uri: "postmessage",
+        callback: function(response) {
+            if (!response || !response.code) {
+                showNotification("Error during Google authentication", "error");
+                disableForm("registerForm", false);
+                showLoading(false);
+                return;
             }
-        })();
+
+            var payload = {
+                name: userName,
+                password: userPassword,
+                oauth_code: response.code
+            };
+
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(function(res) {
+                return res.json();
+            })
+            .then(function(data) {
+                showLoading(false);
+
+                if (data.success) {
+                    localStorage.setItem("user_email", data.email);
+                    localStorage.setItem("user_name", data.name);
+                    localStorage.setItem("user_language", userLanguage);
+
+                    fetch("https://api.lerriai.com/api/set-language", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email: data.email, language: userLanguage })
+                    });
+
+                    showNotification("Welcome, " + data.name + "!", "success");
+
+                    setTimeout(function() {
+                        checkOnboardingAndRedirect(data.email);
+                    }, 1500);
+
+                } else if (data.redirect) {
+                    showNotification("Account already exists", "error");
+                    setTimeout(function() {
+                        window.location.href = data.redirect;
+                    }, 2000);
+                } else {
+                    showNotification(data.error || "Registration error", "error");
+                    disableForm("registerForm", false);
+                }
+            })
+            .catch(function(error) {
+                showNotification("Server connection error", "error");
+                showLoading(false);
+                disableForm("registerForm", false);
+            });
+        }
+    });
+
+    tokenClient.requestCode();
+}
+
+function initLoginForm() {
+    var loginForm = document.getElementById("loginForm");
+    if (!loginForm) return;
+
+    var savedEmail = localStorage.getItem("user_email");
+    if (savedEmail) {
+        showLoading(true);
+        checkOnboardingAndRedirect(savedEmail);
+        return;
     }
 
-    form.addEventListener("submit", async (e) => {
+    loginForm.addEventListener("submit", function(e) {
         e.preventDefault();
 
-        const email = document.getElementById("loginEmail").value.trim();
-        const password = document.getElementById("loginPassword").value;
+        var email = document.getElementById("loginEmail").value.trim();
+        var password = document.getElementById("loginPassword").value;
 
         if (!validateEmail(email)) return;
         if (!validatePassword(password)) return;
@@ -240,50 +283,62 @@ if (document.getElementById("loginForm")) {
         disableForm("loginForm", true);
         showLoading(true);
 
-        try {
-            const res = await fetch(API_LOGIN_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await res.json();
+        fetch(API_LOGIN_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: email, password: password })
+        })
+        .then(function(res) {
+            return res.json();
+        })
+        .then(function(data) {
             showLoading(false);
 
             if (data.success) {
                 localStorage.setItem("user_email", email);
                 localStorage.setItem("user_name", data.name);
 
-                showNotification(`✅ Welcome back, ${data.name}!`, "success");
+                showNotification("Welcome back, " + data.name + "!", "success");
 
-                const response = await fetch(`https://api.lerriai.com/api/check-onboarding?email=${encodeURIComponent(email)}`);
-                const onboardingStatus = await response.json();
-                
-                if (onboardingStatus.completed) {
-                    setTimeout(() => {
-                        window.location.href = "pwa/index.html";
-                    }, 1000);
-                } else {
-                    setTimeout(() => {
-                        window.location.href = "onboarding.html";
-                    }, 1000);
-                }
-            }else {
+                setTimeout(function() {
+                    checkOnboardingAndRedirect(email);
+                }, 1000);
+            } else {
                 showNotification(data.error || "Incorrect email or password", "error");
                 disableForm("loginForm", false);
             }
-
-        } catch (error) {
+        })
+        .catch(function(error) {
             showNotification("Server connection error", "error");
             showLoading(false);
             disableForm("loginForm", false);
-        }
+        });
     });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-    const firstInput = document.querySelector("input");
+window.addEventListener("DOMContentLoaded", function() {
+    var firstInput = document.querySelector("input");
     if (firstInput) {
         firstInput.focus();
+    }
+    
+    var togglePass = document.getElementById("togglePass");
+    var passwordInput = document.getElementById("passwordInput") || document.getElementById("loginPassword");
+    
+    if (togglePass && passwordInput) {
+        togglePass.addEventListener("click", function() {
+            var type = passwordInput.type === "password" ? "text" : "password";
+            passwordInput.type = type;
+            togglePass.classList.toggle("fa-eye");
+            togglePass.classList.toggle("fa-eye-slash");
+        });
+    }
+
+    if (document.getElementById("registerForm")) {
+        initRegisterForm();
+    }
+
+    if (document.getElementById("loginForm")) {
+        initLoginForm();
     }
 });
