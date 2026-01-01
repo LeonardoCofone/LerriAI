@@ -1666,11 +1666,11 @@ function initChat() {
             showNotification(`⚠️ ${trialStatus.messagesRemaining} free messages remaining`, 'warning');
         }
 
-        const textCost = calculateMessageCost(false);
+        // RIMOSSO IL CALCOLO DEL COSTO QUI - ora viene gestito dal backend
         const filesCost = calculateFileCost(attachedFiles);
-        const totalCost = textCost + filesCost;
 
-        if (settings.currentSpend + totalCost > settings.maxSpend) {
+        // Controllo budget solo per i file (il costo del messaggio viene dal backend)
+        if (settings.currentSpend + filesCost > settings.maxSpend) {
             addMessage('⚠️ Budget limit reached!', 'bot');
             return;
         }
@@ -1684,7 +1684,7 @@ function initChat() {
         const hasFiles = attachedFiles.length > 0;
         const filesList = attachedFiles.map(item => item.file.name).join(', ');
         
-        let displayMsg = msg || '🔎 Analyzing attached files';
+        let displayMsg = msg || '📎 Analyzing attached files';
         if (hasFiles && msg) {
             displayMsg = msg;
         }
@@ -1746,22 +1746,25 @@ function initChat() {
             loadingMsg.remove();
             addMessage(replyText, 'bot', true, null, true);
 
-            settings.stats.messages++;
-            settings.currentSpend += totalCost;
-            settings.currentSpend = Math.round(settings.currentSpend * 100000) / 100000;
-
-            console.log(`💰 Text cost: €${textCost.toFixed(5)} + Files: €${filesCost.toFixed(2)}`);
+            // AGGIORNA CON I DATI DAL BACKEND
+            if (data.stats) {
+                settings.stats = data.stats;
+            }
+            
+            if (data.currentSpend !== undefined) {
+                settings.currentSpend = data.currentSpend;
+            }
 
             if (data.events) events = data.events;
             if (data.tasks) tasks = data.tasks;
-            if (data.stats) {
-                settings.stats.events = data.stats.events || settings.stats.events;
-                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
-            }
 
             if (data.subscription) {
                 settings.subscription = data.subscription;
             }
+
+            // Il backend restituisce il costo effettivo
+            const actualCost = data.messageCost || 0.00099;
+            console.log(`💰 Message cost from backend: €${actualCost.toFixed(5)}`);
 
             await syncToServer();
             updateStats();
