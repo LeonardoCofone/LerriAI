@@ -1494,45 +1494,58 @@ function initChat() {
                 };
 
                 mediaRecorder.onstop = async () => {
+                    console.log("🛑 Registrazione terminata. Inizio elaborazione...");
+                    
                     chatInput.placeholder = 'Ask Lerri...';
                     chatInput.disabled = false;
 
+                    // --- CONTROLLO TRIAL ---
                     try {
                         const trialStatus = await checkTrialStatus();
+                        console.log("🔍 Stato Trial:", trialStatus);
+
                         if (!trialStatus.canSendMessage) {
-                            await showSubscriptionModal(); // Mostra il popup di abbonamento
+                            console.warn("🚫 Limite trial raggiunto o abbonamento necessario.");
+                            await showSubscriptionModal();
                             
-                            // Spegni il microfono e ferma tutto
+                            // Ferma lo stream se esiste
                             if (typeof stream !== 'undefined') {
                                 stream.getTracks().forEach(track => track.stop());
                             }
-                            return; // ESCE DALLA FUNZIONE QUI (non invia nulla)
+                            return;
                         }
                     } catch (err) {
-                        console.error("Errore verifica trial vocale:", err);
+                        console.error("❌ Errore verifica trial vocale:", err);
                     }
 
                     setProcessingState(true);
-                                    
+
                     const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                     const durationMs = Date.now() - startTime;
                     const durationSeconds = Math.round(durationMs / 1000);
-
+                    
+                    console.log(`⏱️--------------- Durata Audio: ${durationSeconds} secondi`);
 
                     const hasFiles = attachedFiles.length > 0;
                     const filesList = attachedFiles.map(item => item.file.name).join(', ');
+                    console.log(`📎--------- File allegati: ${hasFiles ? filesList : 'Nessuno'}`);
 
                     const transcribingMsg = addMessage(`🎤 Audio ${durationSeconds}s${hasFiles ? ` + ${attachedFiles.length} file(s)` : ''} - Transcribing...`, 'user', false);
-                                        
+                    
                     const reader = new FileReader();
+                    
                     reader.onloadend = async () => {
                         const base64Audio = reader.result.split(',')[1];
+                        console.log("✅ --------------Audio convertito in Base64 pronto per l'invio.");
                         
                         try {
                             const filesData = await Promise.all(
                                 attachedFiles.map(item => fileToBase64(item.file))
                             );
+                            console.log(`📂 ${filesData.length} file convertiti per l'upload.`);
 
+                            console.log("🚀 --------------Invio richiesta al server...");
+                            
                             const response = await fetch(BACKEND_URL, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -1544,8 +1557,11 @@ function initChat() {
                                     audio_duration: durationSeconds
                                 })
                             });
+
+                            console.log(`📡 --------Risposta server status: ${response.status}`);
                             
                             const data = await response.json();
+                            console.log("📥 ----Dati ricevuti dal server:", data); // Decommenta se vuoi vedere tutto il JSON
 
                             if (!response.ok) {
                                 if (data && data.error) {
@@ -1555,11 +1571,13 @@ function initChat() {
                                 }
                             }
 
+                            transcribingMsg.remove();
+                            
                             const transcribedText = data.transcription || '';
                             const aiReply = data.value || data.reply || '';
                             
-                            transcribingMsg.remove();
-                            
+                            console.log(`📝 -----------Trascrizione: "${transcribedText.substring(0, 30)}..."`);
+
                             if (transcribedText) {
                                 const userMsgElement = addMessage(transcribedText, 'user', true, audioBlob, true);
                                 
@@ -1579,45 +1597,46 @@ function initChat() {
                             if (aiReply) {
                                 addMessage(aiReply, 'bot', true, null, true);
                             }
-                            
-                            settings.stats.messages++;
-                            settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
-                            settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
 
                             if (data.currentSpend !== undefined) {
+                                console.log(`💰--------------- Aggiornamento budget da server: Vecchio=${settings.currentSpend} -> Nuovo=${data.currentSpend}`);
                                 settings.currentSpend = data.currentSpend;
+                            } else {
+                                console.warn("⚠️--------------------- Il server non ha restituito currentSpend!");
                             }
 
-                            console.log(`💰 Voice cost: €${voiceCost.toFixed(5)} (${durationSeconds}s) + Files: €${filesCost.toFixed(2)}`);
-
-                            if (data.events) events = data.events;
-                            if (data.tasks) tasks = data.tasks;
                             if (data.stats) {
-                                settings.stats.events = data.stats.events || settings.stats.events;
-                                settings.stats.tasks = data.stats.tasks || settings.stats.tasks;
+                                settings.stats = data.stats;
                             }
-
                             if (data.subscription) {
                                 settings.subscription = data.subscription;
-                                console.log('✅ Updated subscription from voice:', settings.subscription);
                             }
+                            if (data.events) events = data.events;
+                            if (data.tasks) tasks = data.tasks;
+
+                            console.log(`💸 ---------Costo calcolato dal server per questo messaggio: €${data.messageCost || 'N/A'}`);
 
                             await syncToServer();
-                            await updateTrialBanner();
-                            setProcessingState(false);
                             updateStats();
                             updateBudgetDisplay();
+                            await updateTrialBanner();
                             
                         } catch (error) {
                             transcribingMsg.remove();
-                            // Mostra un messaggio di errore più specifico.
+                            console.error("❌ ERRORE durante elaborazione audio:", error);
                             addMessage(`❌ Si è verificato un errore: ${error.message}. Riprova.`, 'bot');
-                            console.error("Audio error:", error);
+                        } finally {
+                            setProcessingState(false);
+                            console.log("🏁 Processo audio terminato.");
                         }
                     };
                     
                     reader.readAsDataURL(audioBlob);
-                    stream.getTracks().forEach(track => track.stop());
+                    
+                    // Ferma i microfoni
+                    if (typeof stream !== 'undefined') {
+                        stream.getTracks().forEach(track => track.stop());
+                    }
                 };
 
                 mediaRecorder.start();
