@@ -211,12 +211,22 @@ function startGoogleAuth(userName, userPassword, userLanguage) {
                 oauth_code: response.code
             };
 
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() {
+                controller.abort();
+            }, 15000);
+
             fetch(API_URL, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal: controller.signal
             })
             .then(function(res) {
+                clearTimeout(timeoutId);
+                if (!res.ok) {
+                    throw new Error("Server error: " + res.status);
+                }
                 return res.json();
             })
             .then(function(data) {
@@ -231,12 +241,12 @@ function startGoogleAuth(userName, userPassword, userLanguage) {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email: data.email, language: userLanguage })
-                    });
+                    }).catch(function() {});
 
                     showNotification("Welcome, " + data.name + "!", "success");
 
                     setTimeout(function() {
-                        checkOnboardingAndRedirect(data.email);
+                        window.location.href = "onboarding.html";
                     }, 1500);
 
                 } else if (data.redirect) {
@@ -302,6 +312,16 @@ function initLoginForm() {
 
                 setTimeout(function() {
                     checkOnboardingAndRedirect(email);
+                }, 1000);
+            } else if (data.redirect) {
+                showNotification(data.error || "Account not active", "error");
+                setTimeout(function() {
+                    window.location.href = data.redirect;
+                }, 2000);
+            } else if (data.error && data.error.toLowerCase().indexOf("not active") !== -1) {
+                showNotification(data.error, "error");
+                setTimeout(function() {
+                    window.location.href = "gia_registrato.html";
                 }, 1000);
             } else {
                 showNotification(data.error || "Incorrect email or password", "error");
