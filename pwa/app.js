@@ -1437,7 +1437,7 @@ function initChat() {
     updateTrialBanner();
     
     if (!email) {
-        //window.location.href = '../login.html';
+        window.location.href = '../login.html';
         return;
     }
 
@@ -1561,7 +1561,7 @@ function initChat() {
                             console.log(`📡 --------Risposta server status: ${response.status}`);
                             
                             const data = await response.json();
-                            console.log("📥 ----Dati ricevuti dal server:", data); // Decommenta se vuoi vedere tutto il JSON
+                            console.log("📥 ----Dati ricevuti dal server:", data);
 
                             if (!response.ok) {
                                 if (data && data.error) {
