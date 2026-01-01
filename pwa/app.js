@@ -1540,7 +1540,8 @@ function initChat() {
                                     audio_data: base64Audio,
                                     email: getUserEmail(),
                                     user_id: getUserIdentifier(),
-                                    files: filesData
+                                    files: filesData,
+                                    audio_duration: durationSeconds
                                 })
                             });
                             
@@ -1578,8 +1579,7 @@ function initChat() {
                             if (aiReply) {
                                 addMessage(aiReply, 'bot', true, null, true);
                             }
-
-                            // TROVA QUESTO E MODIFICA:
+                            
                             settings.stats.messages++;
                             settings.stats.voiceMessages = (settings.stats.voiceMessages || 0) + 1;
                             settings.stats.voiceSeconds = (settings.stats.voiceSeconds || 0) + durationSeconds;
