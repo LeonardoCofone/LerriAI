@@ -5,412 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LerriAI - Login</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 <link rel="canonical" href="https://www.lerriai.com/existing.html">
 <meta name="description" content="LerriAI Login - Access your account to manage your AI-powered personal assistant integrated with Google services.">
-<style>
-:root {
-    --primary: #0ea5e9;
-    --primary-light: #38bdf8;
-    --primary-dark: #0284c7;
-    --primary-glow: rgba(14, 165, 233, 0.4);
-    --accent: #f97316;
-    --accent-light: #fb923c;
-    --accent-glow: rgba(249, 115, 22, 0.3);
-    --secondary: #14b8a6;
-    --secondary-light: #2dd4bf;
-    --secondary-glow: rgba(20, 184, 166, 0.3);
-    --bg-primary: #f0f9ff;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #e0f2fe;
-    --bg-glass: rgba(255, 255, 255, 0.85);
-    --text-primary: #0c4a6e;
-    --text-secondary: #0369a1;
-    --text-muted: #64748b;
-    --text-light: #94a3b8;
-    --text-white: #ffffff;
-    --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 50%, #10b981 100%);
-    --gradient-hero: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
-    --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #f97316 100%);
-    --shadow-sm: 0 2px 8px rgba(14, 165, 233, 0.08);
-    --shadow-md: 0 8px 30px rgba(14, 165, 233, 0.12);
-    --shadow-lg: 0 20px 60px rgba(14, 165, 233, 0.15);
-    --shadow-glow: 0 0 40px rgba(14, 165, 233, 0.25);
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-full: 9999px;
-    --transition-fast: 0.15s ease;
-    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-*, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html, body {
-    height: 100%;
-    overflow: hidden;
-}
-
-body.login-page {
-    font-family: var(--font-body);
-    background: var(--gradient-hero);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    color: var(--text-primary);
-    padding: 20px;
-    position: relative;
-}
-
-body.login-page::before,
-body.login-page::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(80px);
-    z-index: 0;
-    animation: float 8s ease-in-out infinite;
-}
-
-body.login-page::before {
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(14, 165, 233, 0.25) 0%, transparent 70%);
-    top: -100px;
-    right: -50px;
-}
-
-body.login-page::after {
-    width: 350px;
-    height: 350px;
-    background: radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, transparent 70%);
-    bottom: -80px;
-    left: -80px;
-    animation-delay: 2s;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.03); }
-}
-
-.grid-bg {
-    position: fixed;
-    inset: 0;
-    background-image: 
-        linear-gradient(rgba(14, 165, 233, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
-    background-size: 50px 50px;
-    z-index: 0;
-    pointer-events: none;
-}
-
-.container {
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    padding: 2.5rem;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    max-width: 420px;
-    max-height: 95vh;
-    overflow-y: auto;
-    width: 100%;
-    text-align: center;
-    transition: var(--transition-normal);
-    border: 1px solid rgba(14, 165, 233, 0.15);
-    position: relative;
-    z-index: 1;
-}
-
-.container:hover {
-    box-shadow: var(--shadow-glow);
-    transform: translateY(-2px);
-}
-
-.logo-container {
-    margin-bottom: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-}
-
-.logo-img {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-md);
-}
-
-.logo-text {
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 700;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-h1 {
-    font-family: var(--font-display);
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
-    font-size: 1.8rem;
-    font-weight: 700;
-}
-
-.subtitle {
-    color: var(--text-muted);
-    margin-bottom: 1.5rem;
-    line-height: 1.6;
-    font-size: 0.95rem;
-}
-
-.form-group {
-    margin-bottom: 1.2rem;
-    text-align: left;
-    position: relative;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-input {
-    width: 100%;
-    padding: 0.9rem 1rem;
-    border-radius: var(--radius-md);
-    border: 2px solid rgba(14, 165, 233, 0.2);
-    font-size: 0.95rem;
-    font-family: var(--font-body);
-    transition: var(--transition-normal);
-    box-sizing: border-box;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px var(--primary-glow);
-}
-
-input::placeholder {
-    color: var(--text-light);
-}
-
-button.primary-btn {
-    width: 100%;
-    background: var(--gradient-primary);
-    color: var(--text-white);
-    border: none;
-    padding: 1rem;
-    border-radius: var(--radius-full);
-    font-size: 1rem;
-    font-weight: 700;
-    font-family: var(--font-body);
-    cursor: pointer;
-    transition: var(--transition-normal);
-    margin-top: 1rem;
-    box-shadow: 0 8px 30px var(--primary-glow);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-button.primary-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 40px var(--primary-glow);
-}
-
-button.primary-btn:active {
-    transform: translateY(-1px);
-}
-
-button.primary-btn:disabled {
-    background: var(--text-light);
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-.loading {
-    display: none;
-    margin-top: 1rem;
-    color: var(--primary);
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.loading.active {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.loading svg {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.link-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(14, 165, 233, 0.15);
-}
-
-.link-section p {
-    color: var(--text-muted);
-    margin: 0;
-    font-size: 0.9rem;
-}
-
-.link-section a {
-    color: var(--primary);
-    text-decoration: none;
-    font-weight: 600;
-    transition: var(--transition-normal);
-}
-
-.link-section a:hover {
-    color: var(--secondary);
-    text-decoration: underline;
-}
-
-.notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--bg-secondary);
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    display: none;
-    align-items: center;
-    gap: 1rem;
-    z-index: 9999;
-    max-width: 400px;
-    animation: slideIn 0.3s ease;
-    border-left: 4px solid var(--primary);
-}
-
-@keyframes slideIn {
-    from { transform: translateX(400px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-.notification.show {
-    display: flex;
-}
-
-.notification.error {
-    border-left-color: var(--accent);
-}
-
-.notification.error svg {
-    color: var(--accent);
-}
-
-.notification.success {
-    border-left-color: var(--secondary);
-}
-
-.notification.success svg {
-    color: var(--secondary);
-}
-
-.notification svg {
-    color: var(--primary);
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-}
-
-.notification span {
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.show-pass {
-    position: absolute;
-    right: 14px;
-    top: 68%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: var(--text-muted);
-    width: 20px;
-    height: 20px;
-    transition: var(--transition-normal);
-}
-
-.show-pass:hover {
-    color: var(--primary);
-    transform: translateY(-50%) scale(1.1);
-}
-
-@media (max-height: 600px), (max-width: 500px) {
-    .container {
-        padding: 1.5rem;
-        max-width: 95%;
-    }
-
-    h1 {
-        font-size: 1.4rem;
-    }
-
-    .subtitle {
-        font-size: 0.85rem;
-        margin-bottom: 1rem;
-    }
-
-    input, button {
-        font-size: 0.9rem;
-        padding: 0.7rem;
-    }
-
-    .logo-container {
-        margin-bottom: 1rem;
-    }
-    
-    .logo-img {
-        width: 40px;
-        height: 40px;
-    }
-
-    .logo-text {
-        font-size: 1.4rem;
-    }
-
-    .link-section {
-        margin-top: 1rem;
-    }
-}
-</style>
+<link rel="stylesheet" href="logg.css">
 </head>
 <body class="login-page">
 
@@ -419,7 +21,7 @@ button.primary-btn:disabled {
 <section class="container animate__animated animate__fadeIn">
     <div class="logo-container animate__animated animate__fadeInDown">
         <img src="pwa/icon/icon-512.png" alt="LerriAI" class="logo-img">
-        <span class="logo-text"><h2>LerriAI</h2></span>
+        <span class="logo-text">LerriAI</span>
     </div>
     
     <h1 class="animate__animated animate__fadeInUp">Welcome Back</h1>
@@ -436,17 +38,17 @@ button.primary-btn:disabled {
         <div class="form-group">
             <label for="loginPassword">Password</label>
             <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
-            <svg class="show-pass" id="togglePass" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <i class="fa-solid fa-eye show-pass" id="togglePass"></i>
         </div>
 
         <button type="submit" class="primary-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+            <i class="fas fa-sign-in-alt"></i>
             Log In
         </button>
     </form>
 
     <div class="loading" id="loadingIndicator">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+        <i class="fas fa-spinner"></i>
         Logging in...
     </div>
 
@@ -456,7 +58,7 @@ button.primary-btn:disabled {
 </section>
 
 <div class="notification" id="notification">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    <i class="fas fa-info-circle"></i>
     <span id="notificationText"></span>
 </div>
 
