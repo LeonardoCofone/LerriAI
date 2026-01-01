@@ -1746,11 +1746,10 @@ function initChat() {
             loadingMsg.remove();
             addMessage(replyText, 'bot', true, null, true);
 
-            // AGGIORNA CON I DATI DAL BACKEND
             if (data.stats) {
                 settings.stats = data.stats;
             }
-            
+
             if (data.currentSpend !== undefined) {
                 settings.currentSpend = data.currentSpend;
             }
@@ -1762,7 +1761,6 @@ function initChat() {
                 settings.subscription = data.subscription;
             }
 
-            // Il backend restituisce il costo effettivo
             const actualCost = data.messageCost || 0.00099;
             console.log(`💰 Message cost from backend: €${actualCost.toFixed(5)}`);
 
