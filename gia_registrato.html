@@ -5,15 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Access Detected</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 <link rel="canonical" href="https://www.lerriai.com/gia_registrato.html">
 <meta name="description" content="LerriAI Access Detected - Notification of account deletion and guidance for further actions.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
-
 <style>
 :root {
     --color-primary: #0ea5e9;
@@ -59,7 +56,6 @@ body {
     50% { background-position: 100% 50%; }
 }
 
-/* Background Elements */
 .bg-grid {
     position: fixed;
     top: 0;
@@ -116,7 +112,6 @@ body {
     50% { transform: translateY(-30px) scale(1.05); }
 }
 
-/* Container */
 .container {
     background: rgba(255, 255, 255, 0.85);
     padding: 3rem 2.5rem;
@@ -133,7 +128,6 @@ body {
     z-index: 1;
 }
 
-/* Logo */
 .logo {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 2rem;
@@ -146,7 +140,6 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* Icon */
 .icon {
     font-size: 4rem;
     margin-bottom: 1.5rem;
@@ -156,6 +149,12 @@ body {
     background-clip: text;
     animation: iconBounce 2s ease-in-out infinite;
     display: inline-block;
+}
+
+.icon svg {
+    width: 64px;
+    height: 64px;
+    stroke: url(#iconGradient);
 }
 
 @keyframes iconBounce {
@@ -184,7 +183,6 @@ p {
     color: var(--color-text-light);
 }
 
-/* Button */
 .button {
     display: inline-flex;
     align-items: center;
@@ -228,7 +226,11 @@ p {
     left: 100%;
 }
 
-/* Particles */
+.button svg {
+    width: 20px;
+    height: 20px;
+}
+
 .particles {
     position: fixed;
     top: 0;
@@ -284,7 +286,6 @@ p {
     100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
 }
 
-/* Responsive */
 @media (max-width: 500px) {
     .container { 
         padding: 2rem 1.5rem; 
@@ -293,7 +294,7 @@ p {
     .logo { font-size: 1.75rem; }
     h1 { font-size: 1.6rem; }
     p { font-size: 1rem; }
-    .icon { font-size: 3rem; }
+    .icon svg { width: 48px; height: 48px; }
     .button { 
         padding: 0.9rem 2rem; 
         font-size: 0.95rem; 
@@ -301,7 +302,6 @@ p {
     .bg-orb-1, .bg-orb-2 { opacity: 0.3; }
 }
 
-/* Animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -320,7 +320,15 @@ p {
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <!-- Background Elements -->
+  <svg style="position:absolute;width:0;height:0;">
+    <defs>
+      <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#f97316"/>
+        <stop offset="100%" style="stop-color:#fbbf24"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  
   <div class="bg-grid"></div>
   <div class="bg-orb bg-orb-1"></div>
   <div class="bg-orb bg-orb-2"></div>
@@ -337,14 +345,15 @@ p {
   <div class="container animate__animated animate__zoomIn">
     <div class="logo"><h2>LerriAI</h2></div>
     <div class="icon animate__animated animate__bounceIn">
-      <i class="fas fa-exclamation-triangle"></i>
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="url(#iconGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
     </div>
     <h1 class="animate__animated animate__fadeInUp animate__delay-1s">Access Detected!</h1>
     <p class="animate__animated animate__fadeInUp animate__delay-2s">
       You have deleted your account with this email. Please try to log in with another email or contact support if you encounter issues.
     </p>
     <a href="login.html" class="button animate__animated animate__fadeInUp animate__delay-3s">
-      <i class="fas fa-arrow-left"></i> Back to Login
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to Login
     </a>
   </div>
 </body>

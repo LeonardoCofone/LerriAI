@@ -5,14 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lerri - Thank You</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="icon" href="pwa/icon/favicon.ico" type="image/x-icon">
 <link rel="canonical" href="https://www.lerriai.com/thankyou.html">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self';">
-
 <meta name="description" content="LerriAI Thank You - Confirmation of message receipt and next steps for our AI-powered personal assistant application integrated with Google services.">
 <style>
 :root {
@@ -58,7 +55,6 @@ body {
     50% { background-position: 100% 50%; }
 }
 
-/* Background Elements */
 .bg-grid {
     position: fixed;
     top: 0;
@@ -115,7 +111,6 @@ body {
     50% { transform: translateY(-30px) scale(1.05); }
 }
 
-/* Container */
 .container {
     background: rgba(255, 255, 255, 0.85);
     padding: 3.5rem 2.5rem;
@@ -138,7 +133,6 @@ body {
     transform: translateY(-5px);
 }
 
-/* Logo */
 .logo {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 2rem;
@@ -151,7 +145,6 @@ body {
     letter-spacing: -0.5px;
 }
 
-/* Success Icon */
 .success-icon-wrapper {
     position: relative;
     display: inline-block;
@@ -159,11 +152,8 @@ body {
 }
 
 .icon-success {
-    font-size: 5rem;
-    background: var(--gradient-success);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    width: 80px;
+    height: 80px;
     filter: drop-shadow(0 4px 15px rgba(34, 197, 94, 0.3));
     animation: smoothFloat 3s ease-in-out infinite;
     display: inline-block;
@@ -174,7 +164,6 @@ body {
     50% { transform: translateY(-12px); }
 }
 
-/* Glow ring around icon */
 .success-icon-wrapper::before {
     content: '';
     position: absolute;
@@ -218,7 +207,6 @@ h1 {
     font-weight: 600;
 }
 
-/* Primary Button */
 .primary-btn {
     display: inline-flex;
     align-items: center;
@@ -262,7 +250,11 @@ h1 {
     left: 100%;
 }
 
-/* Footer Note */
+.primary-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
 .footer-note {
     margin-top: 2.5rem;
     font-size: 0.9rem;
@@ -270,7 +262,6 @@ h1 {
     opacity: 0.8;
 }
 
-/* Responsive */
 @media (max-width: 500px) {
     .container {
         padding: 2.5rem 1.5rem;
@@ -279,7 +270,7 @@ h1 {
     .logo { font-size: 1.75rem; }
     h1 { font-size: 1.8rem; }
     .message { font-size: 1rem; }
-    .icon-success { font-size: 4rem; }
+    .icon-success { width: 64px; height: 64px; }
     .primary-btn {
         padding: 0.9rem 2rem;
         font-size: 0.95rem;
@@ -287,7 +278,6 @@ h1 {
     .bg-orb-1, .bg-orb-2 { opacity: 0.3; }
 }
 
-/* Animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -305,7 +295,15 @@ h1 {
 </style>
 </head>
 <body>
-  <!-- Background Elements -->
+  <svg style="position:absolute;width:0;height:0;">
+    <defs>
+      <linearGradient id="successGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#22c55e"/>
+        <stop offset="100%" style="stop-color:#14b8a6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
   <div class="bg-grid"></div>
   <div class="bg-orb bg-orb-1"></div>
   <div class="bg-orb bg-orb-2"></div>
@@ -315,7 +313,7 @@ h1 {
     <div class="logo"><h2>LerriAI</h2></div>
     
     <div class="success-icon-wrapper">
-        <i class="fa-solid fa-circle-check icon-success"></i>
+        <svg class="icon-success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="url(#successGradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
     </div>
 
     <h1 class="animate__animated animate__fadeIn animate__delay-1s">Thank You!</h1>
@@ -326,7 +324,8 @@ h1 {
 
     <div class="animate__animated animate__zoomIn animate__delay-2s">
         <a href="index.html" class="primary-btn">
-            <i class="fa-solid fa-arrow-left"></i> Back to Home
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Back to Home
         </a>
     </div>
 
