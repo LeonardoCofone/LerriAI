@@ -587,7 +587,7 @@ async function showSubscriptionModal() {
                     </div>
 
                     <h2 class="sub-title">Upgrade Required</h2>
-                    <p class="sub-desc">Il tuo piano gratuito è terminato. Passa a Premium per continuare a usare LerriAI senza limiti.</p>
+                    <p class="sub-desc">Your free plan has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
                     
                     <div class="sub-features">
                         <div class="sub-tag">✨ Unlimited AI</div>
@@ -598,13 +598,13 @@ async function showSubscriptionModal() {
                     
                     <div class="price-box">
                         <div class="sub-price">
-                            €2.99<span>/mese</span>
+                            €2.99<span>/month</span>
                         </div>
-                        <div class="sub-note">+ costi di utilizzo (usage fees)</div>
+                        <div class="sub-note">+ usage fees</div>
                     </div>
                     
                     <button id="submit-payment" class="btn-pay">
-                        Attiva Abbonamento &rarr;
+                        Activate Subscription &rarr;
                     </button>
                 </div>
             </div>
