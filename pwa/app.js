@@ -357,79 +357,256 @@ async function showSubscriptionModal() {
     
     const style = document.createElement('style');
     style.innerHTML = `
+        /* --- RESET & FONTS --- */
+        .lerri-modal-root {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* --- OVERLAY (SFONDO) --- */
         .sub-overlay { 
-            position: fixed; inset: 0; 
-            background: rgba(0, 0, 0, 0.85); 
-            display: flex; justify-content: center; align-items: center; 
-            z-index: 99999; backdrop-filter: blur(8px);
+            position: fixed; 
+            inset: 0; 
+            background: rgba(15, 23, 42, 0.85); /* Dark Slate Blue profondo */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999999; 
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInOverlay 0.4s ease forwards;
         }
+
+        /* --- CARD PRINCIPALE --- */
         .sub-card { 
-            background: #fff; padding: 1.5rem; 
-            border-radius: 16px; width: 90%; max-width: 340px; 
+            background: #ffffff; 
+            padding: 2.5rem 2rem; 
+            border-radius: 28px; 
+            width: 100%; 
+            max-width: 380px; 
             text-align: center; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
-            animation: popIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            font-family: -apple-system, sans-serif;
+            position: relative;
+            /* Ombre multistrato per profondità 3D */
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+                0 50px 100px -20px rgba(50, 50, 93, 0.25), 
+                0 30px 60px -30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.95);
+            opacity: 0;
+            animation: popInCard 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            overflow: hidden;
         }
+
+        /* Effetto luce superiore */
+        .sub-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+            z-index: 10;
+        }
+
+        /* --- ICONA LUCCHETTO STILOSA --- */
+        .icon-wrapper {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem auto;
+            font-size: 2rem;
+            box-shadow: 
+                inset 0 2px 4px rgba(255,255,255,1),
+                0 8px 20px -4px rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(255,255,255,0.6);
+            transform: rotate(-3deg);
+            transition: transform 0.3s ease;
+        }
+        .sub-card:hover .icon-wrapper {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        /* --- TESTI --- */
         .sub-title { 
-            font-size: 1.4rem; font-weight: 800; color: #1e293b; margin: 0 0 0.2rem 0; 
-            letter-spacing: -0.02em;
+            font-size: 1.75rem; 
+            font-weight: 800; 
+            color: #0f172a; 
+            margin: 0 0 0.5rem 0; 
+            letter-spacing: -0.03em;
+            line-height: 1.1;
         }
-        .sub-desc { color: #64748b; font-size: 0.9rem; margin-bottom: 1rem; }
-        
-        /* Lista benefici compatta */
+        .sub-desc { 
+            color: #64748b; 
+            font-size: 1rem; 
+            line-height: 1.5;
+            margin-bottom: 2rem; 
+            padding: 0 10px;
+        }
+
+        /* --- GRID FEATURES --- */
         .sub-features { 
-            display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
-            margin-bottom: 1.2rem;
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            justify-content: center;
+            margin-bottom: 2rem;
         }
         .sub-tag {
-            background: #f1f5f9; color: #334155; 
-            padding: 4px 10px; border-radius: 6px; 
-            font-size: 0.8rem; font-weight: 500;
+            background: #f8fafc; 
+            color: #334155; 
+            padding: 8px 14px; 
+            border-radius: 12px; 
+            font-size: 0.85rem; 
+            font-weight: 600;
             border: 1px solid #e2e8f0;
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .sub-tag:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
         }
 
-        .sub-price { font-size: 1.8rem; font-weight: 700; color: #0f172a; margin: 0; line-height: 1; }
-        .sub-price span { font-size: 0.8rem; color: #64748b; font-weight: 400; }
-        
+        /* --- PREZZO --- */
+        .price-box {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border: 1px dashed #cbd5e1;
+        }
+        .sub-price { 
+            font-size: 2.8rem; 
+            font-weight: 800; 
+            color: #0f172a; 
+            line-height: 1; 
+            letter-spacing: -0.04em;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 4px;
+        }
+        .sub-price span { 
+            font-size: 1rem; 
+            color: #64748b; 
+            font-weight: 500; 
+        }
+        .sub-note {
+            font-size: 0.75rem; 
+            color: #94a3b8; 
+            margin-top: 6px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* --- BOTTONE PREMIUM --- */
         .btn-pay { 
-            background: #000; color: white; border: none; 
-            padding: 14px; border-radius: 10px; 
-            font-weight: 600; font-size: 1rem; width: 100%; 
-            cursor: pointer; margin-top: 1.2rem; 
-            transition: opacity 0.2s;
+            background: #0f172a; 
+            color: white; 
+            border: none; 
+            padding: 18px 24px; 
+            border-radius: 16px; 
+            font-weight: 700; 
+            font-size: 1.1rem; 
+            width: 100%; 
+            cursor: pointer; 
+            margin-top: 0.5rem; 
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .btn-pay:hover { opacity: 0.9; }
-        .btn-pay:disabled { opacity: 0.6; cursor: wait; }
+        
+        /* Gradiente sottile su hover */
+        .btn-pay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: 0.5s;
+        }
+        
+        .btn-pay:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.2);
+            background: #000;
+        }
+        .btn-pay:hover::before {
+            transform: translateX(100%);
+        }
+        .btn-pay:active { 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .btn-pay:disabled { 
+            opacity: 0.7; 
+            cursor: wait; 
+            transform: none; 
+        }
 
-        @keyframes popIn { 
-            from { opacity: 0; transform: scale(0.95) translateY(10px); } 
-            to { opacity: 1; transform: scale(1) translateY(0); } 
+        /* --- ANIMAZIONI --- */
+        @keyframes fadeInOverlay { 
+            to { opacity: 1; } 
+        }
+        @keyframes popInCard { 
+            to { opacity: 1; transform: scale(1); } 
+        }
+
+        /* --- MEDIA QUERIES (MOBILE) --- */
+        @media (max-width: 480px) {
+            .sub-card {
+                padding: 2rem 1.5rem;
+                max-width: 90%;
+            }
+            .sub-title { font-size: 1.5rem; }
+            .sub-price { font-size: 2.2rem; }
+            .icon-wrapper { width: 60px; height: 60px; font-size: 1.6rem; }
+            .btn-pay { padding: 16px; font-size: 1rem; }
         }
     `;
     document.head.appendChild(style);
 
     modal.innerHTML = `
-        <div class="sub-overlay">
-            <div class="sub-card">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔒</div>
-                <h2 class="sub-title">Upgrade Required</h2>
-                <p class="sub-desc">Subscribe to continue using LerriAI</p>
-                
-                <div class="sub-features">
-                    <span class="sub-tag">✨ Unlimited Chat</span>
-                    <span class="sub-tag">📅 Calendar</span>
-                    <span class="sub-tag">📧 More Precise</span>
+        <div class="lerri-modal-root">
+            <div class="sub-overlay">
+                <div class="sub-card">
+                    
+                    <div class="icon-wrapper">
+                        <span>🔒</span>
+                    </div>
+
+                    <h2 class="sub-title">Upgrade Required</h2>
+                    <p class="sub-desc">Il tuo piano gratuito è terminato. Passa a Premium per continuare a usare LerriAI senza limiti.</p>
+                    
+                    <div class="sub-features">
+                        <div class="sub-tag">✨ Unlimited AI</div>
+                        <div class="sub-tag">📅 Calendar Sync</div>
+                        <div class="sub-tag">🚀 Faster Reply</div>
+                        <div class="sub-tag">📧 Gmail Agent</div>
+                    </div>
+                    
+                    <div class="price-box">
+                        <div class="sub-price">
+                            €2.99<span>/mese</span>
+                        </div>
+                        <div class="sub-note">+ costi di utilizzo (usage fees)</div>
+                    </div>
+                    
+                    <button id="submit-payment" class="btn-pay">
+                        Attiva Abbonamento &rarr;
+                    </button>
                 </div>
-                
-                <div class="sub-price">
-                    €2.99<span>/mo</span>
-                </div>
-                <p style="font-size: 0.75rem; color: #94a3b8; margin: 5px 0 0 0;">+ usage fees</p>
-                
-                <button id="submit-payment" class="btn-pay">
-                    Subscribe Now
-                </button>
             </div>
         </div>
     `;
