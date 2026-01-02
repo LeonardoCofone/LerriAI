@@ -1,6 +1,5 @@
 const BACKEND_URL = "https://api.lerriai.com/api/chat";
 const API_BASE_URL = 'https://api.lerriai.com'; //http://localhost:3000
-const PAYPAL_CLIENT_ID = "YOUR_PAYPAL_CLIENT_ID_HERE";
 const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
 const LANGUAGES = {
     "it": "Italiano",
@@ -27,31 +26,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register(`${baseUrl}sw.js`, { scope: baseUrl })
         .then(reg => console.log('✅ SW registered with scope:', reg.scope))
         .catch(err => console.error('❌ SW registration failed:', err));
-}
-
-
-
-
-function loadPayPalSDK() {
-    if (window.paypalLoaded || document.querySelector('script[src*="paypal.com/sdk"]')) {
-        return Promise.resolve();
-    }
-    
-    return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
-        script.async = true;
-        script.onload = () => {
-            window.paypalLoaded = true;
-            console.log('✅ PayPal SDK loaded');
-            resolve();
-        };
-        script.onerror = () => {
-            console.error('❌ PayPal SDK load failed');
-            reject(new Error('PayPal SDK failed to load'));
-        };
-        document.body.appendChild(script);
-    });
 }
 
 
@@ -813,14 +787,6 @@ async function loadDataFromServer() {
             return;
         }
 
-        if (!window.paypalLoaded) {
-            const script = document.createElement('script');
-            script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
-            script.async = true;
-            document.body.appendChild(script);
-            window.paypalLoaded = true;
-        }
-
         console.log('🕒 Schedule loaded:', {
             slots: settings.schedule.slots.length,
             categories: settings.schedule.categories.length,
@@ -891,7 +857,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     await loadDataFromServer();
-    await loadPayPalSDK();
     
     initTabs();
     initChat();
