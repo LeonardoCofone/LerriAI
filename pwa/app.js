@@ -373,11 +373,39 @@ async function showSubscriptionModal() {
     const existingModal = document.getElementById('subscription-modal');
     if (existingModal) return;
 
+    const email = getUserEmail();
+    if (!email) {
+        alert("Errore: Email non trovata. Esegui il login.");
+        return;
+    }
+
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
+    
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .subscription-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 10000; backdrop-filter: blur(5px); }
+        .subscription-modal-content { background: #fff; padding: 2rem; border-radius: 20px; width: 90%; max-width: 400px; text-align: center; position: relative; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); animation: modalSlideUp 0.3s ease-out; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .close-modal-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; transition: color 0.2s; }
+        .close-modal-btn:hover { color: #0f172a; }
+        .premium-title { font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .premium-subtitle { color: #64748b; margin-bottom: 1.5rem; font-size: 1rem; }
+        .subscription-benefits { text-align: left; background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+        .subscription-benefits p { margin: 8px 0; color: #334155; display: flex; align-items: center; font-size: 0.95rem; }
+        .premium-divider { height: 1px; background: #e2e8f0; margin: 1.5rem 0; }
+        .subscription-price { font-size: 2rem; font-weight: 700; color: #0f172a; margin-bottom: 0; }
+        .subscription-price span { font-size: 0.9rem; color: #64748b; font-weight: 400; }
+        .btn-primary-sub { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 600; font-size: 1.1rem; width: 100%; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px; }
+        .btn-primary-sub:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3); }
+        .btn-primary-sub:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+        @keyframes modalSlideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    `;
+    document.head.appendChild(style);
+
     modal.innerHTML = `
-        <div class="subscription-modal-overlay">
+        <div class="subscription-modal-overlay" id="modal-overlay">
             <div class="subscription-modal-content">
+                <button class="close-modal-btn" id="close-modal">×</button>
                 <h2 class="premium-title">🚀 Upgrade to Premium</h2>
                 <p class="premium-subtitle">Unlock unlimited AI power</p>
                 
@@ -394,67 +422,62 @@ async function showSubscriptionModal() {
                 <p class="subscription-price">
                     €2.99 <span>/ month + usage</span>
                 </p>
-                <p style="font-size: 0.85rem; color: #64748b; margin-top: 8px;">
-                    Base subscription + pay only for what you use<br>
-                    (typically under €1/month for usage)
+                <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px; margin-bottom: 20px;">
+                    Base subscription + pay for usage<br>
+                    (billed monthly)
                 </p>
                 
-                <div id="payment-element"></div>
-                <button id="submit-payment" class="btn-primary" style="width: 100%; margin-top: 20px;">
+                <button id="submit-payment" class="btn-primary-sub">
                     Subscribe Now
                 </button>
-                
             </div>
         </div>
     `;
-    
-    document.body.appendChild(modal);
-    
-    const stripe = Stripe(process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_...');
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}/api/create-subscription`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: getUserEmail() })
-        });
-        
-        const { clientSecret, subscriptionId } = await response.json();
-        
-        const elements = stripe.elements({ clientSecret });
-        const paymentElement = elements.create('payment');
-        paymentElement.mount('#payment-element');
-        
-        document.getElementById('submit-payment').addEventListener('click', async () => {
-            const submitBtn = document.getElementById('submit-payment');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Processing...';
-            
-            const { error } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: `${window.location.origin}/pwa/index.html?subscription=success`
-                }
-            });
-            
-            if (error) {
-                showNotification('❌ Payment failed: ' + error.message, 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Subscribe Now';
-            }
-        });
-        
-        document.getElementById('close-subscription-modal').addEventListener('click', () => {
-            modal.remove();
-        });
-        
-    } catch (error) {
-        console.error('Subscription modal error:', error);
-        showNotification('❌ Failed to load payment form', 'error');
-        modal.remove();
-    }
-}
 
+    document.body.appendChild(modal);
+
+    const closeBtn = document.getElementById('close-modal');
+    const overlay = document.getElementById('modal-overlay');
+    const submitBtn = document.getElementById('submit-payment');
+
+    const closeModal = () => {
+        modal.style.opacity = '0';
+        setTimeout(() => modal.remove(), 300);
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeModal();
+    });
+
+    submitBtn.addEventListener('click', async () => {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Loading Stripe...';
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/create-subscription`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            });
+
+            const data = await response.json();
+
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                alert("Errore nella creazione del pagamento: " + (data.error || "Errore sconosciuto"));
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Subscribe Now';
+            }
+        } catch (error) {
+            console.error("Errore:", error);
+            alert("Errore di connessione al server");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Subscribe Now';
+        }
+    });
+}
 async function handleSubscriptionSuccess() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('subscription') === 'success') {
