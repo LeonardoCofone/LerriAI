@@ -325,6 +325,11 @@ async function updateTrialBanner() {
         existingBanner.remove();
     }
     
+    if (!status.canSendMessage) {
+        await showSubscriptionModal();
+        return;
+    }
+    
     if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.minutesRemaining >= 0) {
         const messagesContainer = document.getElementById('messages');
         const trialBanner = document.createElement('div');
@@ -359,27 +364,27 @@ async function showSubscriptionModal() {
         return;
     }
 
+    document.body.style.overflow = 'hidden';
+
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
     
     const style = document.createElement('style');
     style.innerHTML = `
-        /* --- RESET & FONTS --- */
         .lerri-modal-root {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* --- OVERLAY (SFONDO) --- */
         .sub-overlay { 
             position: fixed; 
             inset: 0; 
-            background: rgba(15, 23, 42, 0.85); /* Dark Slate Blue profondo */
+            background: rgba(15, 23, 42, 0.95);
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            z-index: 9999999; 
+            z-index: 999999999;
             backdrop-filter: blur(16px) saturate(180%);
             -webkit-backdrop-filter: blur(16px) saturate(180%);
             padding: 20px;
@@ -387,7 +392,6 @@ async function showSubscriptionModal() {
             animation: fadeInOverlay 0.4s ease forwards;
         }
 
-        /* --- CARD PRINCIPALE --- */
         .sub-card { 
             background: #ffffff; 
             padding: 2.5rem 2rem; 
@@ -396,7 +400,6 @@ async function showSubscriptionModal() {
             max-width: 380px; 
             text-align: center; 
             position: relative;
-            /* Ombre multistrato per profondità 3D */
             box-shadow: 
                 0 0 0 1px rgba(255, 255, 255, 0.1) inset,
                 0 50px 100px -20px rgba(50, 50, 93, 0.25), 
@@ -407,7 +410,6 @@ async function showSubscriptionModal() {
             overflow: hidden;
         }
 
-        /* Effetto luce superiore */
         .sub-card::before {
             content: '';
             position: absolute;
@@ -417,7 +419,6 @@ async function showSubscriptionModal() {
             z-index: 10;
         }
 
-        /* --- ICONA LUCCHETTO STILOSA --- */
         .icon-wrapper {
             width: 72px;
             height: 72px;
@@ -439,7 +440,6 @@ async function showSubscriptionModal() {
             transform: rotate(0deg) scale(1.05);
         }
 
-        /* --- TESTI --- */
         .sub-title { 
             font-size: 1.75rem; 
             font-weight: 800; 
@@ -456,7 +456,6 @@ async function showSubscriptionModal() {
             padding: 0 10px;
         }
 
-        /* --- GRID FEATURES --- */
         .sub-features { 
             display: flex; 
             flex-wrap: wrap; 
@@ -483,7 +482,6 @@ async function showSubscriptionModal() {
             transform: translateY(-1px);
         }
 
-        /* --- PREZZO --- */
         .price-box {
             background: #f8fafc;
             border-radius: 16px;
@@ -516,7 +514,6 @@ async function showSubscriptionModal() {
             letter-spacing: 0.05em;
         }
 
-        /* --- BOTTONE PREMIUM --- */
         .btn-pay { 
             background: #0f172a; 
             color: white; 
@@ -534,7 +531,6 @@ async function showSubscriptionModal() {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        /* Gradiente sottile su hover */
         .btn-pay::before {
             content: '';
             position: absolute;
@@ -562,7 +558,6 @@ async function showSubscriptionModal() {
             transform: none; 
         }
 
-        /* --- ANIMAZIONI --- */
         @keyframes fadeInOverlay { 
             to { opacity: 1; } 
         }
@@ -570,7 +565,6 @@ async function showSubscriptionModal() {
             to { opacity: 1; transform: scale(1); } 
         }
 
-        /* --- MEDIA QUERIES (MOBILE) --- */
         @media (max-width: 480px) {
             .sub-card {
                 padding: 2rem 1.5rem;
@@ -594,7 +588,7 @@ async function showSubscriptionModal() {
                     </div>
 
                     <h2 class="sub-title">Upgrade Required</h2>
-                    <p class="sub-desc">Your free plan has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
+                    <p class="sub-desc">Your free trial has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
                     
                     <div class="sub-features">
                         <div class="sub-tag">✨ Unlimited AI</div>
@@ -640,13 +634,13 @@ async function showSubscriptionModal() {
             } else {
                 alert("Payment Error: " + (data.error || "Unknown"));
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Subscribe Now';
+                submitBtn.innerHTML = 'Activate Subscription →';
             }
         } catch (error) {
             console.error("Error:", error);
             alert("Connection Error");
             submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Subscribe Now';
+            submitBtn.innerHTML = 'Activate Subscription →';
         }
     });
 }
@@ -934,6 +928,13 @@ async function loadDataFromServer() {
         if (!res.ok) throw new Error('Load data error');
         
         const data = await res.json();
+
+        const trialStatus = await checkTrialStatus();
+        if (!trialStatus.canSendMessage) {
+            await showSubscriptionModal();
+            isLoading = false;
+            return;
+        }
 
         console.log('📥 Data loaded from server:', data);
 
