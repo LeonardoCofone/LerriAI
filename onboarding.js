@@ -1102,7 +1102,7 @@ async function finishSetup() {
     };
 
     try {
-        const response = await fetch('https://api.lerriai.com/api/onboarding', {
+        const response = await fetch('https://lerriai-backend-production.up.railway.app/api/onboarding', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

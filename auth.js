@@ -1,6 +1,6 @@
 var CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
-var API_URL = "https://api.lerriai.com/api/register";
-var API_LOGIN_URL = "https://api.lerriai.com/api/login";
+var API_URL = "https://lerriai-backend-production.up.railway.app/api/register";
+var API_LOGIN_URL = "https://lerriai-backend-production.up.railway.app/api/login";
 var googleLoaded = false;
 
 function showNotification(message, type) {
@@ -102,7 +102,7 @@ function checkOnboardingAndRedirect(email) {
         controller.abort();
     }, 5000);
 
-    fetch("https://api.lerriai.com/api/check-onboarding?email=" + encodeURIComponent(email), {
+    fetch("https://lerriai-backend-production.up.railway.app/api/check-onboarding?email=" + encodeURIComponent(email), {
         signal: controller.signal
     })
     .then(function(response) {
@@ -237,7 +237,7 @@ function startGoogleAuth(userName, userPassword, userLanguage) {
                     localStorage.setItem("user_name", data.name);
                     localStorage.setItem("user_language", userLanguage);
 
-                    fetch("https://api.lerriai.com/api/set-language", {
+                    fetch("https://lerriai-backend-production.up.railway.app/api/set-language", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ email: data.email, language: userLanguage })

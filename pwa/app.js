@@ -1,5 +1,5 @@
-const BACKEND_URL = "https://api.lerriai.com/api/chat";
-const API_BASE_URL = 'https://api.lerriai.com'; //http://localhost:3000
+const BACKEND_URL = "https://lerriai-backend-production.up.railway.app/api/chat";
+const API_BASE_URL = 'https://lerriai-backend-production.up.railway.app'; //http://localhost:3000
 const CLIENT_ID = "692895314861-lmsub53tc5mdso1g7rkb6gop098safoe.apps.googleusercontent.com";
 const LANGUAGES = {
     "it": "Italiano",
@@ -254,7 +254,7 @@ function initDailyBriefingButton() {
         try {
             const loadingMsg = addMessage('📊 Generating your daily briefing...', 'bot', false);
 
-            const response = await fetch('https://api.lerriai.com/api/trigger-briefing', {
+            const response = await fetch('https://lerriai-backend-production.up.railway.app/api/trigger-briefing', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -329,7 +329,7 @@ async function updateTrialBanner() {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; padding: 12px; text-align: center; font-weight: 600; border-radius: 8px; margin-bottom: 15px;
         `;
-        
+
         const minsLeft = status.minutesRemaining % 60;        
         const hoursLeft = Math.ceil(status.minutesRemaining / 60);
         trialBanner.textContent = `🎁 Trial: ${status.messagesRemaining} msgs | ${hoursLeft}h left`;
@@ -889,7 +889,7 @@ async function syncToServer() {
     };
 
     try {
-        const response = await fetch("https://api.lerriai.com/api/save-data", {
+        const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
@@ -907,8 +907,6 @@ async function syncToServer() {
     }
 }
 
-// Replace the loadDataFromServer function in app.js with this improved version
-
 async function loadDataFromServer() {
     if (isLoading) return;
     isLoading = true;
@@ -920,7 +918,7 @@ async function loadDataFromServer() {
     }
 
     try {
-        const res = await fetch(`https://api.lerriai.com/api/load-data?user=${encodeURIComponent(user)}`);
+        const res = await fetch(`https://lerriai-backend-production.up.railway.app/api/load-data?user=${encodeURIComponent(user)}`);
         if (!res.ok) throw new Error('Load data error');
         
         const data = await res.json();
@@ -1071,7 +1069,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-//setTimeout(() => checkAndPromptPWA(), 2000);
 
 function initTabs() {
     const tabs = document.querySelectorAll('#nav-tabs li');
@@ -1580,7 +1577,7 @@ async function ensurePushSubscription() {
 
 async function sendSubscriptionToBackend(email, subscription) {
     try {
-        const response = await fetch('https://api.lerriai.com/api/subscribe-notifications', {
+        const response = await fetch('https://lerriai-backend-production.up.railway.app/api/subscribe-notifications', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
@@ -1678,7 +1675,6 @@ function initChat() {
                     chatInput.placeholder = 'Ask Lerri...';
                     chatInput.disabled = false;
 
-                    // --- CONTROLLO TRIAL ---
                     try {
                         const trialStatus = await checkTrialStatus();
                         console.log("🔍 Stato Trial:", trialStatus);
@@ -1686,8 +1682,7 @@ function initChat() {
                         if (!trialStatus.canSendMessage) {
                             console.warn("🚫 Limite trial raggiunto o abbonamento necessario.");
                             await showSubscriptionModal();
-                            
-                            // Ferma lo stream se esiste
+
                             if (typeof stream !== 'undefined') {
                                 stream.getTracks().forEach(track => track.stop());
                             }
@@ -2164,7 +2159,7 @@ function initCalendar() {
         btn.disabled = true;
 
         try {
-            const response = await fetch('https://api.lerriai.com/api/import-google-calendar', {
+            const response = await fetch('https://lerriai-backend-production.up.railway.app/api/import-google-calendar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -2288,7 +2283,6 @@ function generateCalendar() {
     }
 }
 
-// Update only the getRecurringEventsForDate function in app.js
 
 function getRecurringEventsForDate(dateKey) {
     const schedule = settings.schedule;
@@ -2477,7 +2471,7 @@ async function saveEvent() {
     }
 
     try {
-        const response = await fetch("https://api.lerriai.com/api/save-data", {
+        const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2533,7 +2527,7 @@ async function deleteEvent(){
     if(events[selectedDate].length === 0) delete events[selectedDate];
     
     try {
-        const response = await fetch("https://api.lerriai.com/api/save-data", {
+        const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2603,7 +2597,7 @@ async function addTask(){
     settings.stats.tasks++;
     
     try {
-        const response = await fetch("https://api.lerriai.com/api/save-data", {
+        const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2657,7 +2651,7 @@ async function toggleTask(id){
         task.completed=!task.completed;
         
         try {
-            const response = await fetch("https://api.lerriai.com/api/save-data", {
+            const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -2686,7 +2680,7 @@ async function deleteTask(id){
     tasks=tasks.filter(t=>t.id!==id);
     
     try {
-        const response = await fetch("https://api.lerriai.com/api/save-data", {
+        const response = await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -2796,7 +2790,7 @@ function initSettings(){
         settings.schedule.dailyBibleVerse = bibleVerseCheckbox.checked;
         
         try {
-            await fetch("https://api.lerriai.com/api/set-language", {
+            await fetch("https://lerriai-backend-production.up.railway.app/api/set-language", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: getUserEmail(), language: settings.language })
@@ -2906,7 +2900,7 @@ function initDeleteAccount() {
         const email = localStorage.getItem("user_email");
         if (email) {
             try {
-                await fetch("https://api.lerriai.com/api/delete-account", {
+                await fetch("https://lerriai-backend-production.up.railway.app/api/delete-account", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email })
@@ -2959,7 +2953,7 @@ function initClearChat() {
         messagesArray = [];
         
         try {
-            await fetch("https://api.lerriai.com/api/save-data", {
+            await fetch("https://lerriai-backend-production.up.railway.app/api/save-data", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
@@ -3026,7 +3020,7 @@ async function handleReauth() {
             ux_mode: 'popup',
             callback: async (response) => {
                 if (response.code) {
-                    const result = await fetch('https://api.lerriai.com/api/refresh-oauth', {
+                    const result = await fetch('https://lerriai-backend-production.up.railway.app/api/refresh-oauth', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
