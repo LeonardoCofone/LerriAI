@@ -1033,7 +1033,7 @@ function removeHobby(hobbyId) {
 }
 
 async function finishSetup() {
-    const userEmail = localStorage.getItem('userEmail');
+    const userEmail = localStorage.getItem('user_email');
     if (!userEmail) {
         showToast('❌ User not found');
         window.location.href = '/login.html';
