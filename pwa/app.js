@@ -873,7 +873,9 @@ async function syncToServer() {
 
     const payload = { 
         user, 
-        pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+        pushSubscription: currentPushSubscription ? 
+            (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+            : null,
         settings: {
             ...settings,
             subscription: settings.subscription || {
@@ -2477,7 +2479,9 @@ async function saveEvent() {
             body: JSON.stringify({
                 user: getUserEmail(),
                 events: events,
-                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                pushSubscription: currentPushSubscription ? 
+                    (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+                    : null,
                 settings: settings,
                 messages: messagesArray
             })
@@ -2533,7 +2537,9 @@ async function deleteEvent(){
             body: JSON.stringify({
                 user: getUserEmail(),
                 events: events,
-                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                pushSubscription: currentPushSubscription ? 
+                    (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+                    : null,
                 settings: settings,
                 messages: messagesArray
             })
@@ -2603,7 +2609,9 @@ async function addTask(){
             body: JSON.stringify({
                 user: getUserEmail(),
                 tasks: tasks,
-                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                pushSubscription: currentPushSubscription ? 
+                    (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+                    : null,
                 settings: settings,
                 messages: messagesArray
             })
@@ -2657,7 +2665,9 @@ async function toggleTask(id){
                 body: JSON.stringify({
                     user: getUserEmail(),
                     tasks: tasks,
-                    pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                    pushSubscription: currentPushSubscription ? 
+    (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+    : null,
                     settings: settings,
                     messages: messagesArray
                 })
@@ -2686,7 +2696,9 @@ async function deleteTask(id){
             body: JSON.stringify({
                 user: getUserEmail(),
                 tasks: tasks,
-                pushSubscription: currentPushSubscription ? currentPushSubscription.toJSON() : null,
+                pushSubscription: currentPushSubscription ? 
+                    (typeof currentPushSubscription.toJSON === 'function' ? currentPushSubscription.toJSON() : currentPushSubscription) 
+                    : null,
                 settings: settings,
                 messages: messagesArray
             })
