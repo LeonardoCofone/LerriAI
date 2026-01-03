@@ -325,7 +325,7 @@ async function updateTrialBanner() {
         existingBanner.remove();
     }
     
-    if (!status.subscriptionActive && status.messagesRemaining >= 0) {
+    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.hoursRemaining >= 0) {
         const messagesContainer = document.getElementById('messages');
         const trialBanner = document.createElement('div');
         trialBanner.id = 'trial-banner';
@@ -338,7 +338,12 @@ async function updateTrialBanner() {
             border-radius: 8px;
             margin-bottom: 15px;
         `;
-        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages remaining`;
+        
+        const hoursText = status.hoursRemaining > 0 
+            ? ` | ${status.hoursRemaining}h remaining` 
+            : ' | Trial expired';
+            
+        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages${hoursText}`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
     }
 }
@@ -735,10 +740,11 @@ let settings = {
         active: false,
         trialMessagesUsed: 0,
         trialLimit: 50,
+        trialStartDate: null,
         subscriptionId: null,
         subscriptionStartDate: null,
         subscriptionEndDate: null
-        },
+    },
     schedule: {
         work: null,
         subjects: [],
