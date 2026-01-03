@@ -330,7 +330,7 @@ async function updateTrialBanner() {
         return;
     }
     
-    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.hoursRemaining >= 0) {
+    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.minutesRemaining >= 0) {
         const messagesContainer = document.getElementById('messages');
         const trialBanner = document.createElement('div');
         trialBanner.id = 'trial-banner';
@@ -344,8 +344,10 @@ async function updateTrialBanner() {
             margin-bottom: 15px;
         `;
         
-        const timeText = status.hoursRemaining > 0 
-            ? ` | ${status.hoursRemaining}h remaining` 
+        const hours = Math.floor(status.minutesRemaining / 60);
+        const minutes = status.minutesRemaining % 60;
+        const timeText = status.minutesRemaining > 0 
+            ? ` | ${hours}h ${minutes}m remaining` 
             : ' | Trial expired';
             
         trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages${timeText}`;
