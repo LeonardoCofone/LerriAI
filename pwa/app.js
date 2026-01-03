@@ -329,11 +329,10 @@ async function updateTrialBanner() {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white; padding: 12px; text-align: center; font-weight: 600; border-radius: 8px; margin-bottom: 15px;
         `;
-
-        const hoursLeft = Math.floor(status.minutesRemaining / 60);
-        const minsLeft = status.minutesRemaining % 60;
         
-        trialBanner.textContent = `🎁 Trial: ${status.messagesRemaining} msgs | ${hoursLeft}h ${minsLeft}m left`;
+        const minsLeft = status.minutesRemaining % 60;        
+        const hoursLeft = Math.ceil(status.minutesRemaining / 60);
+        trialBanner.textContent = `🎁 Trial: ${status.messagesRemaining} msgs | ${hoursLeft}h left`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
         
         if (!status.canSendMessage) {
