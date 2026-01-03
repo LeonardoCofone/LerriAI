@@ -316,42 +316,29 @@ async function checkTrialStatus() {
         return { canSendMessage: true, messagesRemaining: 50 };
     }
 }
-
 async function updateTrialBanner() {
     const status = await checkTrialStatus();
     const existingBanner = document.getElementById('trial-banner');
+    if (existingBanner) existingBanner.remove();
     
-    if (existingBanner) {
-        existingBanner.remove();
-    }
-    
-    if (!status.canSendMessage) {
-        await showSubscriptionModal();
-        return;
-    }
-    
-    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.minutesRemaining >= 0) {
+    if (!status.subscriptionActive) {
         const messagesContainer = document.getElementById('messages');
         const trialBanner = document.createElement('div');
         trialBanner.id = 'trial-banner';
         trialBanner.style.cssText = `
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: 600;
-            border-radius: 8px;
-            margin-bottom: 15px;
+            color: white; padding: 12px; text-align: center; font-weight: 600; border-radius: 8px; margin-bottom: 15px;
         `;
+
+        const hoursLeft = Math.floor(status.minutesRemaining / 60);
+        const minsLeft = status.minutesRemaining % 60;
         
-        const hours = Math.floor(status.minutesRemaining / 60);
-        const minutes = status.minutesRemaining % 60;
-        const timeText = status.minutesRemaining > 0 
-            ? ` | ${hours}h ${minutes}m remaining` 
-            : ' | Trial expired';
-            
-        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages${timeText}`;
+        trialBanner.textContent = `🎁 Trial: ${status.messagesRemaining} msgs | ${hoursLeft}h ${minsLeft}m left`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
+        
+        if (!status.canSendMessage) {
+            showSubscriptionModal();
+        }
     }
 }
 
@@ -364,30 +351,35 @@ async function showSubscriptionModal() {
         return;
     }
 
-    document.body.style.overflow = 'hidden';
-
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
-    modal.style.cssText = `
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.98);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 999999999;
-        backdrop-filter: blur(16px) saturate(180%);
-        -webkit-backdrop-filter: blur(16px) saturate(180%);
-    `;
     
     const style = document.createElement('style');
     style.innerHTML = `
+        /* --- RESET & FONTS --- */
         .lerri-modal-root {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
+        /* --- OVERLAY (SFONDO) --- */
+        .sub-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(15, 23, 42, 0.85); /* Dark Slate Blue profondo */
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999999; 
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            padding: 20px;
+            opacity: 0;
+            animation: fadeInOverlay 0.4s ease forwards;
+        }
+
+        /* --- CARD PRINCIPALE --- */
         .sub-card { 
             background: #ffffff; 
             padding: 2.5rem 2rem; 
@@ -396,6 +388,7 @@ async function showSubscriptionModal() {
             max-width: 380px; 
             text-align: center; 
             position: relative;
+            /* Ombre multistrato per profondità 3D */
             box-shadow: 
                 0 0 0 1px rgba(255, 255, 255, 0.1) inset,
                 0 50px 100px -20px rgba(50, 50, 93, 0.25), 
@@ -406,6 +399,7 @@ async function showSubscriptionModal() {
             overflow: hidden;
         }
 
+        /* Effetto luce superiore */
         .sub-card::before {
             content: '';
             position: absolute;
@@ -415,6 +409,7 @@ async function showSubscriptionModal() {
             z-index: 10;
         }
 
+        /* --- ICONA LUCCHETTO STILOSA --- */
         .icon-wrapper {
             width: 72px;
             height: 72px;
@@ -436,6 +431,7 @@ async function showSubscriptionModal() {
             transform: rotate(0deg) scale(1.05);
         }
 
+        /* --- TESTI --- */
         .sub-title { 
             font-size: 1.75rem; 
             font-weight: 800; 
@@ -452,6 +448,7 @@ async function showSubscriptionModal() {
             padding: 0 10px;
         }
 
+        /* --- GRID FEATURES --- */
         .sub-features { 
             display: flex; 
             flex-wrap: wrap; 
@@ -478,6 +475,7 @@ async function showSubscriptionModal() {
             transform: translateY(-1px);
         }
 
+        /* --- PREZZO --- */
         .price-box {
             background: #f8fafc;
             border-radius: 16px;
@@ -510,6 +508,7 @@ async function showSubscriptionModal() {
             letter-spacing: 0.05em;
         }
 
+        /* --- BOTTONE PREMIUM --- */
         .btn-pay { 
             background: #0f172a; 
             color: white; 
@@ -527,6 +526,7 @@ async function showSubscriptionModal() {
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
+        /* Gradiente sottile su hover */
         .btn-pay::before {
             content: '';
             position: absolute;
@@ -554,10 +554,15 @@ async function showSubscriptionModal() {
             transform: none; 
         }
 
+        /* --- ANIMAZIONI --- */
+        @keyframes fadeInOverlay { 
+            to { opacity: 1; } 
+        }
         @keyframes popInCard { 
             to { opacity: 1; transform: scale(1); } 
         }
 
+        /* --- MEDIA QUERIES (MOBILE) --- */
         @media (max-width: 480px) {
             .sub-card {
                 padding: 2rem 1.5rem;
@@ -573,31 +578,34 @@ async function showSubscriptionModal() {
 
     modal.innerHTML = `
         <div class="lerri-modal-root">
-            <div class="sub-card">
-                <div class="icon-wrapper">
-                    <span>🔒</span>
-                </div>
-
-                <h2 class="sub-title">Upgrade Required</h2>
-                <p class="sub-desc">Your free trial has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
-                
-                <div class="sub-features">
-                    <div class="sub-tag">✨ Unlimited AI</div>
-                    <div class="sub-tag">📅 Calendar Sync</div>
-                    <div class="sub-tag">🚀 Faster Reply</div>
-                    <div class="sub-tag">📧 Gmail Agent</div>
-                </div>
-                
-                <div class="price-box">
-                    <div class="sub-price">
-                        €2.99<span>/month</span>
+            <div class="sub-overlay">
+                <div class="sub-card">
+                    
+                    <div class="icon-wrapper">
+                        <span>🔒</span>
                     </div>
-                    <div class="sub-note">+ usage fees</div>
+
+                    <h2 class="sub-title">Upgrade Required</h2>
+                    <p class="sub-desc">Your free plan has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
+                    
+                    <div class="sub-features">
+                        <div class="sub-tag">✨ Unlimited AI</div>
+                        <div class="sub-tag">📅 Calendar Sync</div>
+                        <div class="sub-tag">🚀 Faster Reply</div>
+                        <div class="sub-tag">📧 Gmail Agent</div>
+                    </div>
+                    
+                    <div class="price-box">
+                        <div class="sub-price">
+                            €2.99<span>/month</span>
+                        </div>
+                        <div class="sub-note">+ usage fees</div>
+                    </div>
+                    
+                    <button id="submit-payment" class="btn-pay">
+                        Activate Subscription &rarr;
+                    </button>
                 </div>
-                
-                <button id="submit-payment" class="btn-pay">
-                    Activate Subscription &rarr;
-                </button>
             </div>
         </div>
     `;
@@ -624,13 +632,13 @@ async function showSubscriptionModal() {
             } else {
                 alert("Payment Error: " + (data.error || "Unknown"));
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Activate Subscription →';
+                submitBtn.innerHTML = 'Subscribe Now';
             }
         } catch (error) {
             console.error("Error:", error);
             alert("Connection Error");
             submitBtn.disabled = false;
-            submitBtn.innerHTML = 'Activate Subscription →';
+            submitBtn.innerHTML = 'Subscribe Now';
         }
     });
 }
@@ -726,11 +734,10 @@ let settings = {
         active: false,
         trialMessagesUsed: 0,
         trialLimit: 50,
-        trialStartDate: null,
         subscriptionId: null,
         subscriptionStartDate: null,
         subscriptionEndDate: null
-    },
+        },
     schedule: {
         work: null,
         subjects: [],
@@ -966,17 +973,13 @@ async function loadDataFromServer() {
             };
         }
 
-        const trialStatus = await checkTrialStatus();
-        console.log('🔍 Trial status:', trialStatus);
-        
-        if (!trialStatus.canSendMessage) {
-            console.warn('🚫 Trial expired - showing modal and blocking');
+        if (!settings.subscription.active && settings.subscription.trialMessagesUsed >= settings.subscription.trialLimit) {
             await showSubscriptionModal();
             isLoading = false;
             return;
         }
 
-        console.log('🕐 Schedule loaded:', {
+        console.log('🕒 Schedule loaded:', {
             slots: settings.schedule.slots.length,
             categories: settings.schedule.categories.length,
             sports: settings.schedule.sports.length,
@@ -1007,8 +1010,6 @@ async function loadDataFromServer() {
             updateLanguageSelect();
             updateBudgetDisplay();
         }
-
-        await updateTrialBanner();
 
         console.log("✅ Data loaded successfully from server");
 
