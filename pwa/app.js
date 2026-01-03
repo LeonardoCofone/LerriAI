@@ -325,7 +325,7 @@ async function updateTrialBanner() {
         existingBanner.remove();
     }
     
-    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.hoursRemaining >= 0) {
+    if (!status.subscriptionActive && status.messagesRemaining >= 0 && status.minutesRemaining >= 0) {
         const messagesContainer = document.getElementById('messages');
         const trialBanner = document.createElement('div');
         trialBanner.id = 'trial-banner';
@@ -339,11 +339,13 @@ async function updateTrialBanner() {
             margin-bottom: 15px;
         `;
         
-        const hoursText = status.hoursRemaining > 0 
-            ? ` | ${status.hoursRemaining}h remaining` 
+        const hours = Math.floor(status.minutesRemaining / 60);
+        const minutes = status.minutesRemaining % 60;
+        const timeText = status.minutesRemaining > 0 
+            ? ` | ${hours}h ${minutes}m remaining` 
             : ' | Trial expired';
             
-        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages${hoursText}`;
+        trialBanner.textContent = `🎁 Free Trial: ${status.messagesRemaining} messages${timeText}`;
         messagesContainer.parentNode.insertBefore(trialBanner, messagesContainer);
     }
 }
@@ -712,13 +714,13 @@ function initEmojiSelect() {
     });
 }
 
-//const COSTS = {
-//    TEXT_MESSAGE: 0.00099,
-//    VOICE_PER_SECOND: 0.005 / 60,
-//    VOICE_BASE: 0.00099,
-//    FILE_BASE: 0.002,
-//    FILE_PER_MB: 0.003
-//};
+const COSTS = {
+    TEXT_MESSAGE: 0.00099,
+    VOICE_PER_SECOND: 0.005 / 60,
+    VOICE_BASE: 0.00099,
+    FILE_BASE: 0.002,
+    FILE_PER_MB: 0.003
+};
 
 let attachedFiles = [];
 let fileMessageCounter = 0;
