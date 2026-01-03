@@ -368,6 +368,17 @@ async function showSubscriptionModal() {
 
     const modal = document.createElement('div');
     modal.id = 'subscription-modal';
+    modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.98);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999999999;
+        backdrop-filter: blur(16px) saturate(180%);
+        -webkit-backdrop-filter: blur(16px) saturate(180%);
+    `;
     
     const style = document.createElement('style');
     style.innerHTML = `
@@ -375,21 +386,6 @@ async function showSubscriptionModal() {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-        }
-
-        .sub-overlay { 
-            position: fixed; 
-            inset: 0; 
-            background: rgba(15, 23, 42, 0.95);
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 999999999;
-            backdrop-filter: blur(16px) saturate(180%);
-            -webkit-backdrop-filter: blur(16px) saturate(180%);
-            padding: 20px;
-            opacity: 0;
-            animation: fadeInOverlay 0.4s ease forwards;
         }
 
         .sub-card { 
@@ -558,9 +554,6 @@ async function showSubscriptionModal() {
             transform: none; 
         }
 
-        @keyframes fadeInOverlay { 
-            to { opacity: 1; } 
-        }
         @keyframes popInCard { 
             to { opacity: 1; transform: scale(1); } 
         }
@@ -580,34 +573,31 @@ async function showSubscriptionModal() {
 
     modal.innerHTML = `
         <div class="lerri-modal-root">
-            <div class="sub-overlay">
-                <div class="sub-card">
-                    
-                    <div class="icon-wrapper">
-                        <span>🔒</span>
-                    </div>
-
-                    <h2 class="sub-title">Upgrade Required</h2>
-                    <p class="sub-desc">Your free trial has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
-                    
-                    <div class="sub-features">
-                        <div class="sub-tag">✨ Unlimited AI</div>
-                        <div class="sub-tag">📅 Calendar Sync</div>
-                        <div class="sub-tag">🚀 Faster Reply</div>
-                        <div class="sub-tag">📧 Gmail Agent</div>
-                    </div>
-                    
-                    <div class="price-box">
-                        <div class="sub-price">
-                            €2.99<span>/month</span>
-                        </div>
-                        <div class="sub-note">+ usage fees</div>
-                    </div>
-                    
-                    <button id="submit-payment" class="btn-pay">
-                        Activate Subscription &rarr;
-                    </button>
+            <div class="sub-card">
+                <div class="icon-wrapper">
+                    <span>🔒</span>
                 </div>
+
+                <h2 class="sub-title">Upgrade Required</h2>
+                <p class="sub-desc">Your free trial has expired. Upgrade to Premium to continue using LerriAI without limits.</p>
+                
+                <div class="sub-features">
+                    <div class="sub-tag">✨ Unlimited AI</div>
+                    <div class="sub-tag">📅 Calendar Sync</div>
+                    <div class="sub-tag">🚀 Faster Reply</div>
+                    <div class="sub-tag">📧 Gmail Agent</div>
+                </div>
+                
+                <div class="price-box">
+                    <div class="sub-price">
+                        €2.99<span>/month</span>
+                    </div>
+                    <div class="sub-note">+ usage fees</div>
+                </div>
+                
+                <button id="submit-payment" class="btn-pay">
+                    Activate Subscription &rarr;
+                </button>
             </div>
         </div>
     `;
@@ -929,13 +919,6 @@ async function loadDataFromServer() {
         
         const data = await res.json();
 
-        const trialStatus = await checkTrialStatus();
-        if (!trialStatus.canSendMessage) {
-            await showSubscriptionModal();
-            isLoading = false;
-            return;
-        }
-
         console.log('📥 Data loaded from server:', data);
 
         if (data.pushSubscription) {
@@ -983,13 +966,17 @@ async function loadDataFromServer() {
             };
         }
 
-        if (!settings.subscription.active && settings.subscription.trialMessagesUsed >= settings.subscription.trialLimit) {
+        const trialStatus = await checkTrialStatus();
+        console.log('🔍 Trial status:', trialStatus);
+        
+        if (!trialStatus.canSendMessage) {
+            console.warn('🚫 Trial expired - showing modal and blocking');
             await showSubscriptionModal();
             isLoading = false;
             return;
         }
 
-        console.log('🕒 Schedule loaded:', {
+        console.log('🕐 Schedule loaded:', {
             slots: settings.schedule.slots.length,
             categories: settings.schedule.categories.length,
             sports: settings.schedule.sports.length,
@@ -1020,6 +1007,8 @@ async function loadDataFromServer() {
             updateLanguageSelect();
             updateBudgetDisplay();
         }
+
+        await updateTrialBanner();
 
         console.log("✅ Data loaded successfully from server");
 
