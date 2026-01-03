@@ -1584,7 +1584,7 @@ async function sendSubscriptionToBackend(email, subscription) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 email, 
-                subscription: subscription.toJSON()
+                subscription: (subscription && typeof subscription.toJSON === 'function') ? subscription.toJSON() : subscription 
             })
         });
         
