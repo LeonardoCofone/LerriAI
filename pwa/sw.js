@@ -1,7 +1,6 @@
-const CACHE_NAME = 'lerri-v1.2';
-const baseUrl = '/LerriAI_dev/pwa/';
+const CACHE_NAME = 'lerri-v1.3';
+const baseUrl = self.location.origin + '/LerriAI_dev/pwa/';
 
-// Only cache files that definitely exist
 const urlsToCache = [
   `${baseUrl}index.html`,
   `${baseUrl}app.js`,
@@ -14,78 +13,52 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
-  console.log('[SW] Installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[SW] Caching essential files');
-        // Cache files one by one to see which one fails
-        return Promise.all(
-          urlsToCache.map(url => {
-            return cache.add(url).catch(err => {
-              console.error('[SW] Failed to cache:', url, err);
-            });
-          })
-        );
-      })
-      .then(() => {
-        console.log('[SW] Installation complete, skip waiting');
-        return self.skipWaiting();
-      })
-      .catch(err => {
-        console.error('[SW] Installation failed:', err);
-      })
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
-  console.log('[SW] Activating...');
   event.waitUntil(
-    caches.keys()
-      .then(cacheNames => {
+    Promise.all([
+      caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => {
             if (cacheName !== CACHE_NAME) {
-              console.log('[SW] Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             }
           })
         );
-      })
-      .then(() => {
-        console.log('[SW] Claiming clients');
-        return self.clients.claim();
-      })
-      .then(() => {
-        console.log('[SW] Activation complete');
-      })
+      }),
+      self.clients.claim()
+    ])
   );
 });
 
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
+      .then(response => response || fetch(event.request))
   );
 });
 
 self.addEventListener('push', event => {
-  console.log('[SW] Push notification received');
-  
   let data = { 
     title: 'LerriAI', 
     body: 'New notification', 
-    icon: `${baseUrl}icon/icon-192.png` 
+    icon: `${baseUrl}icon/icon-192.png`,
+    badge: `${baseUrl}icon/icon-192.png`,
+    tag: 'lerri-notification',
+    requireInteraction: false,
+    data: { url: `${baseUrl}index.html` }
   };
   
   if (event.data) {
     try {
-      data = event.data.json();
+      const parsed = event.data.json();
+      data = { ...data, ...parsed };
     } catch (e) {
       data.body = event.data.text();
     }
@@ -94,18 +67,32 @@ self.addEventListener('push', event => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: data.icon || `${baseUrl}icon/icon-192.png`,
-      badge: data.badge || `${baseUrl}icon/icon-192.png`,
+      icon: data.icon,
+      badge: data.badge,
       vibrate: [200, 100, 200],
-      data: data.data || { url: `${baseUrl}index.html` }
+      tag: data.tag,
+      requireInteraction: data.requireInteraction,
+      data: data.data
     })
   );
 });
 
 self.addEventListener('notificationclick', event => {
-  console.log('[SW] Notification clicked');
   event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || `${baseUrl}index.html`;
+  
   event.waitUntil(
-    clients.openWindow(event.notification.data?.url || `${baseUrl}index.html`)
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then(clientList => {
+        for (const client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
   );
 });
