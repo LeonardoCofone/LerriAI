@@ -1318,10 +1318,17 @@ function showNotificationModal() {
                 console.log('-----⏳ Subscribing to push notifications');
                 console.log('-----🔑 VAPID key:', VAPID_PUBLIC_KEY.substring(0, 20) + '...');
                 
-                const subscription = await registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
-                });
+                let subscription = await registration.pushManager.getSubscription();
+
+                if (!subscription) {
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                    });
+                    console.log('-----✅ New subscription created');
+                } else {
+                    console.log('-----✅ Using existing subscription');
+                }
 
                 currentPushSubscription = subscription;
                 console.log('-----📩 Push subscription created successfully');
