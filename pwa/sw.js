@@ -1,5 +1,5 @@
-const CACHE_NAME = 'lerri-v2.0';
-const baseUrl = self.location.origin + '/LerriAI_dev/pwa/';
+const CACHE_NAME = 'lerri-v3.0';
+const baseUrl = 'https://leonardocofone.github.io/LerriAI_dev/pwa/';
 
 const urlsToCache = [
   `${baseUrl}index.html`,
