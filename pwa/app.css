@@ -1771,6 +1771,241 @@ footer {
     text-align: center;
 }
 
+/* Stile Link Aiuto */
+.help-link {
+    color: #f39c12; /* Arancione attenzione */
+    text-decoration: underline;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-top: 10px;
+    text-align: right;
+}
+
+.full-width {
+    width: calc(100% - 40px); /* Margine 20px per lato */
+    margin: 10px 20px 20px 20px; /* Spazio sotto e ai lati */
+    padding: 14px;
+    background: #0827b0;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0; /* Non si schiaccia */
+    box-shadow: 0 4px 10px rgba(8, 39, 176, 0.3);
+    transition: transform 0.1s active;
+}
+
+.full-width:active {
+    transform: scale(0.98);
+}
+
+.help-alert {
+    background: #eef2ff;
+    border: 1px solid #d0d7ff;
+    color: #3b5bdb;
+    padding: 12px 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Modale Help Specifico */
+.help-modal {
+    max-width: 400px;
+    text-align: left;
+}
+
+.help-modal h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.help-modal-card {
+    background: #ffffff;
+    width: 90%;          /* Lascia un po' di margine ai lati */
+    max-width: 400px;    /* Non diventa gigante su PC */
+    max-height: 85vh;    /* IMPORTANTE: Non esce dallo schermo in altezza */
+    border-radius: 20px; /* Angoli molto arrotondati (stile iOS/Android 14) */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column; /* Per gestire header fisso e body scrollabile */
+    overflow: hidden;    /* Maschera il contenuto che esce dai bordi */
+}
+
+.help-steps {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #0827b0;
+}
+
+.step-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-left: 5px solid #0827b0; /* Default Android Blue */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+.step-icon {
+    font-size: 1.5rem;
+}
+
+.step-text strong {
+    display: block;
+    color: #0827b0;
+    margin-bottom: 4px;
+}
+
+.step-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.4;
+}
+
+.device-tip {
+    background: #fff3cd;
+    color: #856404;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.full-width {
+    width: 100%;
+    padding: 12px;
+}
+
+/* Utilità per nascondere/mostrare */
+.hidden {
+    display: none !important;
+}
+
+.modal-scroll-body {
+    padding: 20px;
+    overflow-y: auto; /* SCROLLA solo questa parte */
+    -webkit-overflow-scrolling: touch; /* Scroll fluido su iOS */
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px); /* Effetto vetro moderno */
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centra verticalmente */
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    padding: 18px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eeeeee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0; /* Non si schiaccia mai */
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    line-height: 1rem;
+    color: #999;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+/* Stile aggiornato per il Modale Help */
+.os-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.os-icon {
+    font-size: 1.4rem;
+}
+
+.instruction-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.instruction-list li {
+    margin-bottom: 6px;
+}
+
+.small-note {
+    font-size: 0.85rem;
+    color: #d35400; /* Arancione scuro */
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    display: block;
+}
+
+/* Modifica specifica per Xiaomi per distinguerlo */
+.step-card[style*="ff6700"] {
+    background-color: #fff8f2;
+}
+
 .recurring-options {
     margin-top: 1rem;
     padding: 1rem;

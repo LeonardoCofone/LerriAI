@@ -409,7 +409,7 @@
                 <div class="settings-card">
                     <div class="model-info">
                         <p>Estimated cost for 1000 text messages: <strong>€<span id="model-cost">0.99€</span></strong></p>
-                        <p>Estimated cost for 1 minute of vocal messages: <strong>€<span>0.006€</span></strong></p>
+                        <p>Estimated cost for 1 minute of vocal messages: <strong>€<span>0.005€</span></strong></p>
                     </div>
                 </div>
 
@@ -458,7 +458,9 @@
                         </div>
                     </div>
                 </div>
-                
+            <div class="settings-group">
+                <p class="help-link" onclick="openHelpModal()">⚠️ Non ricevi le notifiche? Clicca qui.</p>
+            </div>
 
             </div>
         </section>
@@ -474,6 +476,66 @@
         </div>
     </main>
 
+        <div id="help-modal" class="modal-overlay hidden">
+            <div class="modal-content help-modal-card">
+                <div class="modal-header">
+                    <h3>⚠️ Notification Issues?</h3>
+                    <button class="close-btn" onclick="closeHelpModal()">×</button>
+                </div>
+                
+                <div class="modal-scroll-body">
+                    <div class="help-alert">
+                        <span class="icon">ℹ️</span>
+                        <p><strong>System restrictions are the #1 cause.</strong> Your phone puts apps to sleep to save battery. You must whitelist LerriAI manually.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="os-title">
+                            <span class="os-icon">🤖</span> <strong>Android (Samsung, Pixel)</strong>
+                        </div>
+                        <ul class="instruction-list">
+                            <li>Go to: <em>Settings > Apps > LerriAI > Battery</em></li>
+                            <li>Select: <strong>"Unrestricted"</strong> (or "No optimization").</li>
+                            <li>Go to: <em>Mobile Data</em> and enable <strong>"Allow background data usage"</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="step-card" style="border-left-color: #ff6700;">
+                        <div class="os-title">
+                            <span class="os-icon">🟠</span> <strong>Xiaomi / Redmi / POCO</strong>
+                        </div>
+                        <p class="small-note">MIUI is very aggressive. You <strong>MUST</strong> do this:</p>
+                        <ul class="instruction-list">
+                            <li>Go to: <em>Settings > Apps > Manage Apps > LerriAI</em></li>
+                            <li>Enable: <strong>"Autostart"</strong> (Crucial!).</li>
+                            <li>Battery Saver: Select <strong>"No restrictions"</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="step-card" style="border-left-color: #000;">
+                        <div class="os-title">
+                            <span class="os-icon">🍎</span> <strong>Apple iOS (iPhone)</strong>
+                        </div>
+                        <ul class="instruction-list">
+                            <li><strong>Step 1:</strong> Tap the "Share" button and select <strong>"Add to Home Screen"</strong>.</li>
+                            <li><strong>Step 2:</strong> Open the app from the Home Screen icon.</li>
+                            <li><strong>Step 3:</strong> Go to Settings inside the app and enable notifications again.</li>
+                            <li><small><em>(Notifications do not work inside Safari browser)</em></small></li>
+                        </ul>
+                    </div>
+
+                    <div class="step-card" style="background: white; border: 1px solid #eee; border-left: 4px solid #666;">
+                        <div class="os-title">
+                            <span class="os-icon">🔍</span> <strong>Final Checks</strong>
+                        </div>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Ensure <strong>"Do Not Disturb"</strong> or <strong>"Focus Mode"</strong> is OFF.</p>
+                    </div>
+                </div>
+
+                <button class="btn-primary full-width" onclick="closeHelpModal()">Got it, I'll check my settings</button>
+            </div>
+        </div>
+
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
@@ -482,6 +544,27 @@
                     .catch(err => console.error("Errore registrazione SW:", err));
             });
         }
+
+        window.openHelpModal = function() {
+            const modal = document.getElementById('notification-help-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        };
+
+        window.closeHelpModal = function() {
+            const modal = document.getElementById('notification-help-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        };
+
+        // Chiudi se clicco fuori dal box bianco
+        document.getElementById('notification-help-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelpModal();
+            }
+        });
 
         // === Gestione input chat ===
         const chatForm = document.getElementById("chat-form");
