@@ -490,7 +490,7 @@ function renderScheduleDaySlots(day) {
         slotEl.addEventListener('click', (e) => {
             e.stopPropagation();
             if (e.target.closest('.slot-checkbox') || e.target.closest('.slot-resize-handle')) return;
-            if (draggedSlot && draggedSlot.moved) return;
+            if (draggedSlot || isResizing) return;
             openScheduleSlotEditor(slot);
         });
 
@@ -502,7 +502,6 @@ function renderScheduleDaySlots(day) {
 
 const DRAG_THRESHOLD = 10;
 let resizedSlot = null;
-let recentlyDragged = false;
 
 function startScheduleDrag(e, slot, slotEl) {
     const dayColumn = slotEl.closest('.day-column');
@@ -517,7 +516,7 @@ function startScheduleDrag(e, slot, slotEl) {
     document.addEventListener('mouseup', onScheduleDragEnd);
     document.addEventListener('touchmove', onScheduleDragMove, { passive: false });
     document.addEventListener('touchend', onScheduleDragEnd);
-    e.preventDefault();
+    if (e.preventDefault) e.preventDefault();
 }
 
 
@@ -608,9 +607,6 @@ function onScheduleDragEnd(e) {
         draggedSlot.slot.end = newEnd;
         draggedSlot.slotEl.classList.remove('dragging');
         renderScheduleDaySlots(draggedSlot.slot.day);
-
-        recentlyDragged = true;
-        setTimeout(() => recentlyDragged = false, 200);
     } else {
         draggedSlot.slotEl.classList.remove('dragging');
     }
@@ -632,8 +628,8 @@ function startScheduleResize(e, slot, slotEl) {
     document.addEventListener('mouseup', onScheduleResizeEnd);
     document.addEventListener('touchmove', onScheduleResizeMove, { passive: false });
     document.addEventListener('touchend', onScheduleResizeEnd);
-    e.preventDefault();
-    e.stopPropagation();
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
 }
 
 function onScheduleResizeMove(e) {
@@ -660,9 +656,6 @@ function onScheduleResizeEnd() {
     }
     resizedSlot.slot.end = newEnd;
     renderScheduleDaySlots(resizedSlot.slot.day);
-
-    recentlyDragged = true;
-    setTimeout(() => recentlyDragged = false, 200);
 
     isResizing = false;
     resizedSlot = null;
