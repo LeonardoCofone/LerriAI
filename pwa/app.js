@@ -1542,43 +1542,31 @@ async function checkAndPromptNotifications() {
 async function ensurePushSubscription() {
     try {
         if (!('serviceWorker' in navigator)) {
-            console.error('❌ Service Worker not supported');
+            console.error('Service Worker not supported');
             return null;
         }
 
-        await navigator.serviceWorker.ready;
-        console.log('✅ Service Worker ready');
+        const registration = await navigator.serviceWorker.ready;
 
-        const registration = await navigator.serviceWorker.getRegistration(baseUrl);
+        let subscription = await registration.pushManager.getSubscription();
         
-        if (!registration) {
-            console.error('❌ No Service Worker registration found');
-            return null;
-        }
-
-        console.log('✅ Service Worker registration found:', registration.scope);
-
-        let existing = await registration.pushManager.getSubscription();
-        if (!existing) {
-            existing = await registration.pushManager.subscribe({
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
             });
-            console.log('✅ New push subscription created');
-        } else {
-            console.log('✅ Using existing push subscription');
         }
 
-        currentPushSubscription = existing;
+        currentPushSubscription = subscription;
         const email = getUserEmail();
         if (email) {
-            await sendSubscriptionToBackend(email, existing);
+            await sendSubscriptionToBackend(email, subscription);
         }
 
-        return existing;
+        return subscription;
 
     } catch (err) {
-        console.error('❌ ensurePushSubscription error:', err);
+        console.error('Subscription error:', err);
         return null;
     }
 }

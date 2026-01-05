@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lerri-v1.4';
+const CACHE_NAME = 'lerri-v2.0';
 const baseUrl = self.location.origin + '/LerriAI_dev/pwa/';
 
 const urlsToCache = [
@@ -45,15 +45,17 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('push', event => {
-  console.log('[SW] Push event received:', event);
+  console.log('[SW] Push received');
   
   let data = { 
     title: 'LerriAI', 
     body: 'New notification', 
     icon: 'https://leonardocofone.github.io/LerriAI_dev/pwa/icon/icon-192.png',
     badge: 'https://leonardocofone.github.io/LerriAI_dev/pwa/icon/icon-192.png',
-    tag: 'lerri-notification',
-    requireInteraction: false,
+    tag: 'lerri-notification-' + Date.now(),
+    requireInteraction: true,
+    renotify: true,
+    silent: false,
     data: { url: 'https://leonardocofone.github.io/LerriAI_dev/pwa/index.html' }
   };
   
@@ -61,10 +63,8 @@ self.addEventListener('push', event => {
     try {
       const parsed = event.data.json();
       data = { ...data, ...parsed };
-      console.log('[SW] Parsed notification data:', data);
     } catch (e) {
       data.body = event.data.text();
-      console.log('[SW] Text notification:', data.body);
     }
   }
   
@@ -73,15 +73,13 @@ self.addEventListener('push', event => {
       body: data.body,
       icon: data.icon,
       badge: data.badge,
-      vibrate: [200, 100, 200],
+      vibrate: data.vibrate || [200, 100, 200],
       tag: data.tag,
-      requireInteraction: data.requireInteraction,
-      data: data.data,
-      actions: []
-    }).then(() => {
-      console.log('[SW] Notification shown successfully');
-    }).catch(err => {
-      console.error('[SW] Notification error:', err);
+      requireInteraction: data.requireInteraction !== false,
+      renotify: true,
+      silent: false,
+      timestamp: data.timestamp || Date.now(),
+      data: data.data
     })
   );
 });
