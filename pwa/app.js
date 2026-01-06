@@ -3334,3 +3334,32 @@ if (isIosDevice && !isStandaloneMode) {
     
     document.body.prepend(iosBanner);
 }
+
+window.openHelpModal = function(e) {
+    if (e) e.preventDefault(); // Evita che la pagina salti in alto
+    const modal = document.getElementById('help-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    } else {
+        console.error("ERRORE: Non trovo il div con id 'help-modal' in index.html");
+    }
+};
+
+window.closeHelpModal = function() {
+    const modal = document.getElementById('help-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+};
+
+// Chiudi il modale se clicco fuori dalla scheda bianca
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('help-modal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHelpModal();
+            }
+        });
+    }
+});

@@ -1354,10 +1354,6 @@ label {
     font-size: 0.9375rem;
 }
 
-.hidden {
-    display: none !important;
-}
-
 footer {
     text-align: center;
     padding: 1rem;
@@ -1910,7 +1906,6 @@ footer {
     padding: 12px;
 }
 
-/* Utilità per nascondere/mostrare */
 .hidden {
     display: none !important;
 }
