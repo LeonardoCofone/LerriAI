@@ -516,6 +516,11 @@ button:active {
     background: var(--color-primary-dark);
 }
 
+.btn-click {
+    background: var(--color-secondary);
+    color: white;
+}
+
 .btn-secondary {
     background: var(--color-danger);
     color: white;

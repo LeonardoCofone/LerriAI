@@ -24,11 +24,9 @@ The focus is on helping users **stay organized, productive, and informed**.
 LerriAI/  
 ├── backend/                      # Node.js backend + agents and API management  
 │   ├── server.js                 # Main Node.js server (API + agent orchestration)  
-│   ├── refreshTokens.js          # Script to regenerate access tokens  
 │   ├── users.csv                 # Users database + tokens  
 │   ├── .env                      # Environment variables and credentials  
 │   ├── package.json              # Backend dependencies  
-│   ├── ecosystem.config.cjs      # PM2 config to start backend and refreshTokens  
 │  
 │   ├── data/                     # Users personal data (JSON)  
 │   │   └── user@gmail.com.json   # Example user data (tasks, events, settings)  
@@ -53,6 +51,8 @@ LerriAI/
 │ 
 │   ├── scheduler/  
 │   │   ├── bible.js  
+│   │   ├── refresTokens.js  
+│   │   ├── event-notification.js
 │   │   ├── briefing-scheduler.js  
 │   │   └── notification-scheduler.js  
 │  
