@@ -2812,6 +2812,11 @@ function initSettings(){
     });
 }
 
+document.getElementById('help-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openHelpModal();
+});
+
 function updateLanguageSelect() {
     const languageSelect = document.getElementById('language-select');
     if (!languageSelect) return;
@@ -3274,4 +3279,58 @@ function diagnoseNotificationPermission() {
     } catch (err) {
         console.error('Diagnosis error:', err);
     }
+}
+
+// --- iOS INSTALLATION BANNER ---
+const isIosDevice = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+
+if (isIosDevice && !isStandaloneMode) {
+    // 1. Inject Styles
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .ios-pwa-banner {
+            position: fixed; top: 0; left: 0; width: 100%;
+            background: rgba(8, 39, 176, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 45px 16px 20px;
+            box-sizing: border-box;
+            z-index: 999999;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            animation: iosSlideDown 0.5s ease-out;
+        }
+        .ios-share-icon {
+            font-size: 1.4em;
+            vertical-align: text-bottom;
+            display: inline-block;
+            margin: 0 2px;
+        }
+        .ios-pwa-close {
+            position: absolute; right: 15px; top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none; color: white;
+            width: 28px; height: 28px; border-radius: 50%;
+            font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+        @keyframes iosSlideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Create Banner
+    const iosBanner = document.createElement('div');
+    iosBanner.className = 'ios-pwa-banner';
+    iosBanner.innerHTML = `
+        <span>📲 <strong>Install App:</strong> Tap <span class="ios-share-icon">⎋</span> (Share) and select <strong>"Add to Home Screen"</strong> to enable notifications.</span>
+        <button class="ios-pwa-close" onclick="this.parentElement.remove()">×</button>
+    `;
+    
+    document.body.prepend(iosBanner);
 }
