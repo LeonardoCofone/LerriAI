@@ -30,6 +30,8 @@ let selectedSportEmoji = '⚽';
 let selectedHobbyEmoji = '📚';
 let selectedSportDays = new Set();
 let selectedHobbyDays = new Set();
+let touchStartTime = 0;
+let touchStartPos = { x: 0, y: 0 };
 
 const SLOT_HEIGHT_PX = 60;
 const MINUTES_PER_SLOT = 60;
@@ -252,12 +254,34 @@ function renderDaySlots(day) {
         });
 
         slotEl.addEventListener('touchstart', (e) => {
+            touchStartTime = Date.now();
+            const touch = e.touches[0];
+            touchStartPos = { x: touch.clientX, y: touch.clientY };
+            
             if (e.target.classList.contains('slot-resize-handle')) {
-                const touch = e.touches[0];
                 startResize({ clientY: touch.clientY, preventDefault: () => e.preventDefault() }, slot, slotEl);
             } else if (!e.target.classList.contains('slot-checkbox')) {
-                const touch = e.touches[0];
                 startDrag({ clientY: touch.clientY, clientX: touch.clientX, preventDefault: () => e.preventDefault() }, slot, slotEl);
+            }
+        }, { passive: false });
+
+        slotEl.addEventListener('touchend', (e) => {
+            const touchDuration = Date.now() - touchStartTime;
+            const touch = e.changedTouches[0];
+            const touchEndPos = { x: touch.clientX, y: touch.clientY };
+            const distance = Math.sqrt(
+                Math.pow(touchEndPos.x - touchStartPos.x, 2) + 
+                Math.pow(touchEndPos.y - touchStartPos.y, 2)
+            );
+            
+            if (e.target.closest('.slot-checkbox') || e.target.closest('.slot-resize-handle')) return;
+            if (isResizing) return;
+            if (draggedSlot && draggedSlot.moved) return;
+            
+            if (touchDuration < 300 && distance < 10) {
+                e.preventDefault();
+                e.stopPropagation();
+                openSlotEditor(slot);
             }
         }, { passive: false });
 
@@ -268,14 +292,6 @@ function renderDaySlots(day) {
             if (draggedSlot && draggedSlot.moved) return;
             openSlotEditor(slot);
         });
-
-        slotEl.addEventListener('touchend', (e) => {
-            if (e.target.closest('.slot-checkbox') || e.target.closest('.slot-resize-handle')) return;
-            if (recentlyDragged || isResizing) return;
-            if (draggedSlot && draggedSlot.moved) return;
-            e.preventDefault();
-            openSlotEditor(slot);
-        }, { passive: false });
 
         container.appendChild(slotEl);
     });
