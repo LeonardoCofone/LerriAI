@@ -1,5 +1,5 @@
-const CACHE_NAME = 'lerri-v3.0';
-const baseUrl = 'https://leonardocofone.github.io/LerriAI_dev/pwa/';
+const CACHE_NAME = 'lerri-v1.0';
+const baseUrl = 'https://www.lerriai.com/pwa/';
 
 const urlsToCache = [
   `${baseUrl}index.html`,
@@ -50,13 +50,13 @@ self.addEventListener('push', event => {
   let data = { 
     title: 'LerriAI', 
     body: 'New notification', 
-    icon: 'https://leonardocofone.github.io/LerriAI_dev/pwa/icon/icon-192.png',
-    badge: 'https://leonardocofone.github.io/LerriAI_dev/pwa/icon/icon-192.png',
+    icon: 'https://www.lerriai.com/pwa/icon/icon-192.png',
+    badge: 'https://www.lerriai.com/pwa/icon/icon-192.png',
     tag: 'lerri-notification-' + Date.now(),
     requireInteraction: true,
     renotify: true,
     silent: false,
-    data: { url: 'https://leonardocofone.github.io/LerriAI_dev/pwa/index.html' }
+    data: { url: 'https://www.lerriai.com/pwa/index.html' }
   };
   
   if (event.data) {

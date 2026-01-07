@@ -14,7 +14,7 @@ const LANGUAGES = {
     "ar": "العربية"
 };
 
-const baseUrl = 'https://leonardocofone.github.io/LerriAI_dev/pwa/';
+const baseUrl = 'https://www.lerriai.com/pwa/';
 
 const VAPID_PUBLIC_KEY = 'BGR8PSUhEMD5Jij2vMHJamrLlnPZAi26RDhWCRLYKr0J_Cl2L7pZjgbqTHxKqzqU4bMYLNibnl4ltPQzIFkr0-c';
 let isProcessing = false;
