@@ -235,6 +235,7 @@ function initDailyBriefingButton() {
         const email = getUserEmail();
         if (!email) {
             showNotification('❌ Please login first', 'error');
+            window.location.href = '../login.html';
             return;
         }
 
@@ -305,7 +306,7 @@ function initDailyBriefingButton() {
 
 async function checkTrialStatus() {
     const email = getUserEmail();
-    if (!email) return { canSendMessage: true, messagesRemaining: 50 };
+    if (!email) return { canSendMessage: true, messagesRemaining: 0 };
     
     try {
         const response = await fetch(`${API_BASE_URL}/api/check-trial-status?email=${encodeURIComponent(email)}`);
@@ -346,6 +347,7 @@ async function showSubscriptionModal() {
 
     const email = getUserEmail();
     if (!email) {
+        window.location.href = '../login.html';
         alert("Errore: Email non trovata. Esegui il login.");
         return;
     }
@@ -2146,6 +2148,7 @@ function initCalendar() {
     async function importFromGoogleCalendar() {
         const email = getUserEmail();
         if (!email) {
+            window.location.href = '../login.html';
             showNotification('Please login first', 'error');
             return;
         }
