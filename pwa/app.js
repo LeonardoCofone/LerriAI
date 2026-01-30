@@ -880,14 +880,7 @@ async function syncToServer() {
             : null,
         settings: {
             ...settings,
-            subscription: settings.subscription || {
-                active: false,
-                trialMessagesUsed: 0,
-                trialLimit: 50,
-                subscriptionId: null,
-                subscriptionStartDate: null,
-                subscriptionEndDate: null
-            }
+            ...(settings.subscription?.subscriptionId && { subscription: settings.subscription })
         },  
         messages: messagesArray 
     };
