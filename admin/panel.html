@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LerriAI Admin - Subscription Activation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-left: 8px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #666;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 LerriAI Admin Panel</h1>
+        <p class="subtitle">Manual Subscription Management</p>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('activate')">Activate</div>
+            <div class="tab" onclick="switchTab('view')">View User</div>
+        </div>
+        
+        <!-- ACTIVATE TAB -->
+        <div id="activate-tab" class="tab-content active">
+            <form id="activateForm" onsubmit="activateSubscription(event)">
+                <div class="form-group">
+                    <label for="adminKey">🔑 Admin Secret Key</label>
+                    <input type="password" id="adminKey" required>
+                    <div class="hint">From Railway environment variables</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">📧 User Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customerId">💳 Stripe Customer ID (Optional)</label>
+                    <input type="text" id="customerId" placeholder="cus_xxxxx">
+                </div>
+                
+                <div class="form-group">
+                    <label for="subscriptionId">🔖 Stripe Subscription ID (Optional)</label>
+                    <input type="text" id="subscriptionId" placeholder="sub_xxxxx">
+                </div>
+                
+                <button type="submit" id="activateBtn">
+                    ✅ Activate Premium Subscription
+                </button>
+            </form>
+        </div>
+        
+        <!-- VIEW TAB -->
+        <div id="view-tab" class="tab-content">
+            <form id="viewForm" onsubmit="viewUser(event)">
+                <div class="form-group">
+                    <label for="viewAdminKey">🔑 Admin Secret Key</label>
+                    <input type="password" id="viewAdminKey" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="viewEmail">📧 User Email</label>
+                    <input type="email" id="viewEmail" required>
+                </div>
+                
+                <button type="submit" id="viewBtn">
+                    👁️ View User Data
+                </button>
+            </form>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://lerriai-backend-production.up.railway.app';
+        
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            
+            // Clear result
+            document.getElementById('result').className = 'result';
+            document.getElementById('result').textContent = '';
+        }
+        
+        async function activateSubscription(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('activateBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Activating... <span class="loading"></span>';
+            
+            const data = {
+                adminKey: document.getElementById('adminKey').value,
+                email: document.getElementById('email').value,
+                customerId: document.getElementById('customerId').value || null,
+                subscriptionId: document.getElementById('subscriptionId').value || null
+            };
+            
+            try {
+                const res = await fetch(`${API_URL}/api/admin/activate-subscription`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseData = await res.json();
+                
+                if (res.ok) {
+                    result.className = 'result success';
+                    result.textContent = '✅ Success!\n\n' + JSON.stringify(responseData, null, 2);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ Error: ' + (responseData.error || 'Unknown error');
+                }
+            } catch (err) {
+                result.className = 'result error';
+                result.textContent = '❌ Network Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '✅ Activate Premium Subscription';
+            }
+        }
+        
+        async function viewUser(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('viewBtn');
+            const result = document.getElementById('result');
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Loading... <span class="loading"></span>';
+            
+            const adminKey = document.getElementById('viewAdminKey').value;
+            const email = document.getElementById('viewEmail').value;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/admin/user/${email}?adminKey=${encodeURIComponent(adminKey)}`);
+                const data = await res.json();
+                
+                if (res.ok) {
+                    result.className = 'result info';
+                    result.textContent = '📊 User Data:\n\n' + JSON.stringify(data, null, 2);
+                } else {
+                    result.className = 'result error';
+                    result.textContent = '❌ Error: ' + (data.error || 'Unknown error');
+                }
+            } catch (err) {
+                result.className = 'result error';
+                result.textContent = '❌ Network Error: ' + err.message;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '👁️ View User Data';
+            }
+        }
+    </script>
+</body>
+</html>
